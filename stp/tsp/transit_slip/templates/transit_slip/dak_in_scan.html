@@ -1,0 +1,48 @@
+
+{% extends 'transit_slip/layout.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div>
+        <h5>Dak In - scan</h5>
+        <div class="card">
+            <div class="card-body">
+                <input type="text" class="" id="scan-input" autofocus>
+            </div>
+            
+        </div>
+
+    </div>
+    <div>
+        <form action="dak_receive" method="POST">
+            {% csrf_token %}
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">From</th>
+                        <th scope="col">To</th>
+                        <th scope="col">Ltr no</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Code</th>
+                        <th scope="col">Receive</th>
+                        <th scope="col">Spl Pkg</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+            <input type="hidden" name="submit-type" value="scan">
+            <input type="submit" value="Receive" name="scan">
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        var csrf_token = '{{ csrf_token }}'
+    </script>
+    
+    <script src="{% static 'assets/javascript/dak_in_scan.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'transit_slip/layout.html' %}
+{% load static %}
+{% block link %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div>
+        <div class="accordion" id="id-accordion">
+            {% for tr_slip in tr_slip_per_sta %}
+                <div class="card">
+                    <div class="card-header" id="heading">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#{{tr_slip.sta_name}}"
+                                aria-expanded="true" aria-controls="collapseOne">
+                                {{ tr_slip.sta_name }}
+                            </button>
+                        </h2>
+                    </div>
+            
+                    <div id="{{tr_slip.sta_name}}" class="collapse" aria-labelledby="headingOne" data-parent="#id-accordion">
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>TS No</th>
+                                        <th>Date</th>
+                                        <th>DAK Count</th>
+                                        <th>Details</th>
+                                        <th>Received on</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ts in tr_slip.tr_slips %}
+                                        <tr>
+                                            <td>
+                                                {{ ts.id }}
+                                            </td>
+                                            <td>
+                                                {{ ts.date }}
+                                            </td>
+                                            <td>DAK COUNT</td>
+                                            <td>
+                                                <a href="{% url 'transit_slip_detail' id=ts.id %}">Details</a>
+                                            </td>
+                                            <td>
+                                                {% if ts.received_on == None %}
+                                                    <p><input type="text" class="datepicker" name="received-on" style="width: 100px;">
+                                                        <span><button class="btn btn-sm btn-outline-secondary">Save</button></span></p>
+                                                {% else %}
+                                                    <p>{{  ts.received_on }}</p>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            
+            {% endfor %}
+        </div>
+    </div>
+    
+</div>
+
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script>
+        jQuery(function ($) {
+            $(".datepicker").datepicker({
+                dateFormat: "dd-mm-yy",
+                maxDate: "-1d",
+                minDate: "-25d",
+            });
+        });
+    </script>
+{% endblock %}
+

@@ -1,0 +1,40 @@
+{% extends 'transit_slip/layout.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div>
+        <h4>Not despathed Transit Slips</h4>
+    </div>
+    <div>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Destination</th>
+                    <th scope="col">TS No</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">DAK Count</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t_slip in t_slips %}
+                <tr>
+                    <td>{{ t_slip.dst }}</td>
+                    <td>{{ t_slip.id }}</td>
+                    <td>{{ t_slip.date }}</td>
+                    <td>count</td>
+                    <td>
+                        <a href="{% url 'transit_slip_despatch' id=t_slip.id %}">Despatch |</a>
+                        <a href="{% url 'transit_slip_detail' id=t_slip.id %}">Details</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+            
+        
+    </div>
+
+</div>
+{% endblock %}

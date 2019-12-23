@@ -1,0 +1,42 @@
+
+
+@page {
+    margin: 2cm;
+    size: A4;
+}
+
+@media print {
+    .label-printer {
+        font-size: 16pt;
+        margin: 1cm;
+    }
+    .label-address {
+        /* border: 1px solid red; */
+        margin-top: 1cm;
+    }
+    .ts-print {
+        font-size: 12pt;
+    }
+    .ts-print table {
+        width: 85%;
+    }
+    .ts-print .ts-head {
+        width: 80%;
+    }
+}
+
+div {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+
+
+.label-printer {
+    text-align: center;
+    display: flex;
+    flex-wrap: nowrap;
+    margin: 20px 10%;
+    /* border: 1px solid red; */
+}
+

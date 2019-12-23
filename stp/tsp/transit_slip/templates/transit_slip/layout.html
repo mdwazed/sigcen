@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+{% load static %}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Jekyll v3.8.5">
+    <title>SSC JSR</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-4.3.1/css/bootstrap.min.css' %}">
+    <!-- data tables -->
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/DataTables/datatables.min.css' %}" />
+    <!-- select2  -->
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/select2/css/select2.min.css' %}" />
+    {% block link %}
+    {% endblock %}
+
+    <!-- Custom styles for this template -->
+    <link href="{% static 'assets/stylesheets/style.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/stylesheets/print_style.css' %}" rel="stylesheet">
+</head>
+
+<body>
+    {% block topnav %}
+    {% include 'transit_slip/top_nav.html' %}
+    {% endblock %}
+
+    {% block content %}
+
+    {% endblock %}
+
+
+    <div class="container">
+        {% block footer %}
+            {% include 'transit_slip/footer.html' %}
+        {% endblock %}
+    </div> 
+    <!-- end container -->
+
+    <!-- jquery  -->
+    <script src="{% static 'vendor/jquery/jquery-3.4.1.min.js' %}"></script>
+    <!-- data tables  -->
+    <script type="text/javascript" src="{% static 'vendor/DataTables/datatables.min.js' %}"></script>
+    <!-- select2  -->
+    <script type="text/javascript" src="{% static 'vendor/select2/js/select2.min.js' %}"></script>
+    <!-- bootstrap  -->
+    <script type="text/javascript" src="{% static 'vendor/bootstrap-4.3.1/js/bootstrap.min.js' %}"></script>
+    
+    {% block script %}
+
+    {% endblock %}
+
+    <!-- local script  -->
+    <script type="text/javascript" src="{% static 'assets/javascript/local_script.js' %}"></script>
+</body>
+
+</html>

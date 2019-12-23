@@ -1,0 +1,45 @@
+{% extends 'transit_slip/layout.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div>
+        <div style="text-align: center;">
+            <h5>Transit Slip, SSC JSR</h5>
+        </div>
+        <div class="ts-head">
+            <p>TS No: {{ transit_slip.id }}</p>
+            <p>DST: {{ transit_slip.dst }}</p>
+            <p>Count:{{ ltr_count }}</p>
+            <p>Date: {{ transit_slip.date | date:"d/m/Y" }}</p>
+            <p>Prepared By: {{ transit_slip.prepared_by }}</p>
+        </div>
+        
+    </div>
+    <div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Ltr no</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ltr in ltrs %}
+                <tr>
+                    <td>{{ ltr.from_unit }}</td>
+                    <td>{{ ltr.to_unit }}</td>
+                    <td>{{ ltr.ltr_no }}</td>
+                    <td>{{ ltr.date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <a class="btn btn-primary" href="{% url 'transit_slip_print' id=transit_slip.id %}" target="blank">Print</a>
+    </div>
+</div>
+
+{% endblock %}

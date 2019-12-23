@@ -1,0 +1,82 @@
+
+{% extends 'transit_slip/layout.html' %}
+{% block content %}
+<div class="container">
+    <h4>New DAK entry</h4>
+    <div>
+        <table>
+            <form method="post">
+                <tr>
+                    <td></td>
+                    <td>
+                        {% csrf_token %}
+                        {{ form.non_field_errors }}
+                        {{ form.source_erors }}
+                        {{ form.source }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ form.ltr_no.label_tag }}
+                    </td>
+                    <td>
+                        {{ form.ltr_no.errors }}
+                        {{ form.ltr_no }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ form.date.label_tag }}
+                    </td>
+                    <td>
+                        {{ form.date.errors }}
+                        {{ form.date }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="{{ form.to_units.id_for_label }}">{{ form.to_units.label_tag }}<span class="required-cls">*</span></label>
+                    </td>
+                    <td>
+                        <select id="{{ form.to_units.id_for_label }}" name="{{ form.to_units.name }}" class="basic-multiple" multiple="multiple"
+                            style="width: 300px;">
+                            {% for unit in units %}
+                            <option value="{{unit.id}}">{{unit.unit_name}}</option>
+                            {% endfor %}
+                        </select>
+                        {{ form.addresses.errors }}
+                    </td>
+                </tr>
+                <tr>
+                    <td><button type="submit" class="btn btn-outline-primary">Save</button></td>
+                    <td></td>
+                </tr>
+            
+                
+            
+                
+                
+            
+                
+                
+            
+                <div class="form-group">
+                    
+                    <div class="has-feedback">
+                        
+                    </div>
+                </div>
+                
+                <!-- <input type="submit" value="Save"> -->
+            </form>
+            
+        </table>
+ 
+    
+</div>
+<div>
+    
+</div>
+{% endblock %}
+
+

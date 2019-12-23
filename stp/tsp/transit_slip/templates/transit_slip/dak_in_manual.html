@@ -1,0 +1,53 @@
+{% extends 'transit_slip/layout.html' %}
+{% block content %}
+<div class="container">
+<h5>Dak In - Manual</h5>
+    <div class="card">
+        <div class="card-body">
+            <form action="" method=POST>
+                {% csrf_token %}
+                {{form}}
+                <input type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+    <div>
+        <form action="dak_receive" method="POST">
+            {% csrf_token %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">From</th>
+                    <th scope="col">To</th>
+                    <th scope="col">Ltr no</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Code</th>
+                    <th scope="col">Receive</th>
+                    <th scope="col">Spl Pkg</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for letter in letters %}
+                    <tr>
+                        <th scope="row">{{ letter.from_unit }}</th>
+                        <td>{{ letter.to_unit }}</td>
+                        <td>{{ letter.ltr_no }}</td>
+                        <td>{{ letter.date }}</td>
+                        <td>{{ letter.u_string }}</td>
+                        <td>
+                            <input type="checkbox" name="received_ltr" value={{ letter.pk }}>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="spl_pkg" value={{ letter.pk }}>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <input type="hidden" name="submit-type" value="manual">
+        <input type="submit" value="Receive">
+        </form>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'transit_slip/layout.html' %}
+{% block content %}
+<div class="container">
+    <h4>Add New Sta Name</h4>
+    <form action="" method="POST">
+        {% csrf_token %}
+        {{form}}
+        <input type="submit" value="Submit">
+    </form>
+</div>
+
+{% endblock %}
