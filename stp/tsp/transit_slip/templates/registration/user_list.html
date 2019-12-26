@@ -1,0 +1,36 @@
+{% extends 'transit_slip/layout.html' %}
+{% block content %}
+<div class="container">
+    <div>
+        <h5>User List <span><a href="{% url 'create_user' %}">Add new User</a></span></h5>
+    </div>
+
+    <div>
+        <table id="data_table_id" class="display">
+            <thead>
+                <tr>
+                    <th>User Name</th>
+                    <th>User Unit</th>
+                    <th>User Type</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.profile.unit }}</td>
+                    <td>{{ user.profile.get_user_type_display }}</td>
+                    <td>
+                        <a href="#">Update |</a>
+                        <a href="#">Reset Password |</a>
+                        <a href="#">Delete</a>
+                        
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

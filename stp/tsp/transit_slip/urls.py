@@ -6,6 +6,7 @@ from . import views
 
 urlpatterns = [
     path('', views.Home.as_view(), name= 'home'),
+    path('user_list', views.user_list, name= 'user_list'),
     path('create_user', views.create_user, name= 'create_user'),
 
     # unit user
@@ -34,7 +35,9 @@ urlpatterns = [
     path('fetch_letter_json', views.fetch_letter_json, name= 'fetch_letter_json'),
     
     path('add_sta', views.add_new_sta, name= 'add_sta'),
-    path('unit', views.UnitView.as_view(), name= 'unit'),
+    path('unit_list', views.unit_list_view, name= 'unit_list'),
+    path('create_unit', views.UnitCreateView.as_view(), name= 'create_unit'),
+    path('update_unit/<int:pk>', views.UnitUpdateView.as_view(), name= 'update_unit'),
     # path('unit/<int:unit_id>', views.UnitView.as_view(), name= 'unit'),
 ]
 if settings.DEBUG:

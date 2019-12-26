@@ -1,0 +1,35 @@
+{% extends 'transit_slip/layout.html' %}
+{% block content %}
+<div class="container">
+    <div>
+        <h5>Unit List <span><a href="{% url 'create_unit' %}">Add new Unit</a></span></h5>
+    </div>
+    
+    <div>
+        <table id="data_table_id" class="display">
+            <thead>
+                <tr>
+                    <th>Unit</th>
+                    <th>Sta</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for unit in units %}
+                <tr>
+                    <td>{{ unit.unit_name }}</td>
+                    <td>{{ unit.sta_name }}</td>
+                    <td>
+                        <a href="{% url 'update_unit' unit.pk %}" >Update</a>
+                        <a href="#">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+
+{% endblock %}

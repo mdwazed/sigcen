@@ -13,7 +13,7 @@
     </div>
 
     <div>
-        {% if user.is_authenticated and user.profile.unit.unit_name == "sigcen" %}
+        {% if user.is_authenticated and user.profile.user_type == "sc" %}
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
                 aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,23 +49,14 @@
                             <a class="dropdown-item" href="{% url 'old_transit_slip' %}">Old</a>
                         </div>
                     </li>
-                    
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown"
                             aria-haspopup="true" aria-expanded="false">
-                            Admin
+                            {{user}}
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <a class="dropdown-item" href="{% url 'create_user' %}">Create New User</a>
-                            <a class="dropdown-item" href="{% url 'unit' %}">Add/Edit Unit</a>
-                            <a class="dropdown-item" href="{% url 'add_sta' %}">Add New Sta</a>
-                            <a class="dropdown-item" href="#">Misc</a>
-                            <a class="dropdown-item" href="#">Change My Password</a>
+                            <a class="dropdown-item" href="#">Change Password</a>
                         </div>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">{{ user }}</a>
                     </li>
                     <li class="nav-item">
                         <a class="btn btn-outline-primary" href="{% url 'logout' %}">Logout</a>
@@ -73,8 +64,42 @@
                 </ul>
             </div>
         </nav>
-
-        {% elif user.is_authenticated and user.profile.unit.unit_name != "sigcen" %}
+        {% elif user.is_authenticated and user.profile.user_type == "ad" %}
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+                    aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                    <ul class="navbar-nav">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
+                        </li>
+            
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Admin
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                <a class="dropdown-item" href="{% url 'user_list' %}">Add/Edit User</a>
+                                <a class="dropdown-item" href="{% url 'unit_list' %}">Add/Edit Unit</a>
+                                <a class="dropdown-item" href="{% url 'add_sta' %}">Add New Sta</a>
+                                <a class="dropdown-item" href="#">Misc</a>
+                                <a class="dropdown-item" href="#">Change My Password</a>
+                            </div>
+                        </li>
+            
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">{{ user }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-primary" href="{% url 'logout' %}">Logout</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        {% elif user.is_authenticated and user.profile.user_type == "uc" %}
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
                 aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">

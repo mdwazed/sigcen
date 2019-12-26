@@ -5,10 +5,11 @@ from django.core.files import File
 from django.http import HttpResponse, JsonResponse
 from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.views import View
 from django.conf import settings
 from django.core import serializers
+from django.urls import reverse_lazy 
 
 from datetime import datetime, date, timedelta
 
@@ -58,37 +59,56 @@ class Home(View):
         return render(request, self.template_name, context)
 
 
-class UnitView(View):
-    template = 'transit_slip/unit.html'
-    stas = Sta.objects.all()
+# class UnitView(View):
+#     template = 'transit_slip/unit.html'
+#     stas = Sta.objects.all()
+#     units = Unit.objects.all()
+#     def get(self, request):
+#         unit_id = request.GET.get('unit-id', None)
+#         try:
+#             instance  = Unit.objects.get(pk=unit_id)
+#         except ObjectDoesNotExist:
+#             instance=None
+#         form = forms.UnitForm(instance=instance)
+#         context = {
+#             'form' : form,
+#             'stas' : self.stas,
+#             'units' : self.units,
+#         }
+#         return render(request, self.template, context)
+#     def post(self, request):
+#         print(request.POST['unit-id'])
+#         instance = Unit.objects.get(unit_name=request.POST['unit_name'])
+#         form = forms.UnitForm(instance=instance)
+#         if form.is_valid():
+#             form.save(commit=False)
+#             context = {
+#                 'info' : "Unit created successfully"
+#             }
+#             return render(request, 'transit_slip/generic_info.html', context)
+#         context = {
+#             'form' : form,
+#             'stas' : self.stas,
+#             'units' : self.units,
+#         }
+#         return render(request, self.template, context)
+
+def unit_list_view(request):
     units = Unit.objects.all()
-    def get(self, request):
-        unit_id = request.GET.get('unit-id', None)
-        try:
-            instance  = Unit.objects.get(pk=unit_id)
-        except ObjectDoesNotExist:
-            instance=None
-        form = forms.UnitForm(instance=instance)
-        context = {
-            'form' : form,
-            'stas' : self.stas,
-            'units' : self.units,
-        }
-        return render(request, self.template, context)
-    def post(self, request):
-        form = forms.UnitForm(request.POST)
-        if form.is_valid():
-            form.save()
-            context = {
-                'info' : "Unit created successfully"
-            }
-            return render(request, 'transit_slip/generic_info.html', context)
-        context = {
-            'form' : form,
-            'stas' : self.stas,
-            'units' : self.units,
-        }
-        return render(request, self.template, context)
+    context = {
+        'units':units
+    }
+    return render(request, 'transit_slip/unit_list.html', context)
+
+class UnitCreateView(CreateView):
+    model = Unit
+    fields = "__all__"
+    success_url = reverse_lazy("unit_list")
+
+class UnitUpdateView(UpdateView):
+    model = Unit
+    fields = ['unit_name', 'sta_name']
+    success_url = reverse_lazy("unit_list")
 
 
 class LetterView(View):
@@ -221,6 +241,12 @@ def label_bulk(request, ltr_no):
     }
     return render(request, 'transit_slip/label_printer.html', context)
 
+def user_list(request):
+    users = User.objects.all()
+    context = {
+        'users':users,
+    }
+    return render(request, 'registration/user_list.html', context)
 
 def create_user(request):
     """
@@ -240,7 +266,7 @@ def create_user(request):
             # raw_password = form.cleaned_data.get('password1')
             # user = authenticate(username=user.username, password=raw_password)
             # login(request, user)
-            return redirect('home')
+            return redirect('user_list')
     else:
         form = forms.CreateUserForm(sta=sta)
     return render(request, 'registration/create_user.html', {'form': form})

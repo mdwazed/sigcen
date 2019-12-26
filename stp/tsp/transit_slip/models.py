@@ -34,6 +34,10 @@ class TransitSlip(models.Model):
     despatched_on = models.DateField(null=True, blank=True, )
     received_on = models.DateField(null=True, blank=True)
 
+    def ltr_count(self):
+        ltr_count = Letter.objects.filter(transit_slip=self).count()
+        return ltr_count
+
 class Profile(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -43,6 +47,8 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.username
+    def get_user_type(self):
+        return self.user_type
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

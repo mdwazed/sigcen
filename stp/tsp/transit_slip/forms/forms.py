@@ -55,9 +55,3 @@ class DakInForm(forms.Form):
         self.fields['unit'].initial = '4'
         # self.fields['code'].max_length=3
         
-
-class UnitForm(forms.ModelForm):
-
-    class Meta:
-        model = Unit
-        fields = '__all__'
