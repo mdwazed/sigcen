@@ -10,6 +10,7 @@ from django.views import View
 from django.conf import settings
 from django.core import serializers
 from django.urls import reverse_lazy 
+from django.contrib.auth.views import PasswordChangeView
 
 from datetime import datetime, date, timedelta
 
@@ -29,20 +30,6 @@ def test_view(request):
     }
     return render(request, 'transit_slip/test_page.html', context)
 
-def add_new_sta(request):
-    if request.method == 'POST':
-        form = forms.StaForm(request.POST)
-        if form.is_valid():
-            form.save()
-            context = {
-                'info' : "New sta added successfully"
-            }
-            return render(request, 'transit_slip/generic_info.html', context)
-    else:
-        form = forms.StaForm()
-    return render(request, 'transit_slip/add_sta.html', {'form': form})
-
-
 class Home(View):
     template_name = "transit_slip/home.html"
     
@@ -58,40 +45,21 @@ class Home(View):
         }
         return render(request, self.template_name, context)
 
+def add_new_sta(request):
+    if request.method == 'POST':
+        form = forms.StaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            context = {
+                'info' : "New sta added successfully"
+            }
+            return render(request, 'transit_slip/generic_info.html', context)
+    else:
+        form = forms.StaForm()
+    return render(request, 'transit_slip/add_sta.html', {'form': form})
 
-# class UnitView(View):
-#     template = 'transit_slip/unit.html'
-#     stas = Sta.objects.all()
-#     units = Unit.objects.all()
-#     def get(self, request):
-#         unit_id = request.GET.get('unit-id', None)
-#         try:
-#             instance  = Unit.objects.get(pk=unit_id)
-#         except ObjectDoesNotExist:
-#             instance=None
-#         form = forms.UnitForm(instance=instance)
-#         context = {
-#             'form' : form,
-#             'stas' : self.stas,
-#             'units' : self.units,
-#         }
-#         return render(request, self.template, context)
-#     def post(self, request):
-#         print(request.POST['unit-id'])
-#         instance = Unit.objects.get(unit_name=request.POST['unit_name'])
-#         form = forms.UnitForm(instance=instance)
-#         if form.is_valid():
-#             form.save(commit=False)
-#             context = {
-#                 'info' : "Unit created successfully"
-#             }
-#             return render(request, 'transit_slip/generic_info.html', context)
-#         context = {
-#             'form' : form,
-#             'stas' : self.stas,
-#             'units' : self.units,
-#         }
-#         return render(request, self.template, context)
+
+
 
 def unit_list_view(request):
     units = Unit.objects.all()
@@ -103,11 +71,13 @@ def unit_list_view(request):
 class UnitCreateView(CreateView):
     model = Unit
     fields = "__all__"
+    template_name = "transit_slip/unit_add_update.html"
     success_url = reverse_lazy("unit_list")
 
 class UnitUpdateView(UpdateView):
     model = Unit
     fields = ['unit_name', 'sta_name']
+    template_name = "transit_slip/unit_add_update.html"
     success_url = reverse_lazy("unit_list")
 
 
@@ -155,7 +125,7 @@ class LetterView(View):
                 # letter.qr_image_url = file_name
                 letter.qr_image_url = 'qr_code/' +date.today().strftime("%Y/%m/%d/")+ file_name
                 # letter.to_unit = Unit.objects.get(pk=address)
-                print(letter.to_unit)
+                # print(letter.to_unit)
                 letter.save()
             else:
                 return render(request, self.template_name, context)
@@ -271,6 +241,39 @@ def create_user(request):
         form = forms.CreateUserForm(sta=sta)
     return render(request, 'registration/create_user.html', {'form': form})
     
+
+class UserPasswordChangeView(PasswordChangeView):
+    success_url = reverse_lazy("home")
+
+class ResetUserPasswordView(View):
+    def post(self, request):
+        user = User.objects.get(username=request.POST['username'])
+        new_passwd = request.POST['new-passwd']
+        if type(new_passwd) is str:
+            user.set_password(new_passwd)
+            user.save()
+            return redirect("user_list")
+
+class PreResetUserPasswordView(View):
+    template = "registration/reset_user_password.html"
+    def post(self, request):
+        user = User.objects.get(username=request.POST['username'])
+        context = {
+            'user':user,
+        }
+        return render(request, self.template, context)
+
+def delete_user(request):
+    try:
+        user = User.objects.get(username=request.POST['username'])
+    except ObjectDoesNotExist:
+        msg = "The system was unable to find appropriate user"
+        context = {
+            'msg': msg,
+        }
+        return render(request, "transit_slip/generic_info.html", context)
+    user.delete()
+    return redirect("user_list")
 
 class DakInManualView(View):
     """

@@ -6,10 +6,15 @@ from . import views
 
 urlpatterns = [
     path('', views.Home.as_view(), name= 'home'),
+    # user
     path('user_list', views.user_list, name= 'user_list'),
     path('create_user', views.create_user, name= 'create_user'),
+    path('user_password_change', views.UserPasswordChangeView.as_view(), name= 'user_password_change'),
+    path('pre_reset_user_password', views.PreResetUserPasswordView.as_view(), name= 'pre_reset_user_password'),
+    path('reset_user_password', views.ResetUserPasswordView.as_view(), name= 'reset_user_password'),
+    path('delete_user', views.delete_user, name= 'delete_user'),
 
-    # unit user
+    # Letter
     path('new_letter/', views.LetterView.as_view(), name= 'new_letter'),
     path('letter_list_inhouse/', views.letter_list_inhouse, name= 'letter_list_inhouse'),
     path('letter_list_despatched/', views.letter_list_despatched, name= 'letter_list_despatched'),
@@ -38,7 +43,7 @@ urlpatterns = [
     path('unit_list', views.unit_list_view, name= 'unit_list'),
     path('create_unit', views.UnitCreateView.as_view(), name= 'create_unit'),
     path('update_unit/<int:pk>', views.UnitUpdateView.as_view(), name= 'update_unit'),
-    # path('unit/<int:unit_id>', views.UnitView.as_view(), name= 'unit'),
+    # path('reset_user_passwd', views.ResetUserPassword.as_view(), name= 'reset_user_passwd'),
 ]
 if settings.DEBUG:
     urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

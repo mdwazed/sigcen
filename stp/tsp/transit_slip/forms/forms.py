@@ -18,7 +18,7 @@ class LetterForm(forms.ModelForm):
     
     class Meta:
         model = Letter
-        fields = ['ltr_no', 'to_units', 'date']
+        fields = ['addr_line_1','ltr_no', 'to_units', 'date']
 
 class StaForm(forms.ModelForm):
 
@@ -38,7 +38,7 @@ class CreateUserForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('username', 'password1', 'password2', 'unit', 'user_type' )
+        fields = ('username', 'password1', 'password2', 'first_name', 'last_name', 'unit', 'user_type' )
 
 class DakInForm(forms.Form):
     """

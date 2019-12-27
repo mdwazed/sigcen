@@ -40,3 +40,10 @@ div {
     /* border: 1px solid red; */
 }
 
+.label-credit{
+    font-size: .75rem;
+    text-align: left;
+    bottom: 0;
+    color: cornflowerblue;
+}
+

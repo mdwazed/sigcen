@@ -60,7 +60,7 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
     
 class Letter(models.Model):
-    
+    addr_line_1 = models.CharField(max_length=50, blank=True, null=True)
     ltr_no = models.CharField(max_length=50)
     date = models.DateField()
     from_unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='from_unit',)
