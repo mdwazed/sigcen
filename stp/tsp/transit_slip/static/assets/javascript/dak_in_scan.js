@@ -32,7 +32,7 @@ $(document).ready(function () {
                 $('tbody').append(row)
             }
         });
-        // $(this).val('')
+        $(this).val('')
 
     });
 });
