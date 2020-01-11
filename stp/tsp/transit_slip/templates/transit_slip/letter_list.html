@@ -27,14 +27,14 @@
                         <td>In Transit</td>
                         <td>
                             <!-- <a href="{% url 'label' pk=letter.pk %}" target="blank">Print</a> -->
-                            <a href="{% url 'label_bulk' ltr_no=letter.ltr_no %}" target="blank">Print Label </a>
+                            <a href="{% url 'label_bulk' ltr_no=letter.ltr_no|urlencode:"" %}" target="blank">Print Label </a>
                         </td>
                         {% else %}
                         <td>Not despatched</td>
                         <td>
                             <!-- <a href="{% url 'label' pk=letter.pk %}" target="blank">Print</a> -->
-                            <a href="{% url 'label_bulk' ltr_no=letter.ltr_no %}" target="blank">Print Label |</a>
-                            <a href="{% url 'letter_delete' ltr_no=letter.ltr_no %}">Delete</a>
+                            <a href="{% url 'label_bulk' ltr_no=letter.ltr_no|urlencode:"" %}" target="blank">Print Label |</a>
+                            <a href="{% url 'letter_delete' ltr_no=letter.ltr_no|urlencode:"" %}">Delete</a>
                         </td>
                         {% endif %}
                         

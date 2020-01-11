@@ -45,7 +45,7 @@ class DakInForm(forms.Form):
     In dak filtering form. use for receiving dak at counter room
     """
     unit = forms.ChoiceField()
-    date = forms.DateField(initial=datetime.today())
+    date = forms.DateField(initial=date.today())
     code = forms.CharField(required=False)
     def __init__(self, *args, **kwargs):
         sta = kwargs.pop('sta')

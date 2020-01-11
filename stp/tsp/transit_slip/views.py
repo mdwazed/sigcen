@@ -19,6 +19,7 @@ from transit_slip.forms import forms
 import qrcode
 import uuid
 import os
+import urllib
 from random import randint
 from PIL import Image
 
@@ -205,6 +206,7 @@ def label_bulk(request, ltr_no):
     """
     print all label of the same latter
     """
+    ltr_no = urllib.parse.unquote(ltr_no)
     letters = Letter.objects.filter(ltr_no=ltr_no)
     context = {
         'letters' : letters,
