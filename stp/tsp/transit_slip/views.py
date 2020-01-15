@@ -11,6 +11,8 @@ from django.conf import settings
 from django.core import serializers
 from django.urls import reverse_lazy 
 from django.contrib.auth.views import PasswordChangeView
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from datetime import datetime, date, timedelta
 
@@ -22,13 +24,16 @@ import os
 import urllib
 from random import randint
 from PIL import Image
+import logging
 
+logger = logging.getLogger('transit_slip')
 # Create your views here.
 
 def test_view(request):
     context = {
         'test' : 'test string',
     }
+    logger.info("hello")
     return render(request, 'transit_slip/test_page.html', context)
 
 class Home(View):
@@ -46,6 +51,7 @@ class Home(View):
         }
         return render(request, self.template_name, context)
 
+@login_required
 def add_new_sta(request):
     if request.method == 'POST':
         form = forms.StaForm(request.POST)
@@ -61,7 +67,7 @@ def add_new_sta(request):
 
 
 
-
+@login_required
 def unit_list_view(request):
     units = Unit.objects.all()
     context = {
@@ -69,31 +75,37 @@ def unit_list_view(request):
     }
     return render(request, 'transit_slip/unit_list.html', context)
 
-class UnitCreateView(CreateView):
+
+class UnitCreateView(LoginRequiredMixin, CreateView):
     model = Unit
     fields = "__all__"
     template_name = "transit_slip/unit_add_update.html"
     success_url = reverse_lazy("unit_list")
 
-class UnitUpdateView(UpdateView):
+
+class UnitUpdateView(LoginRequiredMixin, UpdateView):
     model = Unit
     fields = ['unit_name', 'sta_name']
     template_name = "transit_slip/unit_add_update.html"
     success_url = reverse_lazy("unit_list")
 
 
-class LetterView(View):
+class LetterView(LoginRequiredMixin, View):
     """
     create new letter
     """
     template_name = 'transit_slip/new_letter.html'
 
     def get(self, request, *args, **kwargs):
-        form = forms.LetterForm()
+        cur_date = datetime.today()
+        init_ltr_no = self.get_default_letter_no()
+        form = forms.LetterForm(initial={'ltr_no':init_ltr_no, 'date': cur_date})
+        logger.info('new letter form created with ltr no %s', init_ltr_no)
         units = Unit.objects.all()
         context = {
             'form' : form,
             'units' : units,
+            'init_ltr_no': init_ltr_no,
         }
         return render(request, self.template_name, context)
 
@@ -128,14 +140,19 @@ class LetterView(View):
                 # letter.to_unit = Unit.objects.get(pk=address)
                 # print(letter.to_unit)
                 letter.save()
+                logger.info("new letter created with id %s", letter.pk)
             else:
                 return render(request, self.template_name, context)
         return redirect(letter_list_inhouse)
             
         # return render(request, self.template_name, context)
+    
+    def get_default_letter_no(self):
+        prefix = '23.01.955.__.__.01.01.'
+        current_date = datetime.today().strftime('%d.%m.%Y')
+        return prefix + current_date
 
-
-
+@login_required
 def letter_details(request, pk=None):
     if request.method == 'POST':
         data = request.POST.copy()
@@ -160,6 +177,7 @@ def letter_details(request, pk=None):
         }
     return render(request, 'transit_slip/letter_details.html', context)
 
+@login_required
 def letter_list_inhouse(request):
     unit = Unit.objects.get(pk=request.session['unitid'])
     letters = Letter.objects.filter(from_unit=unit, received_by_sigcen=False, date__gte=datetime.today()-timedelta(days=7)).order_by('-created_at')
@@ -169,6 +187,7 @@ def letter_list_inhouse(request):
     }
     return render(request, 'transit_slip/letter_list.html', context)
 
+@login_required
 def letter_list_despatched(request):
     unit = Unit.objects.get(pk=request.session['unitid'])
     letters = Letter.objects.filter(from_unit=unit, received_by_sigcen=True, date__gte=datetime.today()-timedelta(days=7)).order_by('-created_at')
@@ -178,11 +197,12 @@ def letter_list_despatched(request):
     }
     return render(request, 'transit_slip/letter_list.html', context)
 
+@login_required
 def letter_delete(request, ltr_no):
     Letter.objects.filter(ltr_no=ltr_no).delete()
     return redirect('letter_list_inhouse')
 
-
+@login_required
 def label(request, pk=None):
     """
     provide labels suitable for printing
@@ -202,6 +222,7 @@ def label(request, pk=None):
         }
     return render(request, 'transit_slip/label_printer.html', context)
 
+@login_required
 def label_bulk(request, ltr_no):
     """
     print all label of the same latter
@@ -213,6 +234,7 @@ def label_bulk(request, ltr_no):
     }
     return render(request, 'transit_slip/label_printer.html', context)
 
+@login_required
 def user_list(request):
     users = User.objects.all()
     context = {
@@ -220,6 +242,7 @@ def user_list(request):
     }
     return render(request, 'registration/user_list.html', context)
 
+@login_required
 def create_user(request):
     """
     create new user
@@ -244,10 +267,10 @@ def create_user(request):
     return render(request, 'registration/create_user.html', {'form': form})
     
 
-class UserPasswordChangeView(PasswordChangeView):
+class UserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     success_url = reverse_lazy("home")
 
-class ResetUserPasswordView(View):
+class ResetUserPasswordView(LoginRequiredMixin, View):
     def post(self, request):
         user = User.objects.get(username=request.POST['username'])
         new_passwd = request.POST['new-passwd']
@@ -256,7 +279,7 @@ class ResetUserPasswordView(View):
             user.save()
             return redirect("user_list")
 
-class PreResetUserPasswordView(View):
+class PreResetUserPasswordView(LoginRequiredMixin, View):
     template = "registration/reset_user_password.html"
     def post(self, request):
         user = User.objects.get(username=request.POST['username'])
@@ -265,6 +288,7 @@ class PreResetUserPasswordView(View):
         }
         return render(request, self.template, context)
 
+@login_required
 def delete_user(request):
     try:
         user = User.objects.get(username=request.POST['username'])
@@ -277,7 +301,7 @@ def delete_user(request):
     user.delete()
     return redirect("user_list")
 
-class DakInManualView(View):
+class DakInManualView(LoginRequiredMixin, View):
     """
     Manually receive DAK from various unit at sigcen
     """
@@ -316,7 +340,7 @@ class DakInManualView(View):
             }
         return render(request, self.template, context)
 
-class DakInScanView(View):
+class DakInScanView(LoginRequiredMixin, View):
     """
     Receive DAK by scanning from various unit at sigcen
     """
@@ -329,7 +353,7 @@ class DakInScanView(View):
         }
         return render(request, self.template, context)
 
-class DakReceive(View):
+class DakReceive(LoginRequiredMixin, View):
     def post(self, request):
         print(request.POST['submit-type'])
         ltr_ids = request.POST.getlist('received_ltr')
@@ -353,7 +377,7 @@ class DakReceive(View):
             
 
 
-class CreateTransitSlipView(View):
+class CreateTransitSlipView(LoginRequiredMixin, View):
     template = 'transit_slip/transit_slip.html'
     stas = Sta.objects.all() 
 
@@ -389,6 +413,7 @@ class CreateTransitSlipView(View):
         }
         return render(request, self.template, context)
 
+@login_required
 def transit_slip_ltrs(request):
     if request.method == 'POST':
         dst = Sta.objects.get(sta_name=request.POST['dst-sta'])
@@ -404,7 +429,7 @@ def transit_slip_ltrs(request):
 
     return redirect('current_transit_slip')
 
-class CurrentTransitSlipView(View):
+class CurrentTransitSlipView(LoginRequiredMixin, View):
     template = 'transit_slip/current_transit_slip.html'
 
     def get(self, request):
@@ -415,7 +440,7 @@ class CurrentTransitSlipView(View):
         return render(request, self.template, context)
 
 
-class OldTransitSlipView(View):
+class OldTransitSlipView(LoginRequiredMixin, View):
     template = 'transit_slip/old_transit_slip.html'
 
     def get(self, request):
@@ -436,7 +461,7 @@ class OldTransitSlipView(View):
         return render(request, self.template, context)
 
 
-class TransitSlipDetailView(View):
+class TransitSlipDetailView(LoginRequiredMixin, View):
     template = 'transit_slip/transit_slip_detail.html'
     def get(self, request, id):
         transit_slip = TransitSlip.objects.get(pk=id)
@@ -448,13 +473,15 @@ class TransitSlipDetailView(View):
             'ltr_count' : ltr_count,
         }
         return render(request, self.template, context)
-        
+
+@login_required        
 def transit_slip_despatch(request, id):
     t_slip = TransitSlip.objects.get(pk=id)
     t_slip.despatched_on = datetime.today()
     t_slip.save()
     return redirect('current_transit_slip')
 
+@login_required
 def fetch_letter_json(request):
     date = request.POST['date']
     u_string = request.POST['u_string']
@@ -466,7 +493,7 @@ def fetch_letter_json(request):
         return HttpResponse(None)
     return HttpResponse(serialize_ltr)
 
-class TransitSlipPrintView(View):
+class TransitSlipPrintView(LoginRequiredMixin, View):
     template = 'transit_slip/transit_slip_print.html'
     def get(self, request, id):
         transit_slip = TransitSlip.objects.get(pk=id)

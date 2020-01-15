@@ -1,24 +1,7 @@
-<!doctype html>
-<html lang="en">
+{% extends 'transit_slip/layout.html' %}
+{% block content %}
+<div class="container">
+    <h1>THIS IS A TEST PAGE</h1>    
 
-<head>
-    <meta charset="utf-8">
-    <title>jQuery UI Datepicker functionality</title>
-    <link href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
-    <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-
-    <!-- Javascript -->
-    <script>
-        $(function () {
-            $("#datepicker-1").datepicker();
-        });
-    </script>
-</head>
-
-<body>
-    <!-- HTML -->
-    <p>Enter Date: <input type="text" id="datepicker-1"></p>
-</body>
-
-</html>
+</div>
+{% endblock %}

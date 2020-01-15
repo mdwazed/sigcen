@@ -9,12 +9,9 @@ from datetime import date, datetime
 
 
 class LetterForm(forms.ModelForm):
-    
-    today = date.today().strftime('%d.%m.%Y')
-    init_ltr_no = f'23.01.955.___.___.01.01.{today}'
-    ltr_no = forms.CharField(initial= init_ltr_no, widget=forms.TextInput(attrs={'size':'30', 'class':'inputText'}))
+    ltr_no = forms.CharField(widget=forms.TextInput(attrs={'size':'30', 'class':'inputText'}))
     to_units = forms.CharField(max_length=500) #uses slect2 for choices
-    date = forms.DateField(initial=date.today())
+    date = forms.DateField()
     
     class Meta:
         model = Letter
