@@ -1,9 +1,59 @@
+
 {% extends 'transit_slip/layout.html' %}
+{% load static %}
 {% block content %}
 <div class="container">
-    <p>Auto preparation of transit slip</p>
-    <p>How things works</p>
-    <p>user : {{user.id}}</p>
+    <div class="home-title">
+        <div>
+            <h2>Transit slip auto preparation system</h2>
+        </div>
+        <div>
+            <img src="{% static 'assets/images/postman.jpg' %}" alt="postman image">
+        </div>
+    </div>
+    <div>
+        <h5>Please read the user instruction below carefully before using the system.</h5>
+        <div class="card instr">
+            <div class="card-header">
+                <h4>Unit user</h4>
+            </div>
+            <div class="card-body">
+                <div class="instr-text">
+                    instruction for unit user. Lorem ipsum, dolor sit amet consectetur adipisicing elit. Enim magnam ratione
+                    sapiente nesciunt rerum eum repudiandae omnis! Vero soluta, officiis quis consequuntur nobis veritatis! Fuga
+                    officia deleniti quaerat nemo tempore!
+                </div>
+            </div>
+        </div>
+        <div class="card instr">
+            <div class="card-header">
+                <h4>Sigcen user</h4>
+            </div>
+            <div class="card-body">
+                <div class="instr-text">
+                    instruction for sigcen user. Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quod sequi consectetur
+                    quibusdam? Autem esse pariatur unde officia nostrum dolores nobis? Maiores, quam modi velit beatae et nemo sit
+                    sed doloremque.
+                </div>
+                
+            </div>
+        </div>
+        <div class="card instr">
+            <div class="card-header">
+                <h4>Admin user</h4>
+            </div>
+            <div class="card-body">
+                <div class="instr-text">
+                    instruction for admin user. Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae, voluptates
+                    labore vitae nam est perspiciatis? Voluptatum molestiae itaque iure explicabo hic perspiciatis aliquid earum
+                    architecto doloremque, assumenda, nostrum veniam debitis.
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    
+    
 </div>
 
 {% endblock %}
