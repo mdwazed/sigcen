@@ -354,6 +354,9 @@ class DakInScanView(LoginRequiredMixin, View):
         return render(request, self.template, context)
 
 class DakReceive(LoginRequiredMixin, View):
+    """
+    Receive dak by sigcen clk after they have been scanned or manually selected as IN DAK
+    """
     def post(self, request):
         print(request.POST['submit-type'])
         ltr_ids = request.POST.getlist('received_ltr')
@@ -489,6 +492,7 @@ def fetch_letter_json(request):
         ltr = Letter.objects.get(u_string=u_string, date=date)
         print(ltr)
         serialize_ltr = serializers.serialize("json", [ltr,])
+        print(serialize_ltr)
     except ObjectDoesNotExist:
         return HttpResponse(None)
     return HttpResponse(serialize_ltr)
