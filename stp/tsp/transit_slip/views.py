@@ -25,6 +25,7 @@ import urllib
 from random import randint
 from PIL import Image
 import logging
+import json
 
 logger = logging.getLogger('transit_slip')
 # Create your views here.
@@ -490,9 +491,9 @@ def fetch_letter_json(request):
     u_string = request.POST['u_string']
     try:
         ltr = Letter.objects.get(u_string=u_string, date=date)
-        print(ltr)
-        serialize_ltr = serializers.serialize("json", [ltr,])
-        print(serialize_ltr)
+        # print(ltr)
+        serialize_ltr = serializers.serialize("json", [ltr,], use_natural_foreign_keys=True)
+        # print(serialize_ltr)
     except ObjectDoesNotExist:
         return HttpResponse(None)
     return HttpResponse(serialize_ltr)

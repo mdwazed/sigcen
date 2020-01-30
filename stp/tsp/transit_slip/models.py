@@ -27,6 +27,9 @@ class Unit(models.Model):
     def __str__(self):
         return self.unit_name
 
+    def natural_key(self):
+        return(self.unit_name)
+
 class TransitSlip(models.Model):
     date = models.DateTimeField()
     dst = models.ForeignKey(Sta, on_delete=models.PROTECT)
