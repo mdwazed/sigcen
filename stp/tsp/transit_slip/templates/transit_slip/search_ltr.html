@@ -1,0 +1,77 @@
+{% extends 'transit_slip/layout.html' %}
+{% block link %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="search-bar card">
+            <div class="card-body">
+                <h6>Find DAK</h6>
+                <form action="" method=POST>
+                    {% csrf_token %}
+                    <select name="unit-id">
+                        <option value="">Search Unit</option>
+                        {% for unit_id, unit_name in unit_choices %}
+                            <option value={{ unit_id }}>{{ unit_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input class="datepicker" type="text" name="search-date" placeholder="Date">
+                    <input type="submit" name="submit" value="Search">
+                </form>
+            </div>
+    </div>
+    
+    <div class="search-result">
+        <h5> {{ letters|length }} DAK returned as search result </h5>
+        <table id="data_table_id" class="display">
+            <thead>
+                <tr>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Date</th>
+                    <th>Code</th>
+                    <th>Ltr No</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for letter in letters %}
+                <tr>
+                    <td>{{ letter.from_unit }}</td>
+                    <td>{{ letter.to_unit }}</td>
+                    <td>{{ letter.date }}</td>
+                    <td>{{ letter.u_string }}</td>
+                    <td>{{ letter.ltr_no }}</td>
+                    {% if letter.received_by_sigcen %}
+                    <td>In Transit</td>
+                    {% else %}
+                    <td>Not despatched</td>
+                    {% endif %}
+                    <td>
+                        <a href="{% url 'letter_state' pk=letter.pk %}">Current State</a>
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script>
+        jQuery(function ($) {
+            $(".datepicker").datepicker({
+                dateFormat: "dd-mm-yy",
+                maxDate: "-1d",
+                // minDate: "-25d",
+            });
+        });
+    </script>
+{% endblock %}

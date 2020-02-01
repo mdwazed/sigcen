@@ -23,8 +23,10 @@
                 <tr>
                     <th>From</th>
                     <th>To</th>
-                    <th>Ltr no</th>
                     <th>Date</th>
+                    <th>Code</th>
+                    <th>Ltr no</th>
+                    <th>Remarks</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,8 +34,10 @@
                 <tr>
                     <td>{{ ltr.from_unit }}</td>
                     <td>{{ ltr.to_unit }}</td>
-                    <td>{{ ltr.ltr_no }}</td>
                     <td>{{ ltr.date }}</td>
+                    <td>{{ ltr.u_string }}</td>
+                    <td>{{ ltr.ltr_no }}</td>
+                    <td></td>
                 </tr>
                 {% endfor %}
             </tbody>

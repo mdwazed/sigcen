@@ -46,17 +46,19 @@
                                 <th>To</th>
                                 <th>Ltr no</th>
                                 <th>Date</th>
+                                <th>Code</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for ltr in ltrs %}
-                            <tr>
+                            <tr id="{{ ltr.pk }}">
                                 <td>{{ltr.from_unit}}</td>
                                 <td>{{ltr.to_unit}}</td>
                                 <td>{{ltr.ltr_no}}</td>
                                 <td>{{ltr.date}}</td>
-                                <td><button type="button" class="btn btn-link">Remove</button></td>
+                                <td>{{ ltr.u_string }}</td>
+                                <td><a class="ltr-remove-link" href="#">Remove</a></td>
                                 <input type="hidden" name="ltr-ids" value="{{ ltr.id }}">
         
                             </tr>
@@ -75,7 +77,13 @@
         {% endif %}
     </div>
     
- </div>
+</div>
 
 {% endblock %}
+
+{% block script %}
+    <script type="text/javascript" src="/static/assets/javascript/transit_slip.js"></script>
+{% endblock %}
+
+
 

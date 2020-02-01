@@ -1,0 +1,70 @@
+{% extends 'transit_slip/layout.html' %}
+{% block content %}
+<div class="container">
+    <h5>State of DAK: {{ letter.ltr_no }}</h5>
+    <div class="dak-state">
+        <table class="table table-striped state-table">
+            <tr>
+                <td class="td-1">From :</td>
+                <td class="td-2">{{ letter.from_unit }}</td>
+            </tr>
+            <tr>
+                <td class="td-1">To :</td>
+                <td class="td-2">{{letter.addr_line_1 | default_if_none:""}} {{ letter.to_unit }}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Date :</td>
+                <td class="td-2">{{ letter.date | date:"d-m-Y" }}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Code :</td>
+                <td class="td-2">{{ letter.u_string }}</td>
+            </tr>
+            <tr>
+                <td class="td-1">DAK Created at :</td>
+                <td class="td-2">{{ letter.created_at | date:"d-m-Y H:i" }}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Received at sigcen :</td>
+                <td class="td-2">{{ letter.received_at_sigcen | default_if_none:"Not Received" }}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Spl pkg :</td>
+                <td class="td-2">{% if letter.spl_pkg %} Yes {% else %} No {% endif %}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Transit slip No :</td>
+                <td class="td-2">{% if letter.transit_slip %}{{ letter.transit_slip.pk }} 
+                                    {% else %} Not Assigned {% endif %}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Transit slip Date :</td>
+                <td class="td-2">{% if letter.transit_slip.date %}{{ letter.transit_slip.date | date:"d-m-Y H:i"}}
+                                    {% else %} Not Assigned {% endif %}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Transit slip DST :</td>
+                <td class="td-2">{% if letter.transit_slip.dst %}{{ letter.transit_slip.dst }}
+                                {% else %} Not Assigned {% endif %}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Transit slip prepared By :</td>
+                <td class="td-2">{% if letter.transit_slip.prepared_by %}{{ letter.transit_slip.prepared_by }}
+                                    {% else %} Not Assigned {% endif %}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Transit slip despatched on :</td>
+                <td class="td-2">{% if letter.transit_slip.despatched_on %}{{ letter.transit_slip.despatched_on | date:"d-m-Y"}}
+                                    {% else %} Not Assigned {% endif %}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Transit slip received on :</td>
+                <td class="td-2">{% if letter.transit_slip_received_on %}{{ letter.transit_slip_received_on | date:"d-m-Y"}}
+                                    {% else %} Not Assigned {% endif %}</td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

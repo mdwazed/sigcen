@@ -22,10 +22,10 @@
                     <td>{{ t_slip.dst }}</td>
                     <td>{{ t_slip.id }}</td>
                     <td>{{ t_slip.date }}</td>
-                    <td>count</td>
+                    <td>{{ t_slip.ltr_count }}</td>
                     <td>
+                        <a href="{% url 'transit_slip_detail' id=t_slip.id %}">Details |</a>
                         <a href="{% url 'transit_slip_despatch' id=t_slip.id %}">Despatch |</a>
-                        <a href="{% url 'transit_slip_detail' id=t_slip.id %}">Details</a>
                     </td>
                 </tr>
                 {% endfor %}

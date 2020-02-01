@@ -101,7 +101,6 @@ class LetterView(LoginRequiredMixin, View):
         cur_date = datetime.today()
         init_ltr_no = self.get_default_letter_no()
         form = forms.LetterForm(initial={'ltr_no':init_ltr_no, 'date': cur_date})
-        logger.info('new letter form created with ltr no %s', init_ltr_no)
         units = Unit.objects.all()
         context = {
             'form' : form,
@@ -122,32 +121,34 @@ class LetterView(LoginRequiredMixin, View):
                 'units' : units,
             }
             if form.is_valid():
-                letter = form.save(commit=False)
-                letter.from_unit = request.user.profile.unit
-                letter.to_unit = Unit.objects.get(pk=to_unit_id)
-                letter.u_string = str(randint(1000, 10000))
-                qr_code_name = str(date.today().strftime("%d%m%Y")) + '-' + str(letter.u_string)
-                file_name = qr_code_name + '.png'
-                file_path = settings.MEDIA_ROOT
-                # file_url = file_path + '/qr_code/' + file_name
-                file_url = file_path + '/qr_code/' +date.today().strftime("%Y/%m/%d/")+ file_name
-                directory = os.path.dirname(file_url)
-                if not os.path.exists(directory):
-                    os.makedirs(directory)
-                img = qrcode.make(qr_code_name)
-                img.save(file_url)
-                # letter.qr_image_url = file_name
-                letter.qr_image_url = 'qr_code/' +date.today().strftime("%Y/%m/%d/")+ file_name
-                # letter.to_unit = Unit.objects.get(pk=address)
-                # print(letter.to_unit)
-                letter.save()
-                logger.info("new letter created with id %s", letter.pk)
+                try:
+                    letter = form.save(commit=False)
+                    letter.from_unit = request.user.profile.unit
+                    letter.to_unit = Unit.objects.get(pk=to_unit_id)
+                    letter.u_string = str(randint(1000, 10000))
+                    qr_code_name = str(date.today().strftime("%d%m%Y")) + '-' + str(letter.u_string)
+                    file_name = qr_code_name + '.png'
+                    file_path = settings.MEDIA_ROOT
+                    # file_url = file_path + '/qr_code/' + file_name
+                    file_url = file_path + '/qr_code/' +date.today().strftime("%Y/%m/%d/")+ file_name
+                    directory = os.path.dirname(file_url)
+                    if not os.path.exists(directory):
+                        os.makedirs(directory)
+                    img = qrcode.make(qr_code_name)
+                    img.save(file_url)
+                    # letter.qr_image_url = file_name
+                    letter.qr_image_url = 'qr_code/' +date.today().strftime("%Y/%m/%d/")+ file_name
+                    # letter.to_unit = Unit.objects.get(pk=address)
+                    # print(letter.to_unit)
+                    letter.save()
+                    logger.info("new letter created with id %s", letter.pk)
+                except Exception as excp:
+                    logger.warnign("new letter creation failed- " + type(excp))
+                    return HttpResponse("letter creation failed")
             else:
                 return render(request, self.template_name, context)
         return redirect(letter_list_inhouse)
             
-        # return render(request, self.template_name, context)
-    
     def get_default_letter_no(self):
         prefix = '23.01.955.__.__.01.01.'
         current_date = datetime.today().strftime('%d.%m.%Y')
@@ -178,10 +179,23 @@ def letter_details(request, pk=None):
         }
     return render(request, 'transit_slip/letter_details.html', context)
 
+def letter_state(request, pk=None):
+    if not pk:
+        return redirect('search_ltr')
+    else:
+        letter = Letter.objects.get(pk=pk)
+        print(letter)
+        context = {
+            'letter': letter,
+        }
+        return render(request, 'transit_slip/letter_state.html', context)
+
+
 @login_required
 def letter_list_inhouse(request):
     unit = Unit.objects.get(pk=request.session['unitid'])
-    letters = Letter.objects.filter(from_unit=unit, received_by_sigcen=False, date__gte=datetime.today()-timedelta(days=7)).order_by('-created_at')
+    letters = Letter.objects.filter(from_unit=unit, received_by_sigcen=False, 
+        date__gte=datetime.today()-timedelta(days=7)).order_by('-created_at')
     context = {
         'letters' : letters,
         'unit' : unit,
@@ -191,7 +205,8 @@ def letter_list_inhouse(request):
 @login_required
 def letter_list_despatched(request):
     unit = Unit.objects.get(pk=request.session['unitid'])
-    letters = Letter.objects.filter(from_unit=unit, received_by_sigcen=True, date__gte=datetime.today()-timedelta(days=7)).order_by('-created_at')
+    letters = Letter.objects.filter(from_unit=unit, received_by_sigcen=True, 
+        date__gte=datetime.today()-timedelta(days=15)).order_by('-created_at')
     context = {
         'letters' : letters,
         'unit' : unit,
@@ -330,7 +345,8 @@ class DakInManualView(LoginRequiredMixin, View):
             else:
                 code = None
             if not code:
-                letters = Letter.objects.filter(from_unit=unit, date=date, received_by_sigcen=False).order_by('-created_at')
+                letters = Letter.objects.filter(from_unit=unit, date=date, 
+                    received_by_sigcen=False).order_by('-created_at')
             else:
                 letters = Letter.objects.filter(from_unit=unit, date=date, u_string=code)
 
@@ -407,7 +423,8 @@ class CreateTransitSlipView(LoginRequiredMixin, View):
             return redirect('create_transit_slip')
         max_size = int(request.POST['pkg-size'])
         ltrs = Letter.objects.filter(to_unit__sta_name=sta_id, 
-                received_by_sigcen=True, transit_slip=None, spl_pkg=False).order_by('-received_at_sigcen')[:max_size]
+                received_by_sigcen=True, transit_slip=None, 
+                spl_pkg=False).order_by('-received_at_sigcen')[:max_size]
         ltr_count = len(ltrs)
         context = {
             'stas' : self.stas,
@@ -510,3 +527,39 @@ class TransitSlipPrintView(LoginRequiredMixin, View):
             'ltr_count': ltr_count,
         }
         return render(request, self.template, context)
+
+class SearchLtrView(LoginRequiredMixin, View):
+    template = 'transit_slip/search_ltr.html'
+    def get_unit_choices(self, request):
+        unit_id = request.session['unitid']
+        sta = Unit.objects.get(pk=unit_id).sta_name
+        unit_choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta)]
+        return unit_choices
+    def get(self, request):
+        unit_choices = self.get_unit_choices(request)
+        context = {
+            'unit_choices': unit_choices,
+        }
+        return render(request, self.template, context)
+
+    def post(self, request):
+        print(request.POST)
+        if not (request.POST['unit-id'] or request.POST['search-date']):
+            return redirect('search_ltr')
+        else:
+            if request.POST['unit-id'] and request.POST['search-date']:
+                unit = Unit.objects.get(pk=request.POST['unit-id'])
+                search_date = datetime.strptime(request.POST['search-date'], "%d-%m-%Y")
+                letters = Letter.objects.filter(from_unit=unit, date=search_date)[:100]
+            elif request.POST['unit-id']:
+                unit = Unit.objects.get(pk=request.POST['unit-id'])
+                letters = Letter.objects.filter(from_unit=unit)[:100]
+            else:
+                search_date = datetime.strptime(request.POST['search-date'], "%d-%m-%Y")
+                letters = Letter.objects.filter(date=search_date)[:100]
+            unit_choices = self.get_unit_choices(request)
+            context = {
+                'letters': letters,
+                'unit_choices': unit_choices,
+            }
+            return render(request, self.template, context)
