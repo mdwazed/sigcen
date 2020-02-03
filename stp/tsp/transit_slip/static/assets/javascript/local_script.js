@@ -11,7 +11,7 @@ function printWindow() {
     window.print();
 }
 
-
+// save the date of transit slip received by distant sigcen
 $('.received-on-save').click(function(){
     let date = $(this).parent().prev().val();
     let ts_id = $(this).parent().next().val();

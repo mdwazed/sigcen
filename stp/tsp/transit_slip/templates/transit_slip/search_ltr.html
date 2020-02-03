@@ -1,6 +1,7 @@
 {% extends 'transit_slip/layout.html' %}
+{% load static %}
 {% block link %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+<link rel="stylesheet" href="{% static '/vendor/jquery-ui-1.12.1/jquery-ui.min.css' %}" />
 {% endblock %}
 {% block content %}
 <div class="container">
@@ -64,12 +65,12 @@
 {% endblock %}
 
 {% block script %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="{% static '/vendor/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
     <script>
         jQuery(function ($) {
             $(".datepicker").datepicker({
                 dateFormat: "dd-mm-yy",
-                maxDate: "-1d",
+                maxDate: "0d",
                 // minDate: "-25d",
             });
         });
