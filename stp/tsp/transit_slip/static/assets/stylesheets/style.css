@@ -135,3 +135,29 @@
 .dak-state .td-2 {
     text-align: left;
 }
+
+.seal-block {
+    margin-top: 100px;
+}
+
+.seal-block p {
+    text-align: right;
+    margin-right: 100px;
+}
+
+.inline-info {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.top-btn-div {
+    margin: 30px 100px;
+}
+.top-btn-div button {
+    margin: 0px 10px;
+}
+
+.heading-with-right-btn {
+    display: flex;
+    justify-content: space-around;
+}

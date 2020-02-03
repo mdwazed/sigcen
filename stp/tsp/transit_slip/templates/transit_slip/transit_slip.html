@@ -36,7 +36,7 @@
             <input type="hidden" name="dst-sta" value="{{ sta_name }}">
             <div class="ltr-list">
                 <div style="margin-top: 20px;">
-                    <h4>Showing DAK for {{ sta_name }}. Total count {{ ltr_count }}</h4>
+                    <h4>Showing DAK for {{ sta_name }}. Total count {{ ltrs | length }}</h4>
                 </div>
                 <div>
                     <table id="transit-slip-table" class="table">

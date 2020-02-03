@@ -47,7 +47,9 @@
                                             <td>
                                                 {% if ts.received_on == None %}
                                                     <p><input type="text" class="datepicker" name="received-on" style="width: 100px;">
-                                                        <span><button class="btn btn-sm btn-outline-secondary">Save</button></span></p>
+                                                        <span><button class="btn btn-sm btn-outline-secondary received-on-save">Save</button></span>
+                                                        <input type="hidden" value="{{ts.id}}">
+                                                    </p>
                                                 {% else %}
                                                     <p>{{  ts.received_on }}</p>
                                                 {% endif %}
@@ -72,6 +74,8 @@
 {% block script %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script>
+        let csrf_token = '{{ csrf_token }}'
+
         jQuery(function ($) {
             $(".datepicker").datepicker({
                 dateFormat: "dd-mm-yy",
@@ -79,6 +83,7 @@
                 minDate: "-25d",
             });
         });
+        
     </script>
 {% endblock %}
 

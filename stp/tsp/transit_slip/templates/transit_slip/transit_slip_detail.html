@@ -16,14 +16,14 @@
         
     </div>
     <div>
-        <table class="table">
+        <table class="table table-sm">
             <thead>
                 <tr>
                     <th>From</th>
                     <th>To</th>
-                    <th>Ltr no</th>
                     <th>Date</th>
                     <th>Code</th>
+                    <th>Ltr no</th>
                     <th>Remarks</th>
                 </tr>
             </thead>
@@ -32,9 +32,9 @@
                 <tr>
                     <td>{{ ltr.from_unit }}</td>
                     <td>{{ ltr.to_unit }}</td>
-                    <td>{{ ltr.ltr_no }}</td>
                     <td>{{ ltr.date }}</td>
                     <td>{{ ltr.u_string }}</td>
+                    <td>{{ ltr.ltr_no }}</td>
                     <td></td>
                 </tr>
                 {% endfor %}
@@ -42,7 +42,7 @@
         </table>
     </div>
     <div>
-        <a class="btn btn-primary" href="{% url 'transit_slip_print' id=transit_slip.id %}" target="blank">Print</a>
+        <button class="btn btn-primary not-to-be-print" onclick="printWindow()">Print</button>
     </div>
 </div>
 

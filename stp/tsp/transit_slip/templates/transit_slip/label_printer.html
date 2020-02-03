@@ -2,8 +2,12 @@
 {% block topnav %}
 {% endblock %}
 {% block content %}
-
-{% for letter in letters %}
+<div class="top-btn-div">
+    <button class="btn btn-primary not-to-be-print" onclick="printLabel()">Print</button>
+    <button class="btn btn-primary not-to-be-print" onclick="closeWindow()">Close</button>
+</div>
+<div>
+    {% for letter in letters %}
     <div class="label-printer">
         <div class="label-address">
             <div>
@@ -15,16 +19,28 @@
                 <p>{{ letter.to_unit.sta_name }}</p>
             </div>
             <div class="label-credit">
-                <p>Sys dev: Maj Wazed,sigs</p>
+                <p>Sys sp: Maj Wazed,sigs</p>
             </div>
-            
+    
         </div>
-        
+    
         <div class="qr-code">
             <img src="/media/{{letter.qr_image_url}}" alt="qr code image">
             <p>{{ letter.date |date:"dmY-"}}{{ letter.u_string }}</p>
         </div>
     </div>
     <hr>
-{% endfor %}
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        function printLabel(){
+            window.print();
+        }
+        function closeWindow(){
+            window.close();
+        }
+    </script>
 {% endblock %}

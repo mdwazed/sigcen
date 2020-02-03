@@ -23,6 +23,13 @@
     .ts-print .ts-head {
         width: 80%;
     }
+    .top-banner {
+        display: none;
+    }
+    .not-to-be-print {
+        display: none;
+    }
+
 }
 
 div {

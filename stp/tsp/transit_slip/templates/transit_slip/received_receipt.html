@@ -1,0 +1,60 @@
+{% extends 'transit_slip/layout.html' %}
+{% block content %}
+<div class="container receipt-print">
+    <div>
+        <div class="heading-with-right-btn">
+            <h5>Received Letters receipt - Static Signal Coy Jashore</h5>
+            <button class="btn btn-primary btn-sm not-to-be-print" onclick="printReceipt()">Print Receipt</button>
+        </div>
+        <div class="inline-info">
+            <p>Receipt ID: <span>{{ receipt.id }}</span></p>
+            <p>Received On: <span>{{ receipt.received_at_sigcen }}</span></p>
+            <p>Received By: <span>{{ receipt.received_by }}</span></p>
+            <p>Total DAK: <span>{{ receive_ltrs | length }}</span></p>
+        </div>
+    </div>
+   
+    <div>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Ser No</th>
+                    <th scope="col">From</th>
+                    <th scope="col">To</th>
+                    <th scope="col">Ltr no</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Code</th>
+                   
+                </tr>
+            </thead>
+            <tbody>
+                {% for letter in receive_ltrs %}
+                <tr>
+                    <td>Ser No</td>
+                    <td>{{ letter.from_unit }}</td>
+                    <td>{{ letter.to_unit }}</td>
+                    <td>{{ letter.ltr_no }}</td>
+                    <td>{{ letter.date }}</td>
+                    <td>{{ letter.u_string }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="seal-block">
+        <p>Official Seal with sign</p>
+        <p>**This receipt is only valid with appropriate seal and sign from Static Sig Coy Jashore.**</p>
+        
+    </div>
+    
+</div>
+
+{% endblock %}
+
+{% block script %}
+    <script>
+        function printReceipt(){
+            window.print();
+        }
+    </script>
+{% endblock %}

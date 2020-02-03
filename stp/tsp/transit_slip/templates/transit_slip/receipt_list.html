@@ -1,0 +1,36 @@
+{% extends 'transit_slip/layout.html' %}
+{% block content %}
+<div class="container">
+    <h5>Recent Receipts </h5>
+    <div>
+        <table id="data_table_id" class="display">
+            <thead>
+                <tr>
+                    <th>Receipt ID</th>
+                    <th>Received on</th>
+                    <th>Received By</th>
+                    <th>Total DAK</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for receipt in receipt_lists %}
+                <tr>
+                    <td>{{ receipt.pk }}</td>
+                    <td>{{ receipt.received_at_sigcen }}</td>
+                    <td>{{ receipt.received_by }}</td>
+                    <td>{{ receipt.get_ltr_count }}</td>
+                    <td><a href="{% url 'receive_receipt' receipt.id %}">Details</a></td>
+                    
+
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+
+{% endblock %}

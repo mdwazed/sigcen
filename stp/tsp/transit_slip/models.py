@@ -41,6 +41,14 @@ class TransitSlip(models.Model):
         ltr_count = Letter.objects.filter(transit_slip=self).count()
         return ltr_count
 
+class LetterReceipt(models.Model):
+    received_at_sigcen = models.DateTimeField(null=True)
+    received_by = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    def get_ltr_count(self):
+        ltr_count = Letter.objects.filter(ltr_receipt=self).count()
+        return ltr_count
+
 class Profile(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -68,13 +76,11 @@ class Letter(models.Model):
     date = models.DateField()
     from_unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='from_unit',)
     to_unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='to_unit',)
-    # to_unit = models.ManyToManyField(Unit, related_name='to_unit')
     u_string = models.CharField(max_length=5)
     qr_image_url = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    received_by_sigcen = models.BooleanField(default=False)
-    received_at_sigcen = models.DateTimeField(null=True)
     spl_pkg = models.BooleanField(default=False)
+    ltr_receipt = models.ForeignKey(LetterReceipt, on_delete=models.SET_NULL, null=True)
     despatched_at = models.DateTimeField(null=True)
     transit_slip = models.ForeignKey(TransitSlip, on_delete=models.SET_NULL, blank=True, null=True)
 

@@ -16,7 +16,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from datetime import datetime, date, timedelta
 
-from transit_slip.models import User, Letter, Unit, Sta, TransitSlip
+from transit_slip.models import User, Letter, Unit, Sta, TransitSlip, LetterReceipt
 from transit_slip.forms import forms
 import qrcode
 import uuid
@@ -194,7 +194,7 @@ def letter_state(request, pk=None):
 @login_required
 def letter_list_inhouse(request):
     unit = Unit.objects.get(pk=request.session['unitid'])
-    letters = Letter.objects.filter(from_unit=unit, received_by_sigcen=False, 
+    letters = Letter.objects.filter(from_unit=unit, ltr_receipt=None, 
         date__gte=datetime.today()-timedelta(days=7)).order_by('-created_at')
     context = {
         'letters' : letters,
@@ -205,8 +205,8 @@ def letter_list_inhouse(request):
 @login_required
 def letter_list_despatched(request):
     unit = Unit.objects.get(pk=request.session['unitid'])
-    letters = Letter.objects.filter(from_unit=unit, received_by_sigcen=True, 
-        date__gte=datetime.today()-timedelta(days=15)).order_by('-created_at')
+    letters = Letter.objects.filter(from_unit=unit, 
+                date__gte=datetime.today()-timedelta(days=15)).exclude(ltr_receipt=None).order_by('-created_at')
     context = {
         'letters' : letters,
         'unit' : unit,
@@ -215,8 +215,13 @@ def letter_list_despatched(request):
 
 @login_required
 def letter_delete(request, ltr_no):
-    Letter.objects.filter(ltr_no=ltr_no).delete()
-    return redirect('letter_list_inhouse')
+    letter = Letter.objects.filter(ltr_no=ltr_no)
+    if letter.ltr_receipt:
+        err_msg = "You can not delete a DAK after received at Sigcen"
+        return render(request, 'transit_slip/generic_error.html', err_msg)
+    else:
+        letter.delete()
+        return redirect('letter_list_inhouse')
 
 @login_required
 def label(request, pk=None):
@@ -340,13 +345,15 @@ class DakInManualView(LoginRequiredMixin, View):
         if form.is_valid():
             unit = form.cleaned_data['unit']
             date = form.cleaned_data['date']
+            # if searched by unique code or assigne code=none
             if form.cleaned_data['code']:
                 code = form.cleaned_data['code']
             else:
                 code = None
+            # search letter wothout code
             if not code:
                 letters = Letter.objects.filter(from_unit=unit, date=date, 
-                    received_by_sigcen=False).order_by('-created_at')
+                    ltr_receipt=None).order_by('-created_at')
             else:
                 letters = Letter.objects.filter(from_unit=unit, date=date, u_string=code)
 
@@ -372,29 +379,62 @@ class DakInScanView(LoginRequiredMixin, View):
 
 class DakReceive(LoginRequiredMixin, View):
     """
-    Receive dak by sigcen clk after they have been scanned or manually selected as IN DAK
+    Receive dak by sigcen clk after they have been scanned or manually selected as IN DAK.
+    activated on clicking receive button on DAK in page.
     """
     def post(self, request):
-        print(request.POST['submit-type'])
+        # print(request.POST['submit-type'])
+        received_ltrs = []
         ltr_ids = request.POST.getlist('received_ltr')
         spl_pkgs = request.POST.getlist('spl_pkg')
+        # create ltr receipt
+        received_by = User.objects.get(pk=request.session['userid'])
+        ltr_receipt = LetterReceipt(received_at_sigcen=datetime.now(), received_by=received_by)
+        ltr_receipt.save()
+        # modifiy received  and spl_pkg attributes of each ltr 
         for ltr_id in ltr_ids:
             try:
                 ltr = Letter.objects.get(pk=ltr_id)
             except ObjectDoesNotExist:
                 err_msg = 'Intended letter not available or created'
                 return render(request, 'transit_slip/generic_error.html', err_msg)
-            ltr.received_by_sigcen = True
-            ltr.received_at_sigcen = datetime.now()
             if ltr_id in spl_pkgs:
                 ltr.spl_pkg = True
-                # print(ltr)
-            ltr.save()
-        if request.POST['submit-type'] == 'manual':
-            return redirect('dak_in_manual')
-        else:
-            return redirect('dak_in_scan')
-            
+            try:
+                ltr.ltr_receipt = ltr_receipt
+                ltr.save()
+                received_ltrs.append(ltr)
+            except Exception:
+                err_msg = 'Intended letter could not be received'
+                logger.warning(err_msg)
+                return render(request, 'transit_slip/generic_error.html', err_msg)
+        # context = {
+        #     'received_ltrs': received_ltrs,
+        #     'ltr_receipt': ltr_receipt,
+        # }      
+        # return render(request, 'transit_slip/received_receipt.html', context)
+        return redirect('receive_receipt', ltr_receipt.pk)
+
+        # if request.POST['submit-type'] == 'manual':
+        #     return redirect('dak_in_manual')
+        # else:
+        #     return redirect('dak_in_scan')
+
+def receipt_list(request):
+    receipt_lists = LetterReceipt.objects.all().order_by('-received_at_sigcen')[:200]
+    context = {
+        'receipt_lists': receipt_lists,
+    }
+    return render(request, 'transit_slip/receipt_list.html', context)
+
+def receive_receipt(request, pk):
+    receipt = LetterReceipt.objects.get(pk=pk)
+    receive_ltrs = Letter.objects.filter(ltr_receipt=receipt)
+    context = {
+        'receipt': receipt,
+        'receive_ltrs': receive_ltrs,
+    }
+    return render(request, 'transit_slip/received_receipt.html', context)
 
 
 class CreateTransitSlipView(LoginRequiredMixin, View):
@@ -405,7 +445,7 @@ class CreateTransitSlipView(LoginRequiredMixin, View):
         if sta_id:
             dst_sta = Sta.objects.get(pk=sta_id)
             ltrs = Letter.objects.filter(to_unit__sta_name=dst_sta, 
-                received_by_sigcen=True, transit_slip=None).order_by('-received_at_sigcen')
+                transit_slip=None).exclude(ltr_receipt=None).order_by('-ltr_receipt__received_at_sigcen')
         else:
             ltrs = None
         context = {
@@ -422,15 +462,14 @@ class CreateTransitSlipView(LoginRequiredMixin, View):
         except ValueError:
             return redirect('create_transit_slip')
         max_size = int(request.POST['pkg-size'])
-        ltrs = Letter.objects.filter(to_unit__sta_name=sta_id, 
-                received_by_sigcen=True, transit_slip=None, 
-                spl_pkg=False).order_by('-received_at_sigcen')[:max_size]
-        ltr_count = len(ltrs)
+        ltrs = Letter.objects.filter(to_unit__sta_name=sta_id, transit_slip=None, 
+                spl_pkg=False).exclude(ltr_receipt=None).order_by('-ltr_receipt__received_at_sigcen')[:max_size]
+        # ltr_count = len(ltrs)
         context = {
             'stas' : self.stas,
             'ltrs' : ltrs,
             'sta_name' : sta_name,
-            'ltr_count' : ltr_count,
+            # 'ltr_count' : ltr_count,
         }
         return render(request, self.template, context)
 
@@ -501,6 +540,20 @@ def transit_slip_despatch(request, id):
     t_slip.despatched_on = datetime.today()
     t_slip.save()
     return redirect('current_transit_slip')
+
+@login_required
+def ts_rcv_update(request):
+    ts_id = int(request.POST['ts_id'])
+    date = datetime.strptime(request.POST['date'], '%d-%m-%Y')
+    try:
+        ts = TransitSlip.objects.get(pk=ts_id)
+    except ObjectDoesNotExist:
+        response = HttpResponse("Error: Could not retrive the transit slip")
+        response.status_code = 400
+        return response
+    ts.received_on = date    
+    ts.save()
+    return HttpResponse("Received date updated...")
 
 @login_required
 def fetch_letter_json(request):

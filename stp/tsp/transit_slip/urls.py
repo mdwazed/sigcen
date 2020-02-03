@@ -27,6 +27,8 @@ urlpatterns = [
     path('label/<int:pk>', views.label, name= 'label'),
     path('label_bulk/<str:ltr_no>', views.label_bulk, name= 'label_bulk'),
     # sigcen user
+    path('receipt_list', views.receipt_list, name= 'receipt_list'),
+    path('receive_receipt/<int:pk>', views.receive_receipt, name= 'receive_receipt'),
     path('dak_in_manual', views.DakInManualView.as_view(), name= 'dak_in_manual'),
     path('dak_in_scan', views.DakInScanView.as_view(), name= 'dak_in_scan'),
     path('dak_receive', views.DakReceive.as_view(), name= 'dak_receive'),
@@ -35,8 +37,9 @@ urlpatterns = [
     path('transit_slip_ltrs', views.transit_slip_ltrs, name= 'transit_slip_ltrs'),
     path('old_transit_slip', views.OldTransitSlipView.as_view(), name= 'old_transit_slip'),
     path('transit_slip_detail/<int:id>', views.TransitSlipDetailView.as_view(), name= 'transit_slip_detail'),
-    path('transit_slip_print/<int:id>', views.TransitSlipPrintView.as_view(), name= 'transit_slip_print'),
+    # path('transit_slip_print/<int:id>', views.TransitSlipPrintView.as_view(), name= 'transit_slip_print'),
     path('transit_slip_despatch/<int:id>', views.transit_slip_despatch, name= 'transit_slip_despatch'),
+    path('ts_rcv_update', views.ts_rcv_update, name= 'ts_rcv_update'),
     path('test', views.test_view, name= 'test_view'),
 
     path('fetch_letter_json', views.fetch_letter_json, name= 'fetch_letter_json'),

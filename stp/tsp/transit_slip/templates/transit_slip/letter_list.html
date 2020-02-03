@@ -23,7 +23,7 @@
                         <td>{{ letter.date }}</td>
                         <td>{{ letter.u_string }}</td>
                         <td>{{ letter.ltr_no }}</td>
-                        {% if letter.received_by_sigcen %}
+                        {% if letter.ltr_receipt %}
                         <td>In Transit</td>
                         <td>
                             <!-- <a href="{% url 'label' pk=letter.pk %}" target="blank">Print</a> -->
