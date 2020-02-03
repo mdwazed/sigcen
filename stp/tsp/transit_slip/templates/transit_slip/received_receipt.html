@@ -30,7 +30,7 @@
             <tbody>
                 {% for letter in receive_ltrs %}
                 <tr>
-                    <td>Ser No</td>
+                    <td>{{ forloop.counter }}</td>
                     <td>{{ letter.from_unit }}</td>
                     <td>{{ letter.to_unit }}</td>
                     <td>{{ letter.ltr_no }}</td>

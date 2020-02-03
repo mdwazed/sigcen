@@ -1,8 +1,38 @@
 {% extends 'transit_slip/layout.html' %}
+{% load static %}
+{% block link %}
+<link rel="stylesheet" href="{% static '/vendor/jquery-ui-1.12.1/jquery-ui.min.css' %}" />
+{% endblock %}
 {% block content %}
 <div class="container">
-    <h5>Recent Letters of {{ unit.unit_name }} </h5>
+    <div class="card">
+        <div class="card-body">
+            <form action="" method=POST autocomplete="off">
+                {% csrf_token %}
+                <div class="input-group inline-header-form">
+    
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="">Filter:</span>
+                    </div>
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="">From:</span>
+                    </div>
+                    <input type="text" class="form-control datepicker" name="from-date" value="">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="">To:</span>
+                    </div>
+                    <input type="text" class="form-control datepicker" name="to-date" value="">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-primary" type="submit" name="submit">Search</button>
+                    </div>
+    
+                </div>
+            </form>
+        </div>
+    </div>
+    
     <div>
+        <h5>Recent Letters of {{ unit.unit_name }} </h5>
         <table id="data_table_id" class="display">
             <thead>
                 <tr>
@@ -12,7 +42,7 @@
                     <th>Code</th>
                     <th>Ltr No</th>
                     <th>Status</th>
-                    <th>Action</th>
+                    <th>Misc</th>
                 </tr>
             </thead>
             <tbody>
@@ -23,18 +53,15 @@
                         <td>{{ letter.date }}</td>
                         <td>{{ letter.u_string }}</td>
                         <td>{{ letter.ltr_no }}</td>
-                        {% if letter.ltr_receipt %}
-                        <td>In Transit</td>
+                        <td>{{ letter.get_current_status }}</td>
+                        {% if letter.get_current_status == "In Unit" %}
                         <td>
-                            <!-- <a href="{% url 'label' pk=letter.pk %}" target="blank">Print</a> -->
-                            <a href="{% url 'label_bulk' ltr_no=letter.ltr_no|urlencode:"" %}" target="blank">Print Label </a>
+                            <a href="{% url 'label_bulk' ltr_no=letter.ltr_no|urlencode:"" %}" target="blank">Print Label</a>
+                            <a href="{% url 'letter_delete' ltr_no=letter.ltr_no|urlencode:"" %}">Delete</a>
                         </td>
                         {% else %}
-                        <td>Not despatched</td>
                         <td>
-                            <!-- <a href="{% url 'label' pk=letter.pk %}" target="blank">Print</a> -->
-                            <a href="{% url 'label_bulk' ltr_no=letter.ltr_no|urlencode:"" %}" target="blank">Print Label |</a>
-                            <a href="{% url 'letter_delete' ltr_no=letter.ltr_no|urlencode:"" %}">Delete</a>
+                            Receipt:{{ letter.ltr_receipt.id }}
                         </td>
                         {% endif %}
                         
@@ -48,4 +75,26 @@
     
 </div>
 
+{% endblock %}
+
+{% block script %}
+    <script src="{% static '/vendor/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+    <script>
+        // let csrf_token = '{{ csrf_token }}'
+        let caller = "{{ caller }}"
+        $(document).ready(function () {
+            if (caller == "inhouse"){
+                $(".card").remove();
+            }
+        });
+
+        jQuery(function ($) {
+            $(".datepicker").datepicker({
+                dateFormat: "dd-mm-yy",
+                maxDate: "0d",
+                minDate: "-1y",
+            });
+        });
+
+    </script>
 {% endblock %}

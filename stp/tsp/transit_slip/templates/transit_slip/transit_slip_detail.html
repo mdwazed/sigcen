@@ -19,6 +19,7 @@
         <table class="table table-sm">
             <thead>
                 <tr>
+                    <th>Ser No</th>
                     <th>From</th>
                     <th>To</th>
                     <th>Date</th>
@@ -30,6 +31,7 @@
             <tbody>
                 {% for ltr in ltrs %}
                 <tr>
+                    <td>{{ forloop.counter }}</td>
                     <td>{{ ltr.from_unit }}</td>
                     <td>{{ ltr.to_unit }}</td>
                     <td>{{ ltr.date }}</td>

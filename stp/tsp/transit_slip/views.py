@@ -194,34 +194,59 @@ def letter_state(request, pk=None):
 @login_required
 def letter_list_inhouse(request):
     unit = Unit.objects.get(pk=request.session['unitid'])
-    letters = Letter.objects.filter(from_unit=unit, ltr_receipt=None, 
-        date__gte=datetime.today()-timedelta(days=7)).order_by('-created_at')
+    letters = Letter.objects.filter(from_unit=unit, ltr_receipt=None,).order_by('-created_at')
     context = {
         'letters' : letters,
         'unit' : unit,
+        'caller': 'inhouse',
     }
     return render(request, 'transit_slip/letter_list.html', context)
 
-@login_required
-def letter_list_despatched(request):
-    unit = Unit.objects.get(pk=request.session['unitid'])
-    letters = Letter.objects.filter(from_unit=unit, 
-                date__gte=datetime.today()-timedelta(days=15)).exclude(ltr_receipt=None).order_by('-created_at')
-    context = {
+class LetterListDespatchedView(LoginRequiredMixin, View):
+    template = 'transit_slip/letter_list.html'
+    
+    def get(self, request, *args, **kwargs):
+        unit = Unit.objects.get(pk=request.session['unitid'])
+        letters = Letter.objects.filter(from_unit=unit, 
+                date__gte=datetime.today()-timedelta(days=30)).exclude(ltr_receipt=None)
+        context = {
         'letters' : letters,
         'unit' : unit,
-    }
-    return render(request, 'transit_slip/letter_list.html', context)
+        }
+        return render(request, self.template, context)
+
+    def post(self, request, *args, **kwargs):
+        from_date = datetime.strptime(request.POST['from-date'], '%d-%m-%Y')
+        to_date = datetime.strptime(request.POST['to-date'], '%d-%m-%Y')
+        unit = Unit.objects.get(pk=request.session['unitid'])
+        letters = Letter.objects.filter(from_unit=unit, 
+                date__gte=from_date, date__lte=to_date,).exclude(ltr_receipt=None)[:200]
+        context = {
+        'letters' : letters,
+        'unit' : unit,
+        }
+        return render(request, self.template, context)
+# @login_required
+# def letter_list_despatched(request):
+#     unit = Unit.objects.get(pk=request.session['unitid'])
+#     letters = Letter.objects.filter(from_unit=unit, 
+#                 date__gte=datetime.today()-timedelta(days=10)).exclude(ltr_receipt=None)
+#     context = {
+#         'letters' : letters,
+#         'unit' : unit,
+#     }
+#     return render(request, 'transit_slip/letter_list.html', context)
 
 @login_required
 def letter_delete(request, ltr_no):
-    letter = Letter.objects.filter(ltr_no=ltr_no)
-    if letter.ltr_receipt:
-        err_msg = "You can not delete a DAK after received at Sigcen"
-        return render(request, 'transit_slip/generic_error.html', err_msg)
-    else:
-        letter.delete()
-        return redirect('letter_list_inhouse')
+    letters = Letter.objects.filter(ltr_no=ltr_no)
+    for letter in letters:
+        if letter.ltr_receipt:
+            err_msg = "You can not delete a DAK after received at Sigcen"
+            return render(request, 'transit_slip/generic_error.html', err_msg)
+        else:
+            letter.delete()
+    return redirect('letter_list_inhouse')
 
 @login_required
 def label(request, pk=None):
@@ -229,9 +254,8 @@ def label(request, pk=None):
     provide labels suitable for printing
     """
     if not pk:
-        # letters = Letter.objects.filter(from_unit= request.session['unitid'], date=datetime.today())
         from_unit = Unit.objects.get(pk=request.session['unitid'])
-        letters = Letter.objects.filter(from_unit=from_unit, date=datetime.today()).order_by('-date')
+        letters = Letter.objects.filter(from_unit=from_unit, ltr_receipt=None)
         context = {
             'letters' : letters,
         }

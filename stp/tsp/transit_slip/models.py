@@ -81,7 +81,7 @@ class Letter(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     spl_pkg = models.BooleanField(default=False)
     ltr_receipt = models.ForeignKey(LetterReceipt, on_delete=models.SET_NULL, null=True)
-    despatched_at = models.DateTimeField(null=True)
+    # despatched_at = models.DateTimeField(null=True)
     transit_slip = models.ForeignKey(TransitSlip, on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
@@ -92,4 +92,16 @@ class Letter(models.Model):
 
     def get_absolute_url(self):
         return (f'/letter/{self.pk}')
+
+    def get_current_status(self):
+        if not self.ltr_receipt:
+            return "In Unit"
+        elif not self.transit_slip:
+            return "In Sigcen"
+        elif not self.transit_slip.received_on:
+            return "In Transit"
+        elif self.transit_slip.received_on:
+            return "Delivered"
+        else:
+            return "Unknown"
 

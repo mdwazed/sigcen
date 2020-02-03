@@ -18,7 +18,7 @@ urlpatterns = [
     # Letter
     path('new_letter/', views.LetterView.as_view(), name= 'new_letter'),
     path('letter_list_inhouse/', views.letter_list_inhouse, name= 'letter_list_inhouse'),
-    path('letter_list_despatched/', views.letter_list_despatched, name= 'letter_list_despatched'),
+    path('letter_list_despatched/', views.LetterListDespatchedView.as_view(), name= 'letter_list_despatched'),
     path('letter_delete/<str:ltr_no>', views.letter_delete, name= 'letter_delete'),
     path('search_ltr', views.SearchLtrView.as_view(), name= 'search_ltr'),
     # path('letter/', views.letter_details, name= 'letter_details'),
