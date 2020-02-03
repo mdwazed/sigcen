@@ -1,0 +1,87 @@
+{% extends 'transit_slip/layout.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <form action="" method=POST>
+                {% csrf_token %}
+                <div class="input-group inline-header-form">
+
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="">SPL PKG for:</span>
+                    </div>
+                    <select name="sta" id="id-sta">
+                        <option value="">-----</option>
+                        {% for sta in stas %}
+                        <option value="{{sta.id}}">{{sta.sta_name}}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="">PKG Size:</span>
+                    </div>
+                    <input type="text" class="form-control" name="pkg-size" value="10">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-primary" type="submit" name="submit">Search</button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+    <div>
+        {% if ltrs %}
+        <form action="{% url 'generate_spl_pkg_ts' %}" method=POST>
+            {% csrf_token %}
+            <input type="hidden" name="dst-sta" value="{{ sta_name }}">
+            <div class="ltr-list">
+                <div style="margin-top: 20px;">
+                    <h4>Showing DAK for {{ sta_name }}. Total count {{ ltrs | length }}</h4>
+                </div>
+                <div>
+                    <table id="transit-slip-table" class="table">
+                        <thead>
+                            <tr>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Ltr no</th>
+                                <th>Date</th>
+                                <th>Code</th>
+                                <th>Select</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ltr in ltrs %}
+                            <tr id="{{ ltr.pk }}">
+                                <td>{{ltr.from_unit}}</td>
+                                <td>{{ltr.to_unit}}</td>
+                                <td>{{ltr.ltr_no}}</td>
+                                <td>{{ltr.date}}</td>
+                                <td>{{ ltr.u_string }}</td>
+                                <td>
+                                    <input type="checkbox" name="ltr-ids" value="{{ ltr.id }}">
+                                </td>
+
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div>
+                    <input type="submit" name="submit_ltrs" class="btn btn-primary" value="Create transit slip">
+                </div>
+
+            </div>
+        </form>
+
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript" src="/static/assets/javascript/transit_slip.js"></script>
+{% endblock %}

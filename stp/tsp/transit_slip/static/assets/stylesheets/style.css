@@ -161,3 +161,8 @@
     display: flex;
     justify-content: space-around;
 }
+
+.ts-receive-sign-block {
+    display: flex;
+    justify-content: space-between;
+}

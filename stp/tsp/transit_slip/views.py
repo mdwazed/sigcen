@@ -475,6 +475,9 @@ class CreateTransitSlipView(LoginRequiredMixin, View):
 
 @login_required
 def transit_slip_ltrs(request):
+    """
+    create the actual transit slip fetching letters from the CreateTransitSlipView
+    """
     if request.method == 'POST':
         dst = Sta.objects.get(sta_name=request.POST['dst-sta'])
         date = datetime.today()
@@ -533,6 +536,53 @@ class TransitSlipDetailView(LoginRequiredMixin, View):
             'ltr_count' : ltr_count,
         }
         return render(request, self.template, context)
+
+class CreateSplPkgView(LoginRequiredMixin, View):
+    template = 'transit_slip/spl_pkg.html'
+    stas = Sta.objects.all()
+    def get(self, request):
+        context = {
+            'stas': self.stas,
+        }
+        return render(request, self.template, context)
+
+    def post(self, request):
+        sta_id = request.POST['sta']
+        try:
+            sta_name = Sta.objects.get(pk=sta_id)
+        except ValueError:
+            return redirect('create_spl_pkg')
+        max_size = int(request.POST['pkg-size'])
+        ltrs = Letter.objects.filter(to_unit__sta_name=sta_id, transit_slip=None, 
+                spl_pkg=True).exclude(ltr_receipt=None).order_by('-ltr_receipt__received_at_sigcen')[:max_size]
+        # ltr_count = len(ltrs)
+        context = {
+            'stas' : self.stas,
+            'ltrs' : ltrs,
+            'sta_name' : sta_name,
+            # 'ltr_count' : ltr_count,
+        }
+        return render(request, self.template, context)
+
+def generate_spl_pkg_ts(request):
+    """
+    create transit slip of spl pkg
+    """
+    if request.method == 'POST':
+        dst = Sta.objects.get(sta_name=request.POST['dst-sta'])
+        date = datetime.today()
+        prepared_by = User.objects.get(pk=request.session['userid'])
+        transit_slip = TransitSlip(date=date, dst=dst, prepared_by=prepared_by)
+        transit_slip.save()
+        ltr_ids = request.POST.getlist('ltr-ids')
+        for ltr_id in ltr_ids:
+            ltr = Letter.objects.get(pk=ltr_id)
+            ltr.transit_slip = transit_slip
+            ltr.save()
+            # print(ltr)
+
+    return redirect('current_transit_slip')
+
 
 @login_required        
 def transit_slip_despatch(request, id):
