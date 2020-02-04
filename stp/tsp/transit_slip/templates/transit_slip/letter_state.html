@@ -62,8 +62,8 @@
                                     {% else %} Not Assigned {% endif %}</td>
             </tr>
             <tr>
-                <td class="td-1">Transit slip received on :</td>
-                <td class="td-2">{% if letter.transit_slip_received_on %}{{ letter.transit_slip_received_on | date:"d-m-Y"}}
+                <td class="td-1">Received at Dst:</td>
+                <td class="td-2">{% if letter.transit_slip.received_on %}{{ letter.transit_slip.received_on | date:"d-m-Y"}}
                                     {% else %} Not Assigned {% endif %}</td>
             </tr>
         </table>

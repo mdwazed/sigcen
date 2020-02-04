@@ -49,6 +49,6 @@ class DakInForm(forms.Form):
         super(DakInForm, self).__init__(*args, **kwargs)
         choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta)]
         self.fields['unit'].choices = choices
-        self.fields['unit'].initial = '4'
+        self.fields['unit'].initial = '0'
         # self.fields['code'].max_length=3
         
