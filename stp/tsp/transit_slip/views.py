@@ -208,7 +208,7 @@ class LetterListDespatchedView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         unit = Unit.objects.get(pk=request.session['unitid'])
         letters = Letter.objects.filter(from_unit=unit, 
-                date__gte=datetime.today()-timedelta(days=30)).exclude(ltr_receipt=None)
+                date__gte=datetime.today()-timedelta(days=10)).exclude(ltr_receipt=None)[:200]
         context = {
         'letters' : letters,
         'unit' : unit,
@@ -216,11 +216,15 @@ class LetterListDespatchedView(LoginRequiredMixin, View):
         return render(request, self.template, context)
 
     def post(self, request, *args, **kwargs):
-        from_date = datetime.strptime(request.POST['from-date'], '%d-%m-%Y')
-        to_date = datetime.strptime(request.POST['to-date'], '%d-%m-%Y')
-        unit = Unit.objects.get(pk=request.session['unitid'])
+        try:
+            from_date = datetime.strptime(request.POST['from-date'], '%d-%m-%Y')
+            to_date = datetime.strptime(request.POST['to-date'], '%d-%m-%Y')
+            unit = Unit.objects.get(pk=request.session['unitid'])
+        except ValueError:
+            err_msg = "Error: Either From or To date is missing"
+            return render(request, 'transit_slip/generic_error.html', {'err_msg': err_msg})
         letters = Letter.objects.filter(from_unit=unit, 
-                date__gte=from_date, date__lte=to_date,).exclude(ltr_receipt=None)[:200]
+            date__gte=from_date, date__lte=to_date,).exclude(ltr_receipt=None)[:200]    
         context = {
         'letters' : letters,
         'unit' : unit,

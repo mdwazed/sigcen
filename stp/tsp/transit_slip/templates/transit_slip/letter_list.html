@@ -61,7 +61,8 @@
                         </td>
                         {% else %}
                         <td>
-                            Receipt:{{ letter.ltr_receipt.id }}
+                            <!-- Receipt:{{ letter.ltr_receipt.id }} -->
+                            <a href="{% url 'letter_state' letter.id %}">Track</a>
                         </td>
                         {% endif %}
                         
