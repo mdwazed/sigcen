@@ -42,7 +42,7 @@ def test_view(request):
 
 class Home(View):
     """
-    Renser home page with user instr
+    Render home page with user instr
     """
     template_name = "transit_slip/home.html"
     
@@ -435,9 +435,10 @@ class DakReceive(LoginRequiredMixin, View):
             if ltr_id in spl_pkgs:
                 ltr.spl_pkg = True
             try:
-                ltr.ltr_receipt = ltr_receipt
-                ltr.save()
-                received_ltrs.append(ltr)
+                if ltr.ltr_receipt is None:
+                    ltr.ltr_receipt = ltr_receipt
+                    ltr.save()
+                    received_ltrs.append(ltr)
             except Exception:
                 err_msg = 'Intended letter could not be received'
                 logger.warning(err_msg)
@@ -463,7 +464,11 @@ def receive_receipt(request, pk):
 
 
 class CreateTransitSlipView(LoginRequiredMixin, View):
-    template = 'transit_slip/transit_slip.html'
+    """
+    create a transit slip automatically based on selected dst and number of ltr
+    ltrs are sorted according to the received time at sigcen
+    """
+    template = 'transit_slip/create_transit_slip.html'
     stas = Sta.objects.all() 
 
     def get(self, request, sta_id=None):
@@ -498,6 +503,34 @@ class CreateTransitSlipView(LoginRequiredMixin, View):
         }
         return render(request, self.template, context)
 
+class CreateTransitSlipManualView(LoginRequiredMixin, View):
+    template = 'transit_slip/create_transit_slip_manually.html'
+    stas = Sta.objects.all() 
+    def get(self, request):
+
+        context = {
+            'stas' : self.stas,
+        }
+        return render(request, self.template, context)
+        
+    
+
+class TransitSlipDetailView(LoginRequiredMixin, View):
+    """
+    displays a transit slip with given id
+    """
+    template = 'transit_slip/transit_slip_detail.html'
+    def get(self, request, id):
+        transit_slip = TransitSlip.objects.get(pk=id)
+        ltrs = Letter.objects.filter(transit_slip=transit_slip)
+        ltr_count = len(ltrs)
+        context = {
+            'transit_slip' : transit_slip, 
+            'ltrs' : ltrs,
+            'ltr_count' : ltr_count,
+        }
+        return render(request, self.template, context)
+
 @login_required
 def transit_slip_ltrs(request):
     """
@@ -514,8 +547,7 @@ def transit_slip_ltrs(request):
             ltr = Letter.objects.get(pk=ltr_id)
             ltr.transit_slip = transit_slip
             ltr.save()
-
-    return redirect('current_transit_slip')
+    return redirect('transit_slip_detail', transit_slip.pk)
 
 class CurrentTransitSlipView(LoginRequiredMixin, View):
     template = 'transit_slip/current_transit_slip.html'
@@ -549,18 +581,7 @@ class OldTransitSlipView(LoginRequiredMixin, View):
         return render(request, self.template, context)
 
 
-class TransitSlipDetailView(LoginRequiredMixin, View):
-    template = 'transit_slip/transit_slip_detail.html'
-    def get(self, request, id):
-        transit_slip = TransitSlip.objects.get(pk=id)
-        ltrs = Letter.objects.filter(transit_slip=transit_slip)
-        ltr_count = len(ltrs)
-        context = {
-            'transit_slip' : transit_slip, 
-            'ltrs' : ltrs,
-            'ltr_count' : ltr_count,
-        }
-        return render(request, self.template, context)
+
 
 class CreateSplPkgView(LoginRequiredMixin, View):
     template = 'transit_slip/spl_pkg.html'

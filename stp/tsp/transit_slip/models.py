@@ -19,6 +19,9 @@ class Sta(models.Model):
 
     def __str__(self):
         return self.sta_name
+    
+    def natural_key(self):
+        return(self.sta_name)
 
 class Unit(models.Model):
     unit_name = models.CharField(max_length=50)

@@ -33,6 +33,7 @@ urlpatterns = [
     path('dak_in_scan', views.DakInScanView.as_view(), name= 'dak_in_scan'),
     path('dak_receive', views.DakReceive.as_view(), name= 'dak_receive'),
     path('create_transit_slip', views.CreateTransitSlipView.as_view(), name= 'create_transit_slip'),
+    path('create_transit_slip_manually', views.CreateTransitSlipManualView.as_view(), name= 'create_transit_slip_manually'),
     path('current_transit_slip', views.CurrentTransitSlipView.as_view(), name= 'current_transit_slip'),
     path('transit_slip_ltrs', views.transit_slip_ltrs, name= 'transit_slip_ltrs'),
     path('old_transit_slip', views.OldTransitSlipView.as_view(), name= 'old_transit_slip'),

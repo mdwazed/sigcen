@@ -1,0 +1,54 @@
+{% extends 'transit_slip/layout.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-head">
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Create Transit Slip by scanning the DAK</h5>
+            DST:
+            <select name="sta" id="id-sta">
+                <option value="">-----</option>
+                {% for sta in stas %}
+                <option value="{{sta.id}}">{{sta.sta_name}}</option>
+                {% endfor %}
+            </select>
+            <input type="text" class="" id="scan-ts" autofocus>
+        </div>
+    </div>
+    <div>
+        <form action="{% url 'transit_slip_ltrs' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" id="dst-sta" name="dst-sta" value="">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">From</th>
+                        <th scope="col">To</th>
+                        <th scope="col">Ltr no</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Code</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  
+    
+                </tbody>
+            </table>
+            <input type="submit" name="submit_ltrs" class="btn btn-primary" value="Create transit slip">
+        </form>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    var csrf_token = '{{ csrf_token }}'
+</script>
+
+<script src="{% static 'assets/javascript/create_ts_man.js' %}"></script>
+{% endblock %}
