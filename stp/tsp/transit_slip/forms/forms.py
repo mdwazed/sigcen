@@ -42,7 +42,7 @@ class DakInForm(forms.Form):
     In dak filtering form. use for receiving dak at counter room
     """
     unit = forms.ChoiceField()
-    date = forms.DateField(initial=date.today())
+    date = forms.DateField()
     code = forms.CharField(required=False)
     def __init__(self, *args, **kwargs):
         sta = kwargs.pop('sta')
@@ -51,4 +51,6 @@ class DakInForm(forms.Form):
         self.fields['unit'].choices = choices
         self.fields['unit'].initial = '0'
         # self.fields['code'].max_length=3
+        self.fields['date'].widget.attrs['class'] = 'datepicker'
+        self.fields['date'].widget.attrs['autocomplete'] = 'off'
         

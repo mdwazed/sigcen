@@ -1,4 +1,8 @@
 {% extends 'transit_slip/layout.html' %}
+{% load static %}
+{% block link %}
+    <link rel="stylesheet" href="{% static '/vendor/jquery-ui-1.12.1/jquery-ui.min.css' %}" />
+{% endblock %}
 {% block content %}
 <div class="container">
 <h5>Dak In - Manual</h5>
@@ -50,4 +54,17 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block script %}
+    <script src="{% static '/vendor/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+    <script>
+        jQuery(function ($) {
+            $(".datepicker").datepicker({
+                dateFormat: "yy-mm-dd",
+                maxDate: "0d",
+                // minDate: "-25d",
+            });
+        });
+    </script>
 {% endblock %}
