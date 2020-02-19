@@ -31,6 +31,9 @@ logger = logging.getLogger('transit_slip')
 # Create your views here.
 
 def test_view(request):
+    """
+    Check the functionality of the system
+    """
     context = {
         'test' : 'test string',
     }
@@ -38,9 +41,11 @@ def test_view(request):
     return render(request, 'transit_slip/test_page.html', context)
 
 class Home(View):
+    """
+    Renser home page with user instr
+    """
     template_name = "transit_slip/home.html"
     
-
     def get(self, request, *args, **kwargs):
         # if request.user.is_authenticated:
         user = request.user
@@ -247,7 +252,7 @@ def letter_delete(request, ltr_no):
     for letter in letters:
         if letter.ltr_receipt:
             err_msg = "You can not delete a DAK after received at Sigcen"
-            return render(request, 'transit_slip/generic_error.html', err_msg)
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
         else:
             letter.delete()
     return redirect('letter_list_inhouse')
@@ -277,6 +282,7 @@ def label_bulk(request, ltr_no):
     print all label of the same latter
     """
     ltr_no = urllib.parse.unquote(ltr_no)
+    print(ltr_no)
     letters = Letter.objects.filter(ltr_no=ltr_no)
     context = {
         'letters' : letters,
@@ -425,7 +431,7 @@ class DakReceive(LoginRequiredMixin, View):
                 ltr = Letter.objects.get(pk=ltr_id)
             except ObjectDoesNotExist:
                 err_msg = 'Intended letter not available or created'
-                return render(request, 'transit_slip/generic_error.html', err_msg)
+                return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
             if ltr_id in spl_pkgs:
                 ltr.spl_pkg = True
             try:
@@ -435,18 +441,9 @@ class DakReceive(LoginRequiredMixin, View):
             except Exception:
                 err_msg = 'Intended letter could not be received'
                 logger.warning(err_msg)
-                return render(request, 'transit_slip/generic_error.html', err_msg)
-        # context = {
-        #     'received_ltrs': received_ltrs,
-        #     'ltr_receipt': ltr_receipt,
-        # }      
-        # return render(request, 'transit_slip/received_receipt.html', context)
+                return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
         return redirect('receive_receipt', ltr_receipt.pk)
 
-        # if request.POST['submit-type'] == 'manual':
-        #     return redirect('dak_in_manual')
-        # else:
-        #     return redirect('dak_in_scan')
 
 def receipt_list(request):
     receipt_lists = LetterReceipt.objects.all().order_by('-received_at_sigcen')[:200]
