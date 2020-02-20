@@ -40,9 +40,6 @@
 
 }
 
-.letter-search {
-
-}
 
 .qr-code {
     display: flex;
@@ -173,4 +170,16 @@
     display: inline-block;
     padding: 10px;
     box-shadow: 5px 10px #888888;
+}
+
+.sys-sp h5 {
+    font-style: oblique;
+    color: magenta;
+}
+
+.home-subcontainer {
+    /* border: 1px solid red; */
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
 }

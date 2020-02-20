@@ -11,8 +11,8 @@ from django.conf import settings
 from django.core import serializers
 from django.urls import reverse_lazy 
 from django.contrib.auth.views import PasswordChangeView
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from datetime import datetime, date, timedelta
 
@@ -29,6 +29,18 @@ import json
 
 logger = logging.getLogger('transit_slip')
 # Create your views here.
+
+def admin_user_test(user):
+    if user.profile.user_type == 'ad':
+        return True
+    else:
+        return False
+
+def not_unit_clk_test(user):
+    if user.profile.user_type == 'sc' or user.profile.user_type == 'ad':
+        return True
+    else:
+        return False
 
 def test_view(request):
     """
@@ -89,14 +101,14 @@ class UnitCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("unit_list")
 
 
-class UnitUpdateView(LoginRequiredMixin, UpdateView):
+class UnitUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Unit
     fields = ['unit_name', 'sta_name']
     template_name = "transit_slip/unit_add_update.html"
     success_url = reverse_lazy("unit_list")
 
 
-class LetterView(LoginRequiredMixin, View):
+class LetterView(LoginRequiredMixin, UserPassesTestMixin, View):
     """
     create new letter
     """
@@ -184,12 +196,13 @@ def letter_details(request, pk=None):
         }
     return render(request, 'transit_slip/letter_details.html', context)
 
+@login_required
 def letter_state(request, pk=None):
     if not pk:
         return redirect('search_ltr')
     else:
         letter = Letter.objects.get(pk=pk)
-        print(letter)
+        print(request.session)
         context = {
             'letter': letter,
         }
@@ -290,6 +303,7 @@ def label_bulk(request, ltr_no):
     return render(request, 'transit_slip/label_printer.html', context)
 
 @login_required
+@user_passes_test(admin_user_test)
 def user_list(request):
     users = User.objects.all()
     context = {
@@ -298,6 +312,7 @@ def user_list(request):
     return render(request, 'registration/user_list.html', context)
 
 @login_required
+@user_passes_test(admin_user_test)
 def create_user(request):
     """
     create new user
@@ -325,7 +340,15 @@ def create_user(request):
 class UserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     success_url = reverse_lazy("home")
 
-class ResetUserPasswordView(LoginRequiredMixin, View):
+class ResetUserPasswordView(LoginRequiredMixin, UserPassesTestMixin, View):
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'ad':
+            return True
+        else:
+            return False
+
     def post(self, request):
         user = User.objects.get(username=request.POST['username'])
         new_passwd = request.POST['new-passwd']
@@ -334,8 +357,16 @@ class ResetUserPasswordView(LoginRequiredMixin, View):
             user.save()
             return redirect("user_list")
 
-class PreResetUserPasswordView(LoginRequiredMixin, View):
+class PreResetUserPasswordView(LoginRequiredMixin, UserPassesTestMixin, View):
     template = "registration/reset_user_password.html"
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'ad':
+            return True
+        else:
+            return False
+
     def post(self, request):
         user = User.objects.get(username=request.POST['username'])
         context = {
@@ -344,6 +375,7 @@ class PreResetUserPasswordView(LoginRequiredMixin, View):
         return render(request, self.template, context)
 
 @login_required
+@user_passes_test(admin_user_test)
 def delete_user(request):
     try:
         user = User.objects.get(username=request.POST['username'])
@@ -356,12 +388,19 @@ def delete_user(request):
     user.delete()
     return redirect("user_list")
 
-class DakInManualView(LoginRequiredMixin, View):
+class DakInManualView(LoginRequiredMixin, UserPassesTestMixin, View):
     """
     Manually receive DAK from various unit at sigcen
     """
     template = 'transit_slip/dak_in_manual.html'
     
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'sc' or user_type == 'ad':
+            return True
+        else:
+            return False
+
     def get(self, request, *args, **kwargs):
         unit_id = request.session['unitid']
         sta = Unit.objects.get(pk=unit_id).sta_name
@@ -398,11 +437,18 @@ class DakInManualView(LoginRequiredMixin, View):
             }
         return render(request, self.template, context)
 
-class DakInScanView(LoginRequiredMixin, View):
+class DakInScanView(LoginRequiredMixin, UserPassesTestMixin, View):
     """
     Receive DAK by scanning from various unit at sigcen
     """
     template = 'transit_slip/dak_in_scan.html'
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'sc' or user_type == 'ad':
+            return True
+        else:
+            return False
 
     def get(self, request, *args, **kwargs):
 
@@ -411,11 +457,19 @@ class DakInScanView(LoginRequiredMixin, View):
         }
         return render(request, self.template, context)
 
-class DakReceive(LoginRequiredMixin, View):
+class DakReceive(LoginRequiredMixin, UserPassesTestMixin, View):
     """
     Receive dak by sigcen clk after they have been scanned or manually selected as IN DAK.
     activated on clicking receive button on DAK in page.
     """
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'sc' or user_type == 'ad':
+            return True
+        else:
+            return False
+
     def post(self, request):
         # print(request.POST['submit-type'])
         received_ltrs = []
@@ -445,7 +499,8 @@ class DakReceive(LoginRequiredMixin, View):
                 return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
         return redirect('receive_receipt', ltr_receipt.pk)
 
-
+@login_required
+@user_passes_test(not_unit_clk_test)
 def receipt_list(request):
     receipt_lists = LetterReceipt.objects.all().order_by('-received_at_sigcen')[:200]
     context = {
@@ -453,6 +508,8 @@ def receipt_list(request):
     }
     return render(request, 'transit_slip/receipt_list.html', context)
 
+@login_required
+@user_passes_test(not_unit_clk_test)
 def receive_receipt(request, pk):
     receipt = LetterReceipt.objects.get(pk=pk)
     receive_ltrs = Letter.objects.filter(ltr_receipt=receipt)
@@ -463,13 +520,20 @@ def receive_receipt(request, pk):
     return render(request, 'transit_slip/received_receipt.html', context)
 
 
-class CreateTransitSlipView(LoginRequiredMixin, View):
+class CreateTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
     """
     create a transit slip automatically based on selected dst and number of ltr
     ltrs are sorted according to the received time at sigcen
     """
     template = 'transit_slip/create_transit_slip.html'
     stas = Sta.objects.all() 
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'sc' or user_type == 'ad':
+            return True
+        else:
+            return False
 
     def get(self, request, sta_id=None):
         if sta_id:
@@ -503,9 +567,17 @@ class CreateTransitSlipView(LoginRequiredMixin, View):
         }
         return render(request, self.template, context)
 
-class CreateTransitSlipManualView(LoginRequiredMixin, View):
+class CreateTransitSlipManualView(LoginRequiredMixin, UserPassesTestMixin, View):
     template = 'transit_slip/create_transit_slip_manually.html'
     stas = Sta.objects.all() 
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'sc' or user_type == 'ad':
+            return True
+        else:
+            return False
+
     def get(self, request):
 
         context = {
@@ -515,11 +587,19 @@ class CreateTransitSlipManualView(LoginRequiredMixin, View):
         
     
 
-class TransitSlipDetailView(LoginRequiredMixin, View):
+class TransitSlipDetailView(LoginRequiredMixin, UserPassesTestMixin, View):
     """
     displays a transit slip with given id
     """
     template = 'transit_slip/transit_slip_detail.html'
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'sc' or user_type == 'ad':
+            return True
+        else:
+            return False
+
     def get(self, request, id):
         transit_slip = TransitSlip.objects.get(pk=id)
         ltrs = Letter.objects.filter(transit_slip=transit_slip)
@@ -532,6 +612,7 @@ class TransitSlipDetailView(LoginRequiredMixin, View):
         return render(request, self.template, context)
 
 @login_required
+@user_passes_test(not_unit_clk_test)
 def transit_slip_ltrs(request):
     """
     create the actual transit slip fetching letters from the CreateTransitSlipView
@@ -549,8 +630,15 @@ def transit_slip_ltrs(request):
             ltr.save()
     return redirect('transit_slip_detail', transit_slip.pk)
 
-class CurrentTransitSlipView(LoginRequiredMixin, View):
+class CurrentTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
     template = 'transit_slip/current_transit_slip.html'
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'sc' or user_type == 'ad':
+            return True
+        else:
+            return False
 
     def get(self, request):
         t_slips = TransitSlip.objects.filter(despatched_on=None)
@@ -560,8 +648,15 @@ class CurrentTransitSlipView(LoginRequiredMixin, View):
         return render(request, self.template, context)
 
 
-class OldTransitSlipView(LoginRequiredMixin, View):
+class OldTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
     template = 'transit_slip/old_transit_slip.html'
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'sc' or user_type == 'ad':
+            return True
+        else:
+            return False
 
     def get(self, request):
         stas = Sta.objects.all()
@@ -583,9 +678,17 @@ class OldTransitSlipView(LoginRequiredMixin, View):
 
 
 
-class CreateSplPkgView(LoginRequiredMixin, View):
+class CreateSplPkgView(LoginRequiredMixin, UserPassesTestMixin, View):
     template = 'transit_slip/spl_pkg.html'
     stas = Sta.objects.all()
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'sc' or user_type == 'ad':
+            return True
+        else:
+            return False
+
     def get(self, request):
         context = {
             'stas': self.stas,
@@ -610,6 +713,8 @@ class CreateSplPkgView(LoginRequiredMixin, View):
         }
         return render(request, self.template, context)
 
+@login_required 
+@user_passes_test(not_unit_clk_test)
 def generate_spl_pkg_ts(request):
     """
     create transit slip of spl pkg
@@ -631,6 +736,7 @@ def generate_spl_pkg_ts(request):
 
 
 @login_required        
+@user_passes_test(not_unit_clk_test)
 def transit_slip_despatch(request, id):
     t_slip = TransitSlip.objects.get(pk=id)
     t_slip.despatched_on = datetime.today()
@@ -638,6 +744,7 @@ def transit_slip_despatch(request, id):
     return redirect('current_transit_slip')
 
 @login_required
+@user_passes_test(not_unit_clk_test)
 def ts_rcv_update(request):
     ts_id = int(request.POST['ts_id'])
     date = datetime.strptime(request.POST['date'], '%d-%m-%Y')
@@ -652,6 +759,7 @@ def ts_rcv_update(request):
     return HttpResponse("Received date updated...")
 
 @login_required
+@user_passes_test(not_unit_clk_test)
 def fetch_letter_json(request):
     date = request.POST['date']
     u_string = request.POST['u_string']
@@ -664,8 +772,16 @@ def fetch_letter_json(request):
         return HttpResponse(None)
     return HttpResponse(serialize_ltr)
 
-class TransitSlipPrintView(LoginRequiredMixin, View):
+class TransitSlipPrintView(LoginRequiredMixin, UserPassesTestMixin, View):
     template = 'transit_slip/transit_slip_print.html'
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'sc' or user_type == 'ad':
+            return True
+        else:
+            return False
+
     def get(self, request, id):
         transit_slip = TransitSlip.objects.get(pk=id)
         ltrs = Letter.objects.filter(transit_slip=transit_slip)
@@ -677,8 +793,16 @@ class TransitSlipPrintView(LoginRequiredMixin, View):
         }
         return render(request, self.template, context)
 
-class SearchLtrView(LoginRequiredMixin, View):
+class SearchLtrView(LoginRequiredMixin, UserPassesTestMixin, View):
     template = 'transit_slip/search_ltr.html'
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'sc' or user_type == 'ad':
+            return True
+        else:
+            return False
+
     def get_unit_choices(self, request):
         unit_id = request.session['unitid']
         sta = Unit.objects.get(pk=unit_id).sta_name
@@ -712,3 +836,15 @@ class SearchLtrView(LoginRequiredMixin, View):
                 'unit_choices': unit_choices,
             }
             return render(request, self.template, context)
+
+
+@login_required
+def letter_delete_admin_view(request):
+    # print(request.POST['ltr_id'])
+    if request.method == 'POST':
+        try:
+            ltr = Letter.objects.get(pk=request.POST['ltr_id'])
+            ltr.delete()
+            return HttpResponse('true')
+        except Exception:
+            return HttpResponse('false')

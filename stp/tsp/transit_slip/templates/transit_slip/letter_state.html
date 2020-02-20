@@ -3,7 +3,7 @@
 <div class="container">
     <h5>State of DAK: {{ letter.ltr_no }}</h5>
     <div class="dak-state">
-        <table class="table table-striped state-table">
+        <table class="table table-sm state-table">
             <tr>
                 <td class="td-1">From :</td>
                 <td class="td-2">{{ letter.from_unit }}</td>
@@ -68,7 +68,19 @@
             </tr>
         </table>
     </div>
+    {% if user.is_authenticated and user.profile.user_type == "ad" %}
+    <div>
+        <button class="btn btn-danger" id="ltr-delete-admin">Delete</button>
+    </div>
+    {% endif %}
 
 </div>
 
+{% endblock %}
+
+{% block script %}
+    <script>
+        let csrf_token = '{{ csrf_token }}';
+        let ltr_id = '{{ letter.pk }}'
+    </script>
 {% endblock %}

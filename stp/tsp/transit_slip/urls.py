@@ -50,6 +50,7 @@ urlpatterns = [
     path('unit_list', views.unit_list_view, name= 'unit_list'),
     path('create_unit', views.UnitCreateView.as_view(), name= 'create_unit'),
     path('update_unit/<int:pk>', views.UnitUpdateView.as_view(), name= 'update_unit'),
+    path('letter_delete_admin', views.letter_delete_admin_view, name= 'letter_delete_admin'),
     # path('reset_user_passwd', views.ResetUserPassword.as_view(), name= 'reset_user_passwd'),
 ]
 if settings.DEBUG:
