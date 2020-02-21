@@ -108,7 +108,7 @@ class UnitUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     success_url = reverse_lazy("unit_list")
 
 
-class LetterView(LoginRequiredMixin, UserPassesTestMixin, View):
+class LetterView(LoginRequiredMixin, View):
     """
     create new letter
     """
@@ -726,13 +726,17 @@ def generate_spl_pkg_ts(request):
         transit_slip = TransitSlip(date=date, dst=dst, prepared_by=prepared_by)
         transit_slip.save()
         ltr_ids = request.POST.getlist('ltr-ids')
-        for ltr_id in ltr_ids:
-            ltr = Letter.objects.get(pk=ltr_id)
-            ltr.transit_slip = transit_slip
-            ltr.save()
-            # print(ltr)
+        if len(ltr_ids) > 0:
+            for ltr_id in ltr_ids:
+                ltr = Letter.objects.get(pk=ltr_id)
+                ltr.transit_slip = transit_slip
+                ltr.save()
+                # print(ltr)
+        else:
+            err_msg = "No DAK was selected."
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
 
-    return redirect('current_transit_slip')
+    return redirect('transit_slip_detail', transit_slip.pk)
 
 
 @login_required        
