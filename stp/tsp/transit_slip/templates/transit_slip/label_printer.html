@@ -11,24 +11,34 @@
     <div class="label-printer">
         <div class="label-address">
             <div>
-                <p>Ltr No: {{ letter.ltr_no }}</p>
+                <p>{{ letter.get_classification_display }}</p>
+                <p>{{ letter.ltr_no }}</p>
                 {% if letter.addr_line_1 %}
                 <p>{{ letter.addr_line_1 }}</p>
                 {% endif %}
+                {% if letter.addr_line_2 %}
+                <p>{{ letter.addr_line_2 }}</p>
+                {% endif %}
                 <p>{{ letter.to_unit }}</p>
                 <p>{{ letter.to_unit.sta_name }}</p>
+                <p>{{ letter.get_classification_display }}</p>
             </div>
             <div class="label-credit">
-                <p>Dev: Maj Wazed,sigs</p>
+                <p>Sys: Maj Wazed,sigs</p>
             </div>
-    
         </div>
     
         <div class="qr-code">
-            <img src="/media/{{letter.qr_image_url}}" alt="qr code image">
-            <p>{{ letter.date |date:"dmY-"}}{{ letter.u_string }}</p>
+            
+            <div>
+                <img src="/media/{{letter.qr_image_url}}" alt="qr code image">
+                <p>{{ letter.date |date:"dmY-"}}{{ letter.u_string }}</p>
+            </div>
+            
         </div>
+        
     </div>
+    
     <hr>
     {% endfor %}
 </div>

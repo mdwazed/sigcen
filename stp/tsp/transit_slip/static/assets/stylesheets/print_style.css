@@ -1,18 +1,37 @@
 
 
+.do-printer { /* has to be before the media print inorder to hide the borderduring print */
+    margin-left: 200px;
+    width: 19.5cm;
+    height: 13.97cm;
+    border: 1px solid blue;
+}
+
 @page {
-    margin: 2cm;
+    margin: 1cm;
     size: A4;
 }
 
 @media print {
     .label-printer {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    .ts-print {
+        break-inside: auto;
+    }
+    .receipt-print {
+        break-inside: auto;
+    }
+
+    .label-printer {
         font-size: 16pt;
         margin: 1cm;
     }
     .label-address {
-        /* border: 1px solid red; */
         margin-top: 1cm;
+    }
+    .label-address {
     }
     .ts-print {
         font-size: 12pt;
@@ -29,22 +48,23 @@
     .not-to-be-print {
         display: none;
     }
+    .do-printer {
+    width: 19.5cm;
+    height: 13.97cm;
+    border: none;
+    }
 
 }
-
-div {
-    page-break-inside: avoid;
-    break-inside: avoid;
-}
-
-
 
 .label-printer {
     text-align: center;
     display: flex;
     flex-wrap: nowrap;
     margin: 20px 10%;
-    /* border: 1px solid red; */
+    /* line-height: 0.5; */
+}
+.label-printer p {
+    margin: 0;
 }
 
 .label-credit{
@@ -54,3 +74,48 @@ div {
     color: cornflowerblue;
 }
 
+
+.do-printer p {
+    font-weight: 700;
+    margin: 0.3em;
+}
+
+.do-address {
+    line-height: 1;
+    display: flex;
+    flex-direction: column;
+}
+.do-address .top-line {
+    margin-top: 1cm;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+}
+.do-address .main-address {
+    margin-top: 2cm;
+    display: flex;
+    flex-direction: row-reverse;
+}
+.do-address .main-address div{
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+.do-qr-code {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: flex-end;
+}
+.do-qr-code div {
+    margin: 0cm 1cm;
+}
+.do-qr-code img{
+    height: 3cm;
+}
+.do-qr-code-credit {
+    font-size: 70%;
+    color: darkgray;
+    font-weight: normal;
+}

@@ -1,0 +1,60 @@
+{% extends 'transit_slip/layout.html' %}
+{% block topnav %}
+{% endblock %}
+
+{% block content %}
+<div class="top-btn-div not-to-be-print">
+    <button class="btn btn-primary not-to-be-print" onclick="printLabel()">Print</button>
+    <button class="btn btn-primary not-to-be-print" onclick="closeWindow()">Close</button>
+</div>
+<div>
+    <div class="do-printer">
+        <div class="do-address">
+            <div class="top-line">
+                <p>{{ letter.ltr_no }}</p>
+                <p>Dated:&nbsp;{{ letter.date | date:"d/m/Y" }}</p>
+            </div>
+            <div class="main-address">
+                <div>
+                    <p>To</p>
+                    <p style="width: 10cm;">{{ letter.addr_line_1 }}</p>
+                    <p>{{ letter.addr_line_2 }}</p>
+                    <p>{{ letter.to_unit }}</p>
+                    <p>{{ letter.to_unit.sta_name }}</p>
+                </div>
+                
+            </div>
+            
+    
+    
+        </div>
+    
+        <div class="do-qr-code">
+            
+            <div>
+                <img src="/media/{{letter.qr_image_url}}" alt="qr code image">
+                <p>{{ letter.date |date:"dmY-"}}{{ letter.u_string }}</p>
+            </div>
+            <div class="do-qr-code-credit">
+                <p>Sys: Maj Wazed,sigs</p>
+            </div>
+            
+        </div>
+        
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    function printLabel() {
+        window.print();
+    }
+    function closeWindow() {
+        window.close();
+    }
+</script>
+{% endblock %}

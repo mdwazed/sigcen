@@ -1,8 +1,7 @@
-
 {% extends 'transit_slip/layout.html' %}
 {% block content %}
 <div class="container">
-    <h4>New DAK entry</h4>
+    <h4>New DO entry</h4>
     <div>
         <table>
             <form method="post">
@@ -15,15 +14,7 @@
                         {{ form.source }}
                     </td>
                 </tr>
-                <tr>
-                    <td>
-                        {{ form.classification.label_tag }}
-                    </td>
-                    <td>
-                        {{ form.classification.errors }}
-                        {{ form.classification }}
-                    </td>
-                </tr>
+               
                 <tr>
                     <td>
                         <!-- {{ form.addr_line_1.label_tag }} -->
@@ -64,11 +55,12 @@
                 </tr>
                 <tr>
                     <td>
-                        <label for="{{ form.to_units.id_for_label }}">{{ form.to_units.label_tag }}<span class="required-cls">*</span></label>
+                        <label for="{{ form.to_units.id_for_label }}">{{ form.to_units.label_tag }}<span
+                                class="required-cls">*</span></label>
                     </td>
                     <td>
-                        <select id="{{ form.to_units.id_for_label }}" name="{{ form.to_units.name }}" class="basic-multiple" multiple="multiple"
-                            style="width: 300px;">
+                        <select id="{{ form.to_units.id_for_label }}" name="{{ form.to_units.name }}"
+                            class="basic-multiple" multiple="multiple" style="width: 300px;">
                             {% for unit in units %}
                             <option value="{{unit.id}}">{{unit.unit_name}}</option>
                             {% endfor %}
@@ -87,10 +79,8 @@
                 <!-- <input type="submit" value="Save"> -->
             </form>
         </table>
-</div>
-<div>
-    
-</div>
-{% endblock %}
+    </div>
+    <div>
 
-
+    </div>
+    {% endblock %}

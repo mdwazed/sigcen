@@ -30,6 +30,14 @@ import json
 logger = logging.getLogger('transit_slip')
 # Create your views here.
 
+def get_default_letter_no(type):
+    if type == 'regular':
+        prefix = '23.01.955.__.__.01.01.'
+        current_date = datetime.today().strftime('%d.%m.%Y')
+        return prefix + current_date 
+    elif type == 'do':
+        return 'PF:'
+
 def admin_user_test(user):
     if user.profile.user_type == 'ad':
         return True
@@ -116,7 +124,7 @@ class LetterView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         cur_date = datetime.today()
-        init_ltr_no = self.get_default_letter_no()
+        init_ltr_no = get_default_letter_no(type='regular')
         form = forms.LetterForm(initial={'ltr_no':init_ltr_no, 'date': cur_date})
         units = Unit.objects.all()
         context = {
@@ -140,6 +148,7 @@ class LetterView(LoginRequiredMixin, View):
             if form.is_valid():
                 try:
                     letter = form.save(commit=False)
+                    letter.letter_type = 'reg'
                     letter.from_unit = request.user.profile.unit
                     letter.to_unit = Unit.objects.get(pk=to_unit_id)
                     letter.u_string = str(randint(1000, 10000))
@@ -159,17 +168,78 @@ class LetterView(LoginRequiredMixin, View):
                     # print(letter.to_unit)
                     letter.save()
                     logger.info("new letter created with id %s", letter.pk)
-                except Exception as excp:
-                    logger.warnign("new letter creation failed- " + type(excp))
-                    return HttpResponse("letter creation failed")
+                except Exception as err:
+                    logger.warning(f'letter creation failed {err}')
+                    err_msg = "New letter cration failed. Contact system admin"
+                    return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
             else:
                 return render(request, self.template_name, context)
         return redirect(letter_list_inhouse)
             
-    def get_default_letter_no(self):
-        prefix = '23.01.955.__.__.01.01.'
-        current_date = datetime.today().strftime('%d.%m.%Y')
-        return prefix + current_date
+ 
+
+class DoView(LoginRequiredMixin, View):
+    """
+    create new DO
+    """
+    template_name = 'transit_slip/new_do.html'
+
+    def get(self, request, *args, **kwargs):
+        cur_date = datetime.today()
+        init_ltr_no = get_default_letter_no(type='do')
+        form = forms.LetterForm(initial={'ltr_no':init_ltr_no, 'date': cur_date})
+        units = Unit.objects.all()
+        context = {
+            'form' : form,
+            'units' : units,
+            'init_ltr_no': init_ltr_no,
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        to_units = request.POST.getlist('to_units')
+        for to_unit_id in to_units:
+            post_data = request.POST.copy()
+            form = forms.LetterForm(post_data)
+            # print(form)
+            units = Unit.objects.all()
+            context = {
+                'form' : form,
+                'units' : units,
+            }
+            if form.is_valid():
+                try:
+                    letter = form.save(commit=False)
+                    letter.letter_type = 'do'
+                    letter.from_unit = request.user.profile.unit
+                    letter.to_unit = Unit.objects.get(pk=to_unit_id)
+                    letter.u_string = str(randint(1000, 10000))
+                    qr_code_name = str(date.today().strftime("%d%m%Y")) + '-' + str(letter.u_string)
+                    file_name = qr_code_name + '.png'
+                    file_path = settings.MEDIA_ROOT
+                    # file_url = file_path + '/qr_code/' + file_name
+                    file_url = file_path + '/qr_code/' +date.today().strftime("%Y/%m/%d/")+ file_name
+                    directory = os.path.dirname(file_url)
+                    if not os.path.exists(directory):
+                        os.makedirs(directory)
+                    img = qrcode.make(qr_code_name)
+                    img.save(file_url)
+                    # letter.qr_image_url = file_name
+                    letter.qr_image_url = 'qr_code/' +date.today().strftime("%Y/%m/%d/")+ file_name
+                    # letter.to_unit = Unit.objects.get(pk=address)
+                    # print(letter.to_unit)
+                    letter.save()
+                    logger.info("new letter created with id %s", letter.pk)
+                except Exception as err:
+                    logger.warning(f'letter creation failed {err}')
+                    err_msg = "New letter cration failed. Contact system admin"
+                    return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+            else:
+                return render(request, self.template_name, context)
+        return redirect(letter_list_inhouse)
+
+    
+
 
 @login_required
 def letter_details(request, pk=None):
@@ -301,6 +371,17 @@ def label_bulk(request, ltr_no):
         'letters' : letters,
     }
     return render(request, 'transit_slip/label_printer.html', context)
+
+def label_do(request, pk=None):
+    """
+    print label of DO letter one at once
+    """
+    if pk:
+        letter = Letter.objects.get(pk=pk)
+        context = {
+            'letter' : letter,
+        }
+        return render(request, 'transit_slip/label_do.html', context)
 
 @login_required
 @user_passes_test(admin_user_test)

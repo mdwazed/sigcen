@@ -9,13 +9,14 @@ from datetime import date, datetime
 
 
 class LetterForm(forms.ModelForm):
+    addr_line_1 = forms.CharField(widget=forms.TextInput(attrs={'size': '60'}), required=False)
     ltr_no = forms.CharField(widget=forms.TextInput(attrs={'size':'30', 'class':'inputText'}))
     to_units = forms.CharField(max_length=500) #uses slect2 for choices
     date = forms.DateField()
     
     class Meta:
         model = Letter
-        fields = ['addr_line_1','ltr_no', 'to_units', 'date']
+        fields = ['addr_line_1','addr_line_2', 'ltr_no', 'to_units', 'date', 'classification',]
 
 class StaForm(forms.ModelForm):
 

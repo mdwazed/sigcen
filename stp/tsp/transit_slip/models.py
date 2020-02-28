@@ -13,9 +13,18 @@ user_type_choices = {
         ('sc', 'Sigcen clk'),
     }
 
+classification_choices = {
+    ('rs', 'Restricted'),
+    ('cf', 'Confidential'),
+    ('sc', 'Secret'),
+    ('ts', 'Top Secret'),
+    ('uc', 'Unclass'),
+}
+
     
 class Sta(models.Model):
     sta_name = models.CharField(max_length=4)
+    sta_full_name = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return self.sta_name
@@ -74,7 +83,10 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
     
 class Letter(models.Model):
-    addr_line_1 = models.CharField(max_length=50, blank=True, null=True)
+    letter_type = models.CharField(max_length=3, default='reg') # reg or do letter. decide in views
+    classification = models.CharField(choices=classification_choices, default='rs', max_length=2, blank=True, null=True )
+    addr_line_1 = models.CharField(max_length=100, blank=True, null=True) #name of receipient
+    addr_line_2 = models.CharField(max_length=25, blank=True, null=True) # appt of receipient
     ltr_no = models.CharField(max_length=50)
     date = models.DateField()
     from_unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='from_unit',)

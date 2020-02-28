@@ -56,7 +56,11 @@
                         <td>{{ letter.get_current_status }}</td>
                         {% if letter.get_current_status == "In Unit" %}
                         <td>
-                            <a href="{% url 'label_bulk' ltr_no=letter.ltr_no|urlencode:"" %}" target="blank">Print Label</a>
+                            {% if letter.letter_type == 'reg' %}
+                                <a href="{% url 'label_bulk' ltr_no=letter.ltr_no|urlencode:"" %}" target="blank">Print Label</a>
+                            {% elif letter.letter_type == 'do' %}
+                                <a href="{% url 'label_do' letter.pk %}" target="blank">Print Label</a>
+                            {% endif %}
                             <a href="{% url 'letter_delete' ltr_no=letter.ltr_no|urlencode:"" %}">Delete</a>
                         </td>
                         {% else %}
