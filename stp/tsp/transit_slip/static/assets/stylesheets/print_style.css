@@ -1,63 +1,10 @@
 
 
 .do-printer { /* has to be before the media print inorder to hide the borderduring print */
-    margin-left: 200px;
-    width: 19.5cm;
-    height: 13.97cm;
+    width: 190mm;
+    height: 140mm;
     border: 1px solid blue;
-}
-
-@page {
-    margin: 0cm;
-    /* size: A4; */
-}
-
-@media print {
-    .label-printer {
-        page-break-inside: avoid;
-        break-inside: avoid;
-    }
-    .ts-print {
-        break-inside: auto;
-    }
-    .receipt-print {
-        break-inside: auto;
-    }
-
-    .label-printer {
-        font-size: 16pt;
-        margin: 1cm;
-    }
-    .label-address {
-        margin-top: 1cm;
-    }
-    .label-address {
-    }
-    .ts-print {
-        font-size: 12pt;
-    }
-    .ts-print table {
-        width: 85%;
-    }
-    .ts-print .ts-head {
-        width: 80%;
-    }
-    .top-banner {
-        display: none;
-    }
-    .not-to-be-print {
-        display: none;
-    }
-    .do-printer {
-        width: 190mm;
-        height: 140mm;
-        border: none;
-        margin: 0;
-    }
-    .do-address {
-        font-size: 150%;
-    }
-
+    margin-left: 200px;
 }
 
 .label-printer {
@@ -79,7 +26,7 @@
 }
 
 .do-printer {
-    width: 190mm;
+    width: 240mm;
     height: 140mm;
 }
 .do-printer p {
@@ -125,4 +72,58 @@
     font-size: 70%;
     color: darkgray;
     font-weight: normal;
+}
+
+
+@page {
+    margin: 0cm;
+    /* size: A4; */
+}
+
+@media print {
+    .label-printer {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    .ts-print {
+        break-inside: auto;
+    }
+    .receipt-print {
+        break-inside: auto;
+    }
+
+    .label-printer {
+        font-size: 16pt;
+        margin: 1cm;
+    }
+    .label-address {
+        margin-top: 1cm;
+    }
+    .label-address {
+    }
+    .ts-print {
+        font-size: 12pt;
+    }
+    .ts-print table {
+        width: 85%;
+    }
+    .ts-print .ts-head {
+        width: 80%;
+    }
+    .top-banner {
+        display: none;
+    }
+    .not-to-be-print {
+        display: none;
+    }
+    .do-printer {
+        width: 240mm;
+        height: 140mm;
+        border: 1px solid blue;
+        margin: 0;
+    }
+    .do-address {
+        font-size: 150%;
+    }
+
 }
