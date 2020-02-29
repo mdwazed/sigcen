@@ -296,7 +296,7 @@ class LetterListDespatchedView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         unit = Unit.objects.get(pk=request.session['unitid'])
         letters = Letter.objects.filter(from_unit=unit, 
-                date__gte=datetime.today()-timedelta(days=10)).exclude(ltr_receipt=None)[:200]
+                date__gte=datetime.today()-timedelta(days=10)).exclude(ltr_receipt=None)[:400]
         context = {
         'letters' : letters,
         'unit' : unit,

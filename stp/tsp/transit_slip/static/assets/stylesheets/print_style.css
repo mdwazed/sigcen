@@ -49,9 +49,13 @@
         display: none;
     }
     .do-printer {
-    width: 19.5cm;
-    height: 13.97cm;
-    border: none;
+        width: 190mm;
+        height: 140mm;
+        border: none;
+        margin: 0;
+    }
+    .do-address {
+        font-size: 150%;
     }
 
 }
@@ -74,7 +78,10 @@
     color: cornflowerblue;
 }
 
-
+.do-printer {
+    width: 190mm;
+    height: 140mm;
+}
 .do-printer p {
     font-weight: 700;
     margin: 0.3em;
