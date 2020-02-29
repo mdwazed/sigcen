@@ -8,8 +8,8 @@
 }
 
 @page {
-    margin: 1cm;
-    size: A4;
+    margin: 0cm;
+    /* size: A4; */
 }
 
 @media print {
