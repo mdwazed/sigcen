@@ -19,8 +19,16 @@
                     <p>To</p>
                     <p style="max-width: 120mm;">{{ letter.addr_line_1 }}</p>
                     <p>{{ letter.addr_line_2 }}</p>
-                    <p>{{ letter.to_unit }}</p>
-                    <p>{{ letter.to_unit.sta_name }}</p>
+                    {% if unit_full_name %}
+                        <p>{{ unit_full_name }}</p>
+                    {% else %}
+                        <p>{{ letter.to_unit }}</p>
+                    {% endif %}
+                    {% if sta_full_name %}
+                        <p>{{ sta_full_name }}</p>
+                    {% else %}
+                        <p>{{ letter.to_unit.sta_name }}</p>
+                    {% endif %}
                 </div>
                 
             </div>

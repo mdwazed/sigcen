@@ -378,8 +378,14 @@ def label_do(request, pk=None):
     """
     if pk:
         letter = Letter.objects.get(pk=pk)
+        unit = letter.to_unit
+        sta = unit.sta_name
+        # sta_full_name = letter.to_unit.sta_name
+        # print(unit_full_name.sta_full_name)
         context = {
             'letter' : letter,
+            'unit_full_name': unit.unit_full_name,
+            'sta_full_name': sta.sta_full_name,
         }
         return render(request, 'transit_slip/label_do.html', context)
 

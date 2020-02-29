@@ -119,7 +119,7 @@
     .do-printer {
         width: 240mm;
         height: 140mm;
-        border: 1px solid blue;
+        border: none;
         margin: 0;
     }
     .do-address {

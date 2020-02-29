@@ -34,6 +34,7 @@ class Sta(models.Model):
 
 class Unit(models.Model):
     unit_name = models.CharField(max_length=50)
+    unit_full_name = models.CharField(max_length=100, null=True, blank=True)
     sta_name = models.ForeignKey(Sta, on_delete=models.PROTECT,)
 
     def __str__(self):
@@ -86,7 +87,7 @@ class Letter(models.Model):
     letter_type = models.CharField(max_length=3, default='reg') # reg or do letter. decide in views
     classification = models.CharField(choices=classification_choices, default='rs', max_length=2, blank=True, null=True )
     addr_line_1 = models.CharField(max_length=100, blank=True, null=True) #name of receipient
-    addr_line_2 = models.CharField(max_length=25, blank=True, null=True) # appt of receipient
+    addr_line_2 = models.CharField(max_length=50, blank=True, null=True) # appt of receipient
     ltr_no = models.CharField(max_length=50)
     date = models.DateField()
     from_unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='from_unit',)
