@@ -26,7 +26,8 @@ urlpatterns = [
     path('letter_state/<int:pk>', views.letter_state, name= 'letter_state'),
     path('label/', views.label, name= 'label'),
     path('label/<int:pk>', views.label, name= 'label'),
-    path('label_bulk/<str:ltr_no>', views.label_bulk, name= 'label_bulk'),
+    # path('label_bulk/<str:ltr_no>', views.label_bulk, name= 'label_bulk'),
+    path('label_bulk/<str:ltr_no>/<str:date_str>', views.label_bulk, name= 'label_bulk'),
     path('label_do/<int:pk>', views.label_do, name= 'label_do'),
     # sigcen user
     path('receipt_list', views.receipt_list, name= 'receipt_list'),

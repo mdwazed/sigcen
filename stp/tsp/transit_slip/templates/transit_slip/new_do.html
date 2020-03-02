@@ -60,7 +60,8 @@
                     </td>
                     <td>
                         <select id="{{ form.to_units.id_for_label }}" name="{{ form.to_units.name }}"
-                            class="basic-multiple" multiple="multiple" style="width: 300px;">
+                            class="basic-multiple" style="width: 300px;">
+                            <option value="">-----------</option>
                             {% for unit in units %}
                             <option value="{{unit.id}}">{{unit.unit_name}}</option>
                             {% endfor %}

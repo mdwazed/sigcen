@@ -360,13 +360,14 @@ def label(request, pk=None):
     return render(request, 'transit_slip/label_printer.html', context)
 
 @login_required
-def label_bulk(request, ltr_no):
+def label_bulk(request, ltr_no, date_str):
     """
     print all label of the same latter
     """
     ltr_no = urllib.parse.unquote(ltr_no)
+    date = datetime.strptime(date_str, '%d%m%Y')
     print(ltr_no)
-    letters = Letter.objects.filter(ltr_no=ltr_no)
+    letters = Letter.objects.filter(ltr_no=ltr_no, date=date)
     context = {
         'letters' : letters,
     }

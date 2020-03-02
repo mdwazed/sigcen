@@ -61,7 +61,7 @@
                         {% if letter.get_current_status == "In Unit" %}
                         <td>
                             {% if letter.letter_type == 'reg' %}
-                                <a href="{% url 'label_bulk' ltr_no=letter.ltr_no|urlencode:"" %}" target="blank">Print Label</a>
+                                <a href="{% url 'label_bulk' letter.ltr_no|urlencode:"" letter.date|date:'dmY' %}" target="blank">Print Label</a>
                             {% elif letter.letter_type == 'do' %}
                                 <a href="{% url 'label_do' letter.pk %}" target="blank">Print Label</a>
                             {% endif %}
