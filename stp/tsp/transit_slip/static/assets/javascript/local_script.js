@@ -33,7 +33,7 @@ $('.received-on-save').click(function(){
 
 });
 
-//delete a letter by admin
+//delete a letter by admin regardless of letter status
 $('#ltr-delete-admin').on('click', function(event){
     url = '/letter_delete_admin';
     redirect_url = '/search_ltr';
@@ -43,6 +43,24 @@ $('#ltr-delete-admin').on('click', function(event){
             if(status == 'success' && data =='true'){
                 window.location.replace(redirect_url);
             }else{
+                alert('There was some problem deleting DAK. Please try later.')
+            }
+        });
+    }
+});
+// delete a letter by user only before received by sigcen
+$('#ltr-delete').on('click', function (event) {
+    ltr_id = $(this).next().val();
+    // console.log($(this));
+    url = '/letter_delete/';
+    redirect_url = '/letter_list_inhouse/';
+    let r = window.confirm("Are you sure!! This will DELETE the DAK parmanently. If you already have " +
+            "printed the Label it will be invalid. ");
+    if (r == true) {
+        $.post(url, { 'csrfmiddlewaretoken': csrf_token, 'ltr_id': ltr_id }, function (data, status) {
+            if (status == 'success' && data == 'true') {
+                window.location.replace(redirect_url);
+            } else {
                 alert('There was some problem deleting DAK. Please try later.')
             }
         });

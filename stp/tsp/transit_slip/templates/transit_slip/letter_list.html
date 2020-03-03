@@ -65,7 +65,8 @@
                             {% elif letter.letter_type == 'do' %}
                                 <a href="{% url 'label_do' letter.pk %}" target="blank">Print Label</a>
                             {% endif %}
-                            <a href="{% url 'letter_delete' ltr_no=letter.ltr_no|urlencode:"" %}">Delete</a>
+                            ||<button class="btn btn-sm btn-danger" id="ltr-delete">Delete</button>
+                            <input type="hidden" value="{{letter.id}}">
                         </td>
                         {% else %}
                         <td>
@@ -89,7 +90,9 @@
 {% block script %}
     <script src="{% static '/vendor/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
     <script>
-        // let csrf_token = '{{ csrf_token }}'
+        // useful for deleting a letter
+        let csrf_token = '{{ csrf_token }}';
+        // remove the date range selection for inhouse letters
         let caller = "{{ caller }}"
         $(document).ready(function () {
             if (caller == "inhouse"){
@@ -104,6 +107,5 @@
                 minDate: "-1y",
             });
         });
-
     </script>
 {% endblock %}

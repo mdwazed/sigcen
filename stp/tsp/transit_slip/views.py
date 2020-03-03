@@ -318,27 +318,20 @@ class LetterListDespatchedView(LoginRequiredMixin, View):
         'unit' : unit,
         }
         return render(request, self.template, context)
-# @login_required
-# def letter_list_despatched(request):
-#     unit = Unit.objects.get(pk=request.session['unitid'])
-#     letters = Letter.objects.filter(from_unit=unit, 
-#                 date__gte=datetime.today()-timedelta(days=10)).exclude(ltr_receipt=None)
-#     context = {
-#         'letters' : letters,
-#         'unit' : unit,
-#     }
-#     return render(request, 'transit_slip/letter_list.html', context)
 
 @login_required
-def letter_delete(request, ltr_no):
-    letters = Letter.objects.filter(ltr_no=ltr_no)
-    for letter in letters:
-        if letter.ltr_receipt:
-            err_msg = "You can not delete a DAK after received at Sigcen"
-            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
-        else:
-            letter.delete()
-    return redirect('letter_list_inhouse')
+def letter_delete(request):
+   
+    if request.method == 'POST':
+        print('letter delete called')
+        try:
+
+            ltr = Letter.objects.get(pk=request.POST['ltr_id'])
+            print(request.POST['ltr_id'])
+            ltr.delete()
+            return HttpResponse('true')
+        except Exception:
+            return HttpResponse('false')
 
 @login_required
 def label(request, pk=None):
