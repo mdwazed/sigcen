@@ -66,3 +66,6 @@ $('#ltr-delete').on('click', function (event) {
         });
     }
 });
+
+//create summary of ts 
+

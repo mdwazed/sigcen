@@ -183,3 +183,9 @@
     justify-content: space-around;
     align-items: flex-start;
 }
+
+.ts-list-header {
+    display: flex;
+    justify-content: space-around;
+    
+}

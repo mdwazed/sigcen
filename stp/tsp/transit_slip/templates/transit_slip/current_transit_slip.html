@@ -2,8 +2,42 @@
 {% load static %}
 {% block content %}
 <div class="container">
-    <div>
+    <div class="ts-list-header">
         <h4>Not despathed Transit Slips</h4>
+        <button type="button" class="btn-primary" id="btn-ts-summary" data-toggle="modal"
+         data-target="#summaryModal">Summary</button>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="summaryModal" data-backdrop="static" tabindex="-1" role="dialog"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Summary</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-sm">
+                        <thead><th>DST</th><th>TS Count</th><th>DAK Count</th></thead>
+                        <tbody>
+                            {% for data in summary_dict.items %}
+                            <tr>
+                                <td>{{ data.0 }}</td>
+                                <td>{{ data.1.0 }}</td>
+                                <td>{{ data.1.1 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
     <div>
         <table class="table table-hover">
@@ -24,8 +58,8 @@
                     <td>{{ t_slip.date }}</td>
                     <td>{{ t_slip.ltr_count }}</td>
                     <td>
-                        <a href="{% url 'transit_slip_detail' id=t_slip.id %}">Details |</a>
-                        <a href="{% url 'transit_slip_despatch' id=t_slip.id %}">Despatch |</a>
+                        <a href="{% url 'transit_slip_detail' t_slip.id %}">Details |</a>
+                        <a href="{% url 'transit_slip_despatch' t_slip.id %}">Despatch |</a>
                     </td>
                 </tr>
                 {% endfor %}

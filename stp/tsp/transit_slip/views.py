@@ -26,6 +26,7 @@ from random import randint
 from PIL import Image
 import logging
 import json
+import itertools
 
 logger = logging.getLogger('transit_slip')
 # Create your views here.
@@ -722,11 +723,33 @@ class CurrentTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
             return False
 
     def get(self, request):
-        t_slips = TransitSlip.objects.filter(despatched_on=None)
+        t_slips = TransitSlip.objects.filter(despatched_on=None).order_by('dst')
+        summary_dict = self.get_summary(t_slips)
+        print(summary_dict)
         context = {
             't_slips' : t_slips,
+            'summary_dict' : summary_dict,
         }
         return render(request, self.template, context)
+
+    def get_summary(self, t_slips):
+        ts_list =[]
+        for t_slip in t_slips:
+            ts_touple = (t_slip.dst.sta_name, t_slip.ltr_count())
+            ts_list.append(ts_touple)
+        key_f = lambda x: x[0]
+        sum_dict = {}
+        for key, group in itertools.groupby(ts_list, key_f):
+            # print(key + ":" + str(list(group)))
+
+            ltr_count = 0
+            ts_count=0
+            for idx, ltrs in enumerate(group):
+                ltr_count += ltrs[1]
+                ts_count = idx+1
+            sum_dict[key]= (ts_count, ltr_count)
+        return sum_dict
+
 
 
 class OldTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
