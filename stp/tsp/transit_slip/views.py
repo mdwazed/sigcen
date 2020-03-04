@@ -583,7 +583,7 @@ class DakReceive(LoginRequiredMixin, UserPassesTestMixin, View):
 @login_required
 @user_passes_test(not_unit_clk_test)
 def receipt_list(request):
-    receipt_lists = LetterReceipt.objects.all().order_by('-received_at_sigcen')[:200]
+    receipt_lists = LetterReceipt.objects.all().order_by('-received_at_sigcen')[:500]
     context = {
         'receipt_lists': receipt_lists,
     }
@@ -893,6 +893,7 @@ class SearchLtrView(LoginRequiredMixin, UserPassesTestMixin, View):
         sta = Unit.objects.get(pk=unit_id).sta_name
         unit_choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta)]
         return unit_choices
+
     def get(self, request):
         unit_choices = self.get_unit_choices(request)
         context = {
@@ -908,13 +909,13 @@ class SearchLtrView(LoginRequiredMixin, UserPassesTestMixin, View):
             if request.POST['unit-id'] and request.POST['search-date']:
                 unit = Unit.objects.get(pk=request.POST['unit-id'])
                 search_date = datetime.strptime(request.POST['search-date'], "%d-%m-%Y")
-                letters = Letter.objects.filter(from_unit=unit, date=search_date)[:100]
+                letters = Letter.objects.filter(from_unit=unit, date=search_date)[:500]
             elif request.POST['unit-id']:
                 unit = Unit.objects.get(pk=request.POST['unit-id'])
-                letters = Letter.objects.filter(from_unit=unit)[:100]
+                letters = Letter.objects.filter(from_unit=unit)[:500]
             else:
                 search_date = datetime.strptime(request.POST['search-date'], "%d-%m-%Y")
-                letters = Letter.objects.filter(date=search_date)[:100]
+                letters = Letter.objects.filter(date=search_date)[:500]
             unit_choices = self.get_unit_choices(request)
             context = {
                 'letters': letters,
