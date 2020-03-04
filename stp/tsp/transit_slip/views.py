@@ -725,7 +725,7 @@ class CurrentTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
     def get(self, request):
         t_slips = TransitSlip.objects.filter(despatched_on=None).order_by('dst')
         summary_dict = self.get_summary(t_slips)
-        print(summary_dict)
+        # print(summary_dict)
         context = {
             't_slips' : t_slips,
             'summary_dict' : summary_dict,
@@ -735,7 +735,7 @@ class CurrentTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
     def get_summary(self, t_slips):
         ts_list =[]
         for t_slip in t_slips:
-            ts_touple = (t_slip.dst.sta_name, t_slip.ltr_count())
+            ts_touple = (t_slip.dst.sta_name, t_slip.ltr_count(), t_slip.id)
             ts_list.append(ts_touple)
         key_f = lambda x: x[0]
         sum_dict = {}
@@ -744,10 +744,13 @@ class CurrentTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
 
             ltr_count = 0
             ts_count=0
+            ts_ids = []
             for idx, ltrs in enumerate(group):
                 ltr_count += ltrs[1]
+                ts_ids.append(ltrs[2])
                 ts_count = idx+1
-            sum_dict[key]= (ts_count, ltr_count)
+            sum_dict[key]= (ts_count, ltr_count, ts_ids)
+            # print(ts_ids)
         return sum_dict
 
 

@@ -20,13 +20,14 @@
                 </div>
                 <div class="modal-body">
                     <table class="table table-sm">
-                        <thead><th>DST</th><th>TS Count</th><th>DAK Count</th></thead>
+                        <thead><th>DST</th><th>TS Count</th><th>DAK Count</th><th>TS no's</th></thead>
                         <tbody>
                             {% for data in summary_dict.items %}
                             <tr>
                                 <td>{{ data.0 }}</td>
                                 <td>{{ data.1.0 }}</td>
                                 <td>{{ data.1.1 }}</td>
+                                <td>{{ data.1.2 }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
