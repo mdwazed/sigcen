@@ -126,4 +126,8 @@
         font-size: 150%;
     }
 
+    .table-sm {
+    line-height: 1;
+}
+
 }

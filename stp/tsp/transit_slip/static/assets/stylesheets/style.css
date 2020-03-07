@@ -13,6 +13,9 @@
     }
 }
 
+.table-sm {
+    line-height: 1;
+}
 .container {
     margin-top: 30px;
 }
