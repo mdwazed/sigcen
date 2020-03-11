@@ -556,6 +556,9 @@ class DakReceive(LoginRequiredMixin, UserPassesTestMixin, View):
         # print(request.POST['submit-type'])
         received_ltrs = []
         ltr_ids = request.POST.getlist('received_ltr')
+        if len(ltr_ids) <= 0:
+            err_msg = 'No DAK was selected. One or more DAK needed.'
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
         spl_pkgs = request.POST.getlist('spl_pkg')
         # create ltr receipt
         received_by = User.objects.get(pk=request.session['userid'])
@@ -700,12 +703,19 @@ def transit_slip_ltrs(request):
     create the actual transit slip fetching letters from the CreateTransitSlipView
     """
     if request.method == 'POST':
-        dst = Sta.objects.get(sta_name=request.POST['dst-sta'])
+        try:
+            dst = Sta.objects.get(sta_name=request.POST['dst-sta'])
+        except ObjectDoesNotExist:
+            err_msg = 'No STA was selected. Please select a dst sta.'
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
         date = datetime.today()
         prepared_by = User.objects.get(pk=request.session['userid'])
         transit_slip = TransitSlip(date=date, dst=dst, prepared_by=prepared_by)
         transit_slip.save()
         ltr_ids = request.POST.getlist('ltr-ids')
+        if len(ltr_ids) <= 0:
+            err_msg = 'No DAK was selected. One or more DAK needed.'
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
         for ltr_id in ltr_ids:
             ltr = Letter.objects.get(pk=ltr_id)
             ltr.transit_slip = transit_slip
