@@ -708,14 +708,14 @@ def transit_slip_ltrs(request):
         except ObjectDoesNotExist:
             err_msg = 'No STA was selected. Please select a dst sta.'
             return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
-        date = datetime.today()
-        prepared_by = User.objects.get(pk=request.session['userid'])
-        transit_slip = TransitSlip(date=date, dst=dst, prepared_by=prepared_by)
-        transit_slip.save()
         ltr_ids = request.POST.getlist('ltr-ids')
         if len(ltr_ids) <= 0:
             err_msg = 'No DAK was selected. One or more DAK needed.'
             return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+        date = datetime.today()
+        prepared_by = User.objects.get(pk=request.session['userid'])
+        transit_slip = TransitSlip(date=date, dst=dst, prepared_by=prepared_by)
+        transit_slip.save()
         for ltr_id in ltr_ids:
             ltr = Letter.objects.get(pk=ltr_id)
             ltr.transit_slip = transit_slip
