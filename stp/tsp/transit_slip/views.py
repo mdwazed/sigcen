@@ -451,11 +451,13 @@ class ResetUserPasswordView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def post(self, request):
         user = User.objects.get(username=request.POST['username'])
-        new_passwd = request.POST['new-passwd']
-        if type(new_passwd) is str:
-            user.set_password(new_passwd)
-            user.save()
-            return redirect("user_list")
+        new_passwd_1 = request.POST['new-passwd-1']
+        new_passwd_2 = request.POST['new-passwd-2']
+        if type(new_passwd_1) is str and type(new_passwd_2) is str:
+            if new_passwd_1 == new_passwd_2:
+                user.set_password(new_passwd_1)
+                user.save()
+                return redirect("user_list")
 
 class PreResetUserPasswordView(LoginRequiredMixin, UserPassesTestMixin, View):
     template = "registration/reset_user_password.html"
@@ -468,9 +470,9 @@ class PreResetUserPasswordView(LoginRequiredMixin, UserPassesTestMixin, View):
             return False
 
     def post(self, request):
-        user = User.objects.get(username=request.POST['username'])
+        target_user = User.objects.get(username=request.POST['username'])
         context = {
-            'user':user,
+            'target_user':target_user,
         }
         return render(request, self.template, context)
 
