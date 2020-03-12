@@ -79,6 +79,7 @@ class Home(View):
         return render(request, self.template_name, context)
 
 @login_required
+@user_passes_test(admin_user_test)
 def add_new_sta(request):
     if request.method == 'POST':
         form = forms.StaForm(request.POST)
@@ -103,11 +104,18 @@ def unit_list_view(request):
     return render(request, 'transit_slip/unit_list.html', context)
 
 
-class UnitCreateView(LoginRequiredMixin, CreateView):
+class UnitCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Unit
     fields = "__all__"
     template_name = "transit_slip/unit_add_update.html"
     success_url = reverse_lazy("unit_list")
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'ad':
+            return True
+        else:
+            return False
 
 
 class UnitUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -115,6 +123,13 @@ class UnitUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     fields = ['unit_name', 'sta_name']
     template_name = "transit_slip/unit_add_update.html"
     success_url = reverse_lazy("unit_list")
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'ad':
+            return True
+        else:
+            return False
 
 
 class LetterView(LoginRequiredMixin, View):
@@ -292,6 +307,9 @@ def letter_list_inhouse(request):
     return render(request, 'transit_slip/letter_list.html', context)
 
 class LetterListDespatchedView(LoginRequiredMixin, View):
+    """
+    list ltr which has been despatched to sigcen
+    """
     template = 'transit_slip/letter_list.html'
     
     def get(self, request, *args, **kwargs):
@@ -886,9 +904,11 @@ def fetch_letter_json(request):
     u_string = request.POST['u_string']
     try:
         ltr = Letter.objects.get(u_string=u_string, date=date)
-        # print(ltr)
-        serialize_ltr = serializers.serialize("json", [ltr,], use_natural_foreign_keys=True)
-        # print(serialize_ltr)
+        print(ltr.ltr_receipt)
+        if ltr.ltr_receipt is None:
+            serialize_ltr = serializers.serialize("json", [ltr,], use_natural_foreign_keys=True)
+        else:
+            serialize_ltr = None
     except ObjectDoesNotExist:
         return HttpResponse(None)
     return HttpResponse(serialize_ltr)
