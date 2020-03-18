@@ -14,9 +14,12 @@
                 <p>{{ letter.ltr_no }}</p>
                 <p>Dated:&nbsp;{{ letter.date | date:"d/m/Y" }}</p>
             </div>
+            <div class="to">
+                <p>To,</p>
+            </div>
             <div class="main-address">
+                
                 <div>
-                    <p>To</p>
                     <p style="max-width: 120mm;">{{ letter.addr_line_1 }}</p>
                     <p>{{ letter.addr_line_2 }}</p>
                     {% if unit_full_name %}

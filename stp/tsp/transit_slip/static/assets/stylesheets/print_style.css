@@ -1,6 +1,6 @@
 
 
-.do-printer { /* has to be before the media print inorder to hide the borderduring print */
+.do-printer { /* has to be before the media print inorder to hide the border during print */
     width: 190mm;
     height: 140mm;
     border: 1px solid blue;
@@ -40,15 +40,21 @@
     flex-direction: column;
 }
 .do-address .top-line {
-    margin-top: 1cm;
+    margin-top: 2cm;
     display: flex;
     flex-wrap: nowrap;
     justify-content: space-around;
 }
-.do-address .main-address {
+.do-address .to {
     margin-top: 2cm;
+    margin-left: 7cm;
+}
+.do-address .main-address {
+    margin-left: 8cm;
+    margin-right: 1cm;
     display: flex;
-    flex-direction: row-reverse;
+    /* flex-direction: row-reverse; */
+
 }
 .do-address .main-address div{
     width: fit-content;
