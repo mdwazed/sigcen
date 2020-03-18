@@ -13,7 +13,7 @@ class LetterListingField(serializers.RelatedField):
         to_unit_code = value.to_unit.pk
         from_unit_code = value.from_unit.pk
         ltr_no = value.ltr_no
-        return (f'{from_unit_code}-{to_unit_code}-{ltr_no}')
+        return (f'{from_unit_code}__{to_unit_code}__{ltr_no}')
 
 class TransitSlipSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(format="%d/%m/%Y")
