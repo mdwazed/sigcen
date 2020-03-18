@@ -98,7 +98,7 @@ class Letter(models.Model):
     spl_pkg = models.BooleanField(default=False)
     ltr_receipt = models.ForeignKey(LetterReceipt, on_delete=models.SET_NULL, null=True)
     # despatched_at = models.DateTimeField(null=True)
-    transit_slip = models.ForeignKey(TransitSlip, on_delete=models.SET_NULL, blank=True, null=True)
+    transit_slip = models.ForeignKey(TransitSlip, related_name='ltrs', on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         unique_together = ('date', 'u_string',)

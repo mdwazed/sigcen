@@ -56,5 +56,3 @@ urlpatterns = [
     path('letter_delete_admin', views.letter_delete_admin_view, name= 'letter_delete_admin'),
     # path('reset_user_passwd', views.ResetUserPassword.as_view(), name= 'reset_user_passwd'),
 ]
-if settings.DEBUG:
-    urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
