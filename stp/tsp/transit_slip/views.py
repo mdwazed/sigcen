@@ -984,6 +984,9 @@ class SearchLtrView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 @login_required
 def letter_delete_admin_view(request):
+    """
+    Allows admin to delete a dak regardless of their status 
+    """
     # print(request.POST['ltr_id'])
     if request.method == 'POST':
         try:
@@ -992,3 +995,35 @@ def letter_delete_admin_view(request):
             return HttpResponse('true')
         except Exception:
             return HttpResponse('false')
+
+class RemoteLtrView(View):
+    def get(self, request):
+        stas = Sta.objects.all()
+        domains = json.dumps(settings.DOMAINS)
+        print(domains)
+        context = {
+            'stas': stas,
+            'domains': domains,
+        }
+        return render(request, 'transit_slip/get_remote_ltr.html', context)
+
+    def post(self, request):
+        from_units = request.POST.getlist('from_unit')
+        to_units = request.POST.getlist('to_unit')
+        dates = request.POST.getlist('date')
+        codes = request.POST.getlist('code')
+        ltr_nos = request.POST.getlist('ltr_no')
+        ts_info = request.POST.get('ts-info')
+        for idx, from_unit in enumerate(from_units):
+            print(idx, from_unit)
+        return HttpResponse('receiving letter')
+
+
+def fetch_unit_names(request):
+    unit_names = []
+    if request.method == "POST":
+        unit_codes = request.POST.getlist('unit_codes[]')
+        for unit_code in unit_codes:
+            unit = Unit.objects.get(pk=unit_code)
+            unit_names.append(unit.unit_name)
+    return JsonResponse(unit_names, safe=False)

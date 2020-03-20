@@ -1,0 +1,66 @@
+{% extends 'transit_slip/layout.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h5>Fetch DAK from remote Sigcen</h5>
+    <div class="card">
+        <div class="card-body">
+            <div class="input-group inline-header-form">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="">From STA:</span>
+                </div>
+                <select name="sta" id="id-sta">
+                    <option value="">-----</option>
+                    {% for sta in stas %}
+                    <option value="{{sta.id}}">{{sta.sta_name}}</option>
+                    {% endfor %}
+                </select>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="ts-no-label">Transit Slip No:</span>
+                </div>
+                <input type="text" class="form-control" name="ts-no" id="ts-no">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-primary" id="fetch-ltr">Fetch</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ts-ltrs">
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="p-2 mb-1 bg-info text-white d-flex justify-content-around">
+                <h5 class="d-inline">DST: <span id="ts-dst"></span></h5>
+                <h5 class="d-inline">ID: <span id="ts-id"></span></h5>
+                <h5 class="d-inline">Date: <span id="ts-date"></span></h5>
+                <h5 class="d-inline">DAK Count: <span id="ts-ltr-count"></span></h5>
+            </div>
+            <table class="table table-hover table-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">From</th>
+                        <th scope="col">To</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Code</th>
+                        <th scope="col">Ltr no</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+            <input type="hidden" name="ts-info" id="ts-info">
+            <button class="btn btn-primary" type="submit">Receive</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    var csrf_token = '{{ csrf_token }}';
+    var domains_str = '{{ domains | safe }}';
+</script>
+
+<script src="{% static 'assets/javascript/remote_dak.js' %}"></script>
+{% endblock %}

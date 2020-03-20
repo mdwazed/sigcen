@@ -45,9 +45,10 @@ urlpatterns = [
     path('generate_spl_pkg_ts', views.generate_spl_pkg_ts, name= 'generate_spl_pkg_ts'),
     path('transit_slip_despatch/<int:id>', views.transit_slip_despatch, name= 'transit_slip_despatch'),
     path('ts_rcv_update', views.ts_rcv_update, name= 'ts_rcv_update'),
-    path('test', views.test_view, name= 'test_view'),
-
     path('fetch_letter_json', views.fetch_letter_json, name= 'fetch_letter_json'),
+    path('remote_ltr', views.RemoteLtrView.as_view(), name= 'remote_ltr'),
+    path('fetch_unit_names/', views.fetch_unit_names, name= 'fetch_unit_names'),
+
     
     path('add_sta', views.add_new_sta, name= 'add_sta'),
     path('unit_list', views.unit_list_view, name= 'unit_list'),
