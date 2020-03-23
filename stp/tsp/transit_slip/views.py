@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.core.files import File
 from django.http import HttpResponse, JsonResponse
@@ -16,7 +16,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from datetime import datetime, date, timedelta
 
-from transit_slip.models import User, Letter, Unit, Sta, TransitSlip, LetterReceipt
+from transit_slip.models import (User, Letter, Unit, Sta, TransitSlip, LetterReceipt,
+                                    OutGoingLetter, DeliveryReceipt)
 from transit_slip.forms import forms
 import qrcode
 import uuid
@@ -120,7 +121,7 @@ class UnitCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 class UnitUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Unit
-    fields = ['unit_name', 'sta_name']
+    fields = ['unit_name', 'unit_full_name', 'sta_name', 'unit_code']
     template_name = "transit_slip/unit_add_update.html"
     success_url = reverse_lazy("unit_list")
 
@@ -131,6 +132,97 @@ class UnitUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         else:
             return False
 
+
+@login_required
+@user_passes_test(admin_user_test)
+def user_list(request):
+    users = User.objects.all()
+    context = {
+        'users':users,
+    }
+    return render(request, 'registration/user_list.html', context)
+
+@login_required
+@user_passes_test(admin_user_test)
+def create_user(request):
+    """
+    create new user
+    """
+    unit_id = request.session['unitid']
+    sta = Unit.objects.get(pk=unit_id).sta_name
+    if request.method == 'POST':
+        form = forms.CreateUserForm(request.POST, sta=sta)
+        if form.is_valid():
+            user = form.save()
+            user.refresh_from_db()  # load the profile instance created by the signal
+            selected_unit_id = form.cleaned_data.get('unit')
+            user.profile.unit = Unit.objects.get(pk=selected_unit_id)
+            user.profile.user_type = form.cleaned_data.get('user_type')
+            user.save()
+            # raw_password = form.cleaned_data.get('password1')
+            # user = authenticate(username=user.username, password=raw_password)
+            # login(request, user)
+            return redirect('user_list')
+    else:
+        form = forms.CreateUserForm(sta=sta)
+    return render(request, 'registration/create_user.html', {'form': form})
+    
+
+class UserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+    success_url = reverse_lazy("home")
+
+class ResetUserPasswordView(LoginRequiredMixin, UserPassesTestMixin, View):
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'ad':
+            return True
+        else:
+            return False
+
+    def post(self, request):
+        user = User.objects.get(username=request.POST['username'])
+        new_passwd_1 = request.POST['new-passwd-1']
+        new_passwd_2 = request.POST['new-passwd-2']
+        if type(new_passwd_1) is str and type(new_passwd_2) is str:
+            if new_passwd_1 == new_passwd_2:
+                user.set_password(new_passwd_1)
+                user.save()
+                return redirect("user_list")
+
+class PreResetUserPasswordView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template = "registration/reset_user_password.html"
+
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'ad':
+            return True
+        else:
+            return False
+
+    def post(self, request):
+        target_user = User.objects.get(username=request.POST['username'])
+        context = {
+            'target_user':target_user,
+        }
+        return render(request, self.template, context)
+
+class UserUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
+    pass
+
+@login_required
+@user_passes_test(admin_user_test)
+def delete_user(request):
+    try:
+        user = User.objects.get(username=request.POST['username'])
+    except ObjectDoesNotExist:
+        msg = "The system was unable to find appropriate user"
+        context = {
+            'msg': msg,
+        }
+        return render(request, "transit_slip/generic_info.html", context)
+    user.delete()
+    return redirect("user_list")
 
 class LetterView(LoginRequiredMixin, View):
     """
@@ -184,8 +276,8 @@ class LetterView(LoginRequiredMixin, View):
                     # print(letter.to_unit)
                     letter.save()
                     logger.info("new letter created with id %s", letter.pk)
-                except Exception as err:
-                    logger.warning(f'letter creation failed {err}')
+                except Exception as e:
+                    logger.warning(f'letter creation failed. {e}')
                     err_msg = "New letter cration failed. Contact system admin"
                     return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
             else:
@@ -402,93 +494,7 @@ def label_do(request, pk=None):
         }
         return render(request, 'transit_slip/label_do.html', context)
 
-@login_required
-@user_passes_test(admin_user_test)
-def user_list(request):
-    users = User.objects.all()
-    context = {
-        'users':users,
-    }
-    return render(request, 'registration/user_list.html', context)
 
-@login_required
-@user_passes_test(admin_user_test)
-def create_user(request):
-    """
-    create new user
-    """
-    unit_id = request.session['unitid']
-    sta = Unit.objects.get(pk=unit_id).sta_name
-    if request.method == 'POST':
-        form = forms.CreateUserForm(request.POST, sta=sta)
-        if form.is_valid():
-            user = form.save()
-            user.refresh_from_db()  # load the profile instance created by the signal
-            selected_unit_id = form.cleaned_data.get('unit')
-            user.profile.unit = Unit.objects.get(pk=selected_unit_id)
-            user.profile.user_type = form.cleaned_data.get('user_type')
-            user.save()
-            # raw_password = form.cleaned_data.get('password1')
-            # user = authenticate(username=user.username, password=raw_password)
-            # login(request, user)
-            return redirect('user_list')
-    else:
-        form = forms.CreateUserForm(sta=sta)
-    return render(request, 'registration/create_user.html', {'form': form})
-    
-
-class UserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
-    success_url = reverse_lazy("home")
-
-class ResetUserPasswordView(LoginRequiredMixin, UserPassesTestMixin, View):
-
-    def test_func(self):
-        user_type = self.request.user.profile.user_type
-        if user_type == 'ad':
-            return True
-        else:
-            return False
-
-    def post(self, request):
-        user = User.objects.get(username=request.POST['username'])
-        new_passwd_1 = request.POST['new-passwd-1']
-        new_passwd_2 = request.POST['new-passwd-2']
-        if type(new_passwd_1) is str and type(new_passwd_2) is str:
-            if new_passwd_1 == new_passwd_2:
-                user.set_password(new_passwd_1)
-                user.save()
-                return redirect("user_list")
-
-class PreResetUserPasswordView(LoginRequiredMixin, UserPassesTestMixin, View):
-    template = "registration/reset_user_password.html"
-
-    def test_func(self):
-        user_type = self.request.user.profile.user_type
-        if user_type == 'ad':
-            return True
-        else:
-            return False
-
-    def post(self, request):
-        target_user = User.objects.get(username=request.POST['username'])
-        context = {
-            'target_user':target_user,
-        }
-        return render(request, self.template, context)
-
-@login_required
-@user_passes_test(admin_user_test)
-def delete_user(request):
-    try:
-        user = User.objects.get(username=request.POST['username'])
-    except ObjectDoesNotExist:
-        msg = "The system was unable to find appropriate user"
-        context = {
-            'msg': msg,
-        }
-        return render(request, "transit_slip/generic_info.html", context)
-    user.delete()
-    return redirect("user_list")
 
 class DakInManualView(LoginRequiredMixin, UserPassesTestMixin, View):
     """
@@ -952,10 +958,23 @@ class SearchLtrView(LoginRequiredMixin, UserPassesTestMixin, View):
         unit_choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta)]
         return unit_choices
 
+    def get_user_unit(self, request):
+        user_unit_id = request.session.get('unitid')
+        try:
+            user_unit = Unit.objects.get(pk=user_unit_id).unit_full_name
+        except ObjectDoesNotExist as e:
+            logger.warning(f'user_unit not found. {e}')
+            err_msg = "Not found user unit." + str(e)
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+        print(f'user unit {user_unit}')
+        return user_unit
+
     def get(self, request):
         unit_choices = self.get_unit_choices(request)
+        user_unit = self.get_user_unit(request)
         context = {
             'unit_choices': unit_choices,
+            'user_unit': user_unit,
         }
         return render(request, self.template, context)
 
@@ -981,6 +1000,30 @@ class SearchLtrView(LoginRequiredMixin, UserPassesTestMixin, View):
             }
             return render(request, self.template, context)
 
+class SearchOutgoingLtrView(SearchLtrView):
+    template = 'transit_slip/search_outgoing_ltr.html'
+
+    def post(self, request):
+        print(request.POST)
+        if not (request.POST['unit-id'] or request.POST['search-date']):
+            return redirect('search_outgoing_ltr')
+        else:
+            if request.POST['unit-id'] and request.POST['search-date']:
+                unit = Unit.objects.get(pk=request.POST['unit-id'])
+                search_date = datetime.strptime(request.POST['search-date'], "%d-%m-%Y")
+                letters = OutGoingLetter.objects.filter(to_unit=unit, date=search_date)[:500]
+            elif request.POST['unit-id']:
+                unit = Unit.objects.get(pk=request.POST['unit-id'])
+                letters = OutGoingLetter.objects.filter(to_unit=unit)[:500]
+            else:
+                search_date = datetime.strptime(request.POST['search-date'], "%d-%m-%Y")
+                letters = OutGoingLetter.objects.filter(date=search_date)[:500]
+            unit_choices = self.get_unit_choices(request)
+            context = {
+                'letters': letters,
+                'unit_choices': unit_choices,
+            }
+            return render(request, self.template, context)
 
 @login_required
 def letter_delete_admin_view(request):
@@ -996,11 +1039,17 @@ def letter_delete_admin_view(request):
         except Exception:
             return HttpResponse('false')
 
+################################################################################
+################## views related to recepient sigcen ###########################
+################################################################################
+
 class RemoteLtrView(View):
+    """
+    fetch letter from remote sigcen and save them to local DB.
+    """
     def get(self, request):
         stas = Sta.objects.all()
         domains = json.dumps(settings.DOMAINS)
-        print(domains)
         context = {
             'stas': stas,
             'domains': domains,
@@ -1015,15 +1064,124 @@ class RemoteLtrView(View):
         ltr_nos = request.POST.getlist('ltr_no')
         ts_info = request.POST.get('ts-info')
         for idx, from_unit in enumerate(from_units):
-            print(idx, from_unit)
-        return HttpResponse('receiving letter')
+            try:
+                from_unit = Unit.objects.get(unit_code=from_units[idx])
+                to_unit = Unit.objects.get(unit_code=to_units[idx])
+            except ObjectDoesNotExist:
+                err_msg = """One or more Unit was not found in local DB. Please add 
+                    the appropriate unit with unit code to local DB."""
+                return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+                
+            date = datetime.strptime(dates[idx], '%d/%m/%Y')
+            code = codes[idx]
+            ltr_no = ltr_nos[idx]
+            out_ltr = OutGoingLetter(from_unit=from_unit, to_unit=to_unit, date=date,
+                        code=code, ltr_no=ltr_no, ts_info=ts_info,)
+            try:
+                out_ltr.full_clean()
+            except ValidationError as e:
+                err_msg = "DAK contain incorrect data." + str(e)
+                return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+            out_ltr.save()
+        info = "All DAK has been received successfully!!"
+        return render(request, 'transit_slip/generic_info.html', { 'info': info })
 
 
 def fetch_unit_names(request):
     unit_names = []
+    err_msg = ''
+    found_all_unit = True
     if request.method == "POST":
         unit_codes = request.POST.getlist('unit_codes[]')
         for unit_code in unit_codes:
-            unit = Unit.objects.get(pk=unit_code)
-            unit_names.append(unit.unit_name)
-    return JsonResponse(unit_names, safe=False)
+            try:
+                unit = Unit.objects.get(unit_code=unit_code)
+            except (ObjectDoesNotExist, Unit.MultipleObjectsReturned) as e:
+                found_all_unit = False
+                err_msg = 'Unit not found or multiple unit returned.'
+                err_msg += str(e)
+                print(err_msg)
+            else:
+                unit_names.append(unit.unit_name)
+    context = {
+        'unit_names' : unit_names,
+        'err_msg' : err_msg,
+        'found_all_unit' : found_all_unit,
+    }
+    return JsonResponse(context, safe=False)
+
+class DeliverLetterView(SearchLtrView):
+    template = 'transit_slip/deliver_ltr.html'
+    err_txt = None
+    
+    def post(self, request):
+        err_txt = None
+        letters = None
+        unit = None
+        null_return = False
+        user_unit = request.session.get('unitid')
+        if not request.POST['unit-id']:
+            err_txt = "No unit was selected!!"
+        else:
+            
+            try:
+                unit = Unit.objects.get(pk=request.POST.get('unit-id'))
+                letters = OutGoingLetter.objects.filter(to_unit=unit, delivery_receipt=None)
+                null_return=True if letters.count()==0 else False
+            except ObjectDoesNotExist as e:
+                err_txt = "Something went wrong while fetching unit." + str(e)
+        unit_choices = self.get_unit_choices(request)
+        user_unit = self.get_user_unit(request)
+        context = {
+                'user_unit': user_unit,
+                'unit' : unit,
+                'letters': letters,
+                'unit_choices': unit_choices,
+                'err_txt': err_txt,
+                'null_return': null_return,
+            }
+        return render(request, self.template, context)
+
+class SaveDeliveryView(View):
+    def post(self, request):
+        print(request.POST)
+        err_txt = None
+        try:
+            unit = Unit.objects.get(pk=request.POST.get('unit-id'))
+            letters = OutGoingLetter.objects.filter(to_unit=unit, delivery_receipt=None)
+        except ObjectDoesNotExist as e:
+            err_txt = "Something went wrong while fetching unit." + str(e)
+        if not err_txt:
+            delivered_at = datetime.now()
+            delivered_by = User.objects.get(pk=request.session['userid'])
+            recepient_no = request.POST.get('army-no')
+            recepient_rank = request.POST.get('rank')
+            recepient_name = request.POST.get('name')
+            derlivery_receipt = DeliveryReceipt(delivered_at=delivered_at, delivered_by=delivered_by,
+                    recepient_no=recepient_no, recepient_rank=recepient_rank, recepient_name=recepient_name)
+            try:
+                derlivery_receipt.full_clean()
+            except ValidationError as e:
+                err_msg = "Validation failed on delivery receipt." + str(e)
+                return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+            derlivery_receipt.save()
+            derlivery_receipt.refresh_from_db()
+            for ltr in letters:
+                ltr.delivery_receipt = derlivery_receipt
+                ltr.save()
+            info = "Delivery data saved successfully."
+            return render(request, "transit_slip/generic_info.html", {'info':info})
+        else:
+            return render(request, "transit_slip/generic_error.html", {'err_msg': err_txt})
+
+def letter_delivery_state(request, pk):
+    if request.method == "GET":
+        try:
+            ltr = OutGoingLetter.objects.get(pk=pk)
+        except ObjectDoesNotExist:
+            err_txt = "Target DAK is not found. May have been removed."
+            return render(request, "transit_slip/generic_error.html", {'err_msg': err_txt})
+        context = {
+            'letter': ltr,
+        }
+        return render(request, "transit_slip/letter_delivery_state.html", context )

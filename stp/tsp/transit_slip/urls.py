@@ -10,6 +10,7 @@ urlpatterns = [
     # user
     path('user_list', views.user_list, name= 'user_list'),
     path('create_user', views.create_user, name= 'create_user'),
+    path('update_user_info', views.UserUpdateView.as_view(), name= 'update_user_info'),
     path('user_password_change', views.UserPasswordChangeView.as_view(), name= 'user_password_change'),
     path('pre_reset_user_password', views.PreResetUserPasswordView.as_view(), name= 'pre_reset_user_password'),
     path('reset_user_password', views.ResetUserPasswordView.as_view(), name= 'reset_user_password'),
@@ -46,8 +47,13 @@ urlpatterns = [
     path('transit_slip_despatch/<int:id>', views.transit_slip_despatch, name= 'transit_slip_despatch'),
     path('ts_rcv_update', views.ts_rcv_update, name= 'ts_rcv_update'),
     path('fetch_letter_json', views.fetch_letter_json, name= 'fetch_letter_json'),
+    # outgoing ltr
     path('remote_ltr', views.RemoteLtrView.as_view(), name= 'remote_ltr'),
     path('fetch_unit_names/', views.fetch_unit_names, name= 'fetch_unit_names'),
+    path('search_outgoing_ltr/', views.SearchOutgoingLtrView.as_view(), name= 'search_outgoing_ltr'),
+    path('deliver_ltr/', views.DeliverLetterView.as_view(), name= 'deliver_ltr'),
+    path('save_delivery/', views.SaveDeliveryView.as_view(), name= 'save_delivery'),
+    path('letter_delivery_state/<int:pk>', views.letter_delivery_state, name= 'letter_delivery_state'),
 
     
     path('add_sta', views.add_new_sta, name= 'add_sta'),

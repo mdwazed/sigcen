@@ -1,0 +1,108 @@
+{% extends 'transit_slip/layout.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div>
+        <h5>DAK Delivery- {{ user_unit }}</h5>
+    </div>
+    {% if err_txt %}
+        <div class="p-2 mb-1 bg-warning text-white d-flex justify-content-around">
+            <h5>ERROR: {{ err_txt }}</h5>
+        </div>
+    {% endif %}
+    {% if null_return %}
+    <div class="p-2 mb-1 bg-info text-white d-flex justify-content-around">
+        <h5>INFO: There are no DAK in pegion hole for this unit.</h5>
+    </div>
+    {% endif %}
+
+    <div class="card not-to-be-print">
+        <div class="card-body">
+            <form action="" method=POST>
+                {% csrf_token %}
+                <select name="unit-id">
+                    <option value="">To Unit</option>
+                    {% for unit_id, unit_name in unit_choices %}
+                    <option value={{ unit_id }}>{{ unit_name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" name="submit" value="Search">
+            </form>
+        </div>
+    </div>
+    {% if letters %}
+        <div>
+            <div class="p-2 mb-1 bg-info text-white d-flex justify-content-around">
+                <h5>Unit: {{ unit }}</h5>
+                <h5>DAK Count: {{ letters | length }}</h5>
+
+            </div>
+            <div>
+                <form action="{% url 'save_delivery' %}" method="POST">
+                    {% csrf_token %}
+                    <div>
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th scope="col">From</th>
+                                    <th scope="col">To</th>
+                                    <th scope="col">Ltr no</th>
+                                    <th scope="col">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for letter in letters %}
+                                <tr>
+                                    <th scope="row">{{ letter.from_unit }}</th>
+                                    <td>{{ letter.to_unit }}</td>
+                                    <td>{{ letter.ltr_no }}</td>
+                                    <td>{{ letter.date | date:"d/m/Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <p>Received By:</p>
+                    </div>
+                    <div class="input-group">
+                        
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="">Army No</span>
+                        </div>
+                        <input type="text" class="form-control" name="army-no">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="">Rank</span>
+                        </div>
+                        <input type="text" class="form-control" name="rank">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="">Name</span>
+                        </div>
+                        <input type="text" class="form-control" name="name">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="">Sign</span>
+                        </div>
+                        <input type="text" class="form-control">
+                    </div>
+                    <div class="alert not-to-be-print">
+                        <input type="hidden" name="unit-id" value="{{ unit.pk }}">
+                        <button class="btn btn-primary" id="btn-deliver">Deliver</button>
+                        <button class="btn btn-primary" id="btn-print">Print</button>
+                    </div>
+                
+                    
+                </form>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="{% static '/vendor/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+<script>
+    let csrf_token = '{{ csrf_token }}';
+</script>
+<script src="{% static 'assets/javascript/deliver_dak.js' %}"></script>
+{% endblock %}

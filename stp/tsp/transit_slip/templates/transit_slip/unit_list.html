@@ -10,7 +10,9 @@
             <thead>
                 <tr>
                     <th>Unit</th>
+                    <th>Unit Full Name</th>
                     <th>Sta</th>
+                    <th>Code</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -18,7 +20,9 @@
                 {% for unit in units %}
                 <tr>
                     <td>{{ unit.unit_name }}</td>
+                    <td>{{ unit.unit_full_name }}</td>
                     <td>{{ unit.sta_name }}</td>
+                    <td>{{ unit.unit_code }}</td>
                     <td>
                         <a href="{% url 'update_unit' unit.pk %}" >Update</a>
                         <a href="#">Delete</a>

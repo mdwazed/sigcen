@@ -10,8 +10,8 @@ class LetterSerializer(serializers.ModelSerializer):
 
 class LetterListingField(serializers.RelatedField):
     def to_representation(self, value):
-        to_unit_code = value.to_unit.pk
-        from_unit_code = value.from_unit.pk
+        to_unit_code = value.to_unit.unit_code
+        from_unit_code = value.from_unit.unit_code
         date = value.date.strftime("%d/%m/%Y")
         u_string = value.u_string
         ltr_no = value.ltr_no
@@ -22,7 +22,9 @@ class TransitSlipSerializer(serializers.ModelSerializer):
     dst = serializers.StringRelatedField()
     prepared_by = serializers.StringRelatedField()
     ltrs = LetterListingField(many=True, read_only=True)
+    despatched_on = serializers.DateField()
+    received_on = serializers.DateTimeField()
 
     class Meta:
         model = TransitSlip
-        fields = ['id', 'date', 'dst', 'prepared_by', 'ltrs']
+        fields = ['id', 'date', 'dst', 'prepared_by', 'ltrs', 'despatched_on', 'received_on']

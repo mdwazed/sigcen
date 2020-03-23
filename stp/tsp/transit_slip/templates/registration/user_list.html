@@ -26,7 +26,11 @@
                     <td>
                         
                         <div>
-                            <a href="#">Update |</a>
+                            <form action="update_user_info" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="username" value="{{user.username}}">
+                                <input class="btn btn-link" type="submit" name="update-user" value="Update user">
+                            </form>
                             
                         </div>
                         <div>

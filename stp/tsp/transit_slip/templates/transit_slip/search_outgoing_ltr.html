@@ -1,0 +1,84 @@
+{% extends 'transit_slip/layout.html' %}
+{% load static %}
+{% block link %}
+<link rel="stylesheet" href="{% static '/vendor/jquery-ui-1.12.1/jquery-ui.min.css' %}" />
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="search-bar card">
+        <div class="card-body">
+            <h6>Find Outgoing DAK</h6>
+            <form action="" method=POST autocomplete="off">
+                {% csrf_token %}
+                <select name="unit-id">
+                    <option value="">To Unit</option>
+                    {% for unit_id, unit_name in unit_choices %}
+                    <option value={{ unit_id }}>{{ unit_name }}</option>
+                    {% endfor %}
+                </select>
+                <input class="datepicker" type="text" name="search-date" placeholder="Date">
+                <input type="submit" name="submit" value="Search">
+            </form>
+            <p>
+                Max return DAK for this search is 500. If the desired DAK is not found try narrow down
+                search result by selecting unit and date both.
+            </p>
+        </div>
+    </div>
+
+    <div class="search-result">
+        <h5> {{ letters|length }} DAK returned as search result </h5>
+        <table id="data_table_id" class="display">
+            <thead>
+                <tr>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Date</th>
+                    <th>Code</th>
+                    <th>Ltr No</th>
+                    <th>TS_info</th>
+                    <th>Received</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for letter in letters %}
+                <tr>
+                    <td>{{ letter.from_unit }}</td>
+                    <td>{{ letter.to_unit }}</td>
+                    <td>{{ letter.date | date:"d/m/Y" }}</td>
+                    <td>{{ letter.code }}</td>
+                    <td>{{ letter.ltr_no }}</td>
+                    <td>{{ letter.ts_info }}</td>
+                    <td>{{ letter.received_at | date:"d/m/Y H:i" }}</td>
+                    {% if letter.delivery_receipt %}
+                        <td>
+                            <a href="{% url 'letter_delivery_state' letter.pk %}">Delivered</a>
+                        </td>
+                    {% else %}
+                        <td>Not Delivered</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="{% static '/vendor/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+<script>
+    jQuery(function ($) {
+        $(".datepicker").datepicker({
+            dateFormat: "dd-mm-yy",
+            maxDate: "0d",
+            // minDate: "-25d",
+        });
+    });
+</script>
+{% endblock %}

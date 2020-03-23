@@ -1,0 +1,60 @@
+{% extends 'transit_slip/layout.html' %}
+{% block content %}
+<div class="container">
+    <h5>State of DAK: {{ letter.ltr_no }}</h5>
+    <div class="dak-state">
+        <table class="table table-sm state-table">
+            <tr>
+                <td class="td-1">From :</td>
+                <td class="td-2">{{ letter.from_unit }}</td>
+            </tr>
+            <tr>
+                <td class="td-1">To :</td>
+                <td class="td-2">{{letter.addr_line_1 | default_if_none:""}} {{ letter.to_unit }}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Date :</td>
+                <td class="td-2">{{ letter.date | date:"d-m-Y" }}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Code :</td>
+                <td class="td-2">{{ letter.code }}</td>
+            </tr>
+            <tr>
+                <td class="td-1">TS Info :</td>
+                <td class="td-2">{{ letter.ts_info }}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Delivered at :</td>
+                <td class="td-2">{{ letter.delivery_receipt.delivered_at | date:'d/m/Y H:i'}}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Delivered By :</td>
+                <td class="td-2">{{ letter.delivery_receipt.delivered_by }}</td>
+            </tr>
+            <tr>
+                <td class="td-1">recepient No :</td>
+                <td class="td-2">{{ letter.delivery_receipt.recepient_no }}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Recepient Rank :</td>
+                <td class="td-2">{{ letter.delivery_receipt.recepient_rank }}</td>
+            </tr>
+            <tr>
+                <td class="td-1">Recepient Name :</td>
+                <td class="td-2">{{ letter.delivery_receipt.recepient_name }}</td>
+            </tr>
+        </table>
+    </div>
+    <button class="btn btn-primary" onclick="goBack()">Back</button>
+
+</div>
+
+{% endblock %}
+{% block script %}
+<script>
+    function goBack() {
+            window.history.back();
+        }
+</script>
+{% endblock %}

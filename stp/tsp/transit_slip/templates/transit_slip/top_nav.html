@@ -17,7 +17,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdownMenuLink" role="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            DAK In
+                            Incoming
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                             <a class="dropdown-item" href="{% url 'dak_in_manual' %}">Manual</a>
@@ -28,11 +28,12 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdownMenuLink" role="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            DAK Out
+                            Outgoing
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                             <a class="dropdown-item" href="{% url 'remote_ltr' %}">Fetch remote DAK</a>
-                            <a class="dropdown-item" href="#">Deliver DAK</a>
+                            <a class="dropdown-item" href="{% url 'deliver_ltr' %}">Deliver DAK</a>
+                            <a class="dropdown-item" href="{% url 'search_outgoing_ltr' %}">Search</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">

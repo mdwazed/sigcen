@@ -9,10 +9,13 @@ let dates = new Array()
 let codes = new Array()
 let ltr_nos = new Array()
 let ltr_count = 0;
+let domain = undefined;
 $(document).ready(function () {
+    
     // ensure scan-ts input remain invisible on page load
     domains = JSON.parse(domains_str)
     $('#ts-no').hide();
+    $('#err-banner').hide();
     $('#ts-no-label').hide();
     $('#fetch-ltr').hide();
     $('.ts-ltrs').hide();
@@ -22,11 +25,13 @@ $(document).ready(function () {
         $('#ts-no-label').show();
         $('#fetch-ltr').show();
     });
+    
     //fetch ltr on fetch button click
     $('#fetch-ltr').on('click', function () {
+        reinit_var();
         ts_id = $('#ts-no').val()
         from_sta = $('#id-sta').children("option:selected").text();
-        let domain = undefined;
+        
         switch (from_sta){
             case 'JSR':
                 domain = domains.JSR
@@ -48,15 +53,25 @@ $(document).ready(function () {
                 xhrFields: {
                     withCredentials: false,
                 },
-                success: function (response) {
+                success: function (response, status) {
+                    console.log(response.received_on)
                     ltr_count = response.ltrs.length;
+                    if (response.received_on){
+                        $('#err-banner').show();
+                        $('#err-txt').html('This Transit Slip has already been received.'+
+                             'Duplicate receive not possible')
+                        $('#receive-btn').hide();
+                    }else{
+                        $('#err-banner').hide();
+                        $('#receive-btn').show();
+
+                    }
                     if (ltr_count > 0){
                         $('.ts-ltrs').show();
                         $('#ts-dst').text(response.dst);
                         $('#ts-id').text(response.id);
                         $('#ts-date').text(response.date);
                         $('#ts-ltr-count').text(ltr_count);
-                        // console.log(response.ltrs);
 
                         for (ltr of response.ltrs) {
                             let ltr_elm = ltr.split('__');
@@ -66,23 +81,61 @@ $(document).ready(function () {
                             codes.push(ltr_elm[3])
                             ltr_nos.push(ltr_elm[4])
                         };
-                        $.when(populate_form_unit_names(), populate_to_unit_names()).then(render_table);
+                        $.when(populate_from_unit_names(), populate_to_unit_names()).then(render_table);
                         $('#ts-info').val(from_sta+"-"+ts_id)
                     }
+                },
+                error: function(xhr, status, error){
+                    console.log(status);
+                    $('#err-txt').html(error)
+                    $('#err-banner').show();
                 },
             });
         }else{
             alert('Error: Not suitable Domain or TS ID!!!');
         };
-        
     }); //end of remote ltr fetch
 
+    // received on remote server and save letter in local server
+    $('#receive-btn').on('click', function (event) {
+        event.preventDefault();
+        let x = confirm("Did you received all the DAK? This action will confirm" +
+                        " remote sigcen about your reception of all DAK in this TS.");
+        if (x == true) {
+            url = 'http://' + domain + '/api/ts_detail/' + ts_id;
+            var data_dict = { 'csrfmiddlewaretoken': csrf_token, 'ts_id': ts_id };
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: data_dict,
+                dataType: 'json',
+                crossDomain: true,
+                xhrFields: {
+                    withCredentials: false,
+                },
+                success: function (response, status) {
+                    if (status == 'nocontent'){
+                        console.log('remote request success')
+                        $('#remote-ltrs').submit()
+                    }
+
+                },
+                error: function (xhr, status, error) {
+                    console.log(status);
+                    $('#err-banner').show();
+                    $('#err-txt').html('Failed to receive the DAK.' + error);
+                },
+                complete: function () {
+                    console.log('completed');
+                }
+            });
 
 
+        }
+    })
 });
 
-function populate_form_unit_names(){
-    console.log('populating from unit name');
+function populate_from_unit_names(){
     const url ='fetch_unit_names/'
     let data_dict = { 'unit_codes': from_units, 'csrfmiddlewaretoken': csrf_token };
     return $.ajax({
@@ -91,16 +144,17 @@ function populate_form_unit_names(){
         data: data_dict,
         // dataType: 'json',
         success: function (response){
-            from_unit_names = response
-            // render_dom()
+            from_unit_names = response.unit_names
+            if(response.found_all_unit == false){
+                $('#err-banner').show();
+                $('#receive-btn').hide();
+                $('#err-txt').html(response.err_msg)
+            }
         }
     });
-    data_dict = { 'unit_codes': to_units, 'csrfmiddlewaretoken': csrf_token };
-    
 };
 
 function populate_to_unit_names(){
-    console.log('populating to unit name');
     const url = 'fetch_unit_names/';
     let data_dict = { 'unit_codes': to_units, 'csrfmiddlewaretoken': csrf_token };
     return $.ajax({
@@ -109,14 +163,18 @@ function populate_to_unit_names(){
         data: data_dict,
         // dataType: 'json',
         success: function (response) {
-            to_unit_names = response
-            // render_dom()
+            to_unit_names = response.unit_names
+            if (response.found_all_unit == false) {
+                $('#err-banner').show();
+                $('#receive-btn').hide();
+                $('#err-txt').html(response.err_msg)
+            }
         }
     });
 };
 
 function render_table(){
-    console.log('rendering dom');
+    console.log('rendering table');
     for (var i = 0; i < ltr_count; i++) {
         let row = "<tr>" +
             "<td>" + from_unit_names[i] + "<input type='hidden' name='from_unit' value="+from_units[i] +"></td>" +
@@ -127,4 +185,19 @@ function render_table(){
             "</tr>"
         $('tbody').append(row)
     }
-}
+};
+
+function reinit_var(){
+    $('tbody').html("")
+    ts_id = undefined
+    from_sta = undefined
+    to_units = []
+    from_units = []
+    to_unit_names = []
+    from_unit_names = []
+    dates = []
+    codes = []
+    ltr_nos = []
+    ltr_count = 0;
+    domain = undefined;
+};

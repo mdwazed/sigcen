@@ -36,6 +36,7 @@ class Unit(models.Model):
     unit_name = models.CharField(max_length=50)
     unit_full_name = models.CharField(max_length=100, null=True, blank=True)
     sta_name = models.ForeignKey(Sta, on_delete=models.PROTECT,)
+    unit_code = models.IntegerField(default=0)
 
     def __str__(self):
         return self.unit_name
@@ -48,7 +49,7 @@ class TransitSlip(models.Model):
     dst = models.ForeignKey(Sta, on_delete=models.PROTECT)
     prepared_by = models.ForeignKey(User, on_delete=models.PROTECT)
     despatched_on = models.DateField(null=True, blank=True, )
-    received_on = models.DateField(null=True, blank=True)
+    received_on = models.DateTimeField(null=True, blank=True)
 
     def ltr_count(self):
         ltr_count = Letter.objects.filter(transit_slip=self).count()
@@ -61,6 +62,16 @@ class LetterReceipt(models.Model):
     def get_ltr_count(self):
         ltr_count = Letter.objects.filter(ltr_receipt=self).count()
         return ltr_count
+
+class DeliveryReceipt(models.Model):
+    delivered_at = models.DateTimeField(null=True)
+    delivered_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    recepient_no = models.CharField(max_length=100, null=True, blank=True)
+    recepient_rank = models.CharField(max_length=100, null=True, blank=True)
+    recepient_name = models.CharField(max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return(f'{self.delivered_by}--{self.recepient_name}')
 
 class Profile(models.Model):
     
@@ -121,3 +132,16 @@ class Letter(models.Model):
         else:
             return "Unknown"
 
+class OutGoingLetter(models.Model):
+    from_unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='orig_unit')
+    to_unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='dst_unit')
+    date = models.DateField()
+    code = models.CharField(max_length=5)
+    ltr_no = models.CharField(max_length=50)
+    ts_info = models.CharField(max_length=10)
+    received_at = models.DateTimeField(auto_now_add=True)
+    delivery_receipt = models.ForeignKey(DeliveryReceipt, on_delete=models.SET_NULL, null=True,
+                            blank=True, related_name='ltrs')
+
+    def __str__(self):
+        return (f'{self.from_unit}--{self.to_unit}--{self.ts_info}')

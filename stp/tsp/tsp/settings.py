@@ -192,5 +192,5 @@ CORS_ORIGIN_ALLOW_ALL = True
 # Domain of all sta
 DOMAINS = {
     'DHK':'127.0.0.1:8000',
-    'JSR':'192.168.13.102:8000',
+    'JSR':'127.0.0.1:8000',
 }
