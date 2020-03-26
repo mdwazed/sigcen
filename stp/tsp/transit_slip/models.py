@@ -1,17 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import date, datetime
 
 # Create your models here.
-
+# types of users. define access permission based on usr type.
 user_type_choices = {
         ('uc', 'Unit clk'),
         ('ad', 'Admin'),
         ('sc', 'Sigcen clk'),
     }
+# letter classification to choose620
 
 classification_choices = {
     ('rs', 'Restricted'),

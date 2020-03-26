@@ -24,29 +24,9 @@
                     <td>{{ user.profile.unit }}</td>
                     <td>{{ user.profile.get_user_type_display }}</td>
                     <td>
-                        
-                        <div>
-                            <form action="update_user_info" method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" name="username" value="{{user.username}}">
-                                <input class="btn btn-link" type="submit" name="update-user" value="Update user">
-                            </form>
-                            
-                        </div>
-                        <div>
-                            <form action="pre_reset_user_password" method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" name="username" value="{{user.username}}">
-                                <input class="btn btn-link" type="submit" name="reset-password" value="Reset password">
-                            </form>
-                        </div>
-                        <div>
-                            <form action="delete_user" method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" name="username" value="{{user.username}}">
-                                <input class="btn btn-link" type="submit" name="delete-user" value="Delete User">
-                            </form>
-                        </div>
+                        <a href="{% url 'update_user_info' user.pk %}">Update User |</a>
+                        <a href="{% url 'reset_user_password' user.pk %}">Reset Password |</a>
+                        <a href="{% url 'delete_user' user.pk %}">Delete User</a>
                     </td>
                 </tr>
                 {% endfor %}

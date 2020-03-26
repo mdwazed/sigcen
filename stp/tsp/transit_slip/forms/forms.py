@@ -1,12 +1,14 @@
 from django import forms
 from django.db import models
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User
 # from django.forms import Form, ModelForm
 from transit_slip.models import Letter, Unit, user_type_choices, Sta
 
 from datetime import date, datetime
+import logging
 
+logger = logging.getLogger('transit_slip')
 
 class LetterForm(forms.ModelForm):
     addr_line_1 = forms.CharField(widget=forms.TextInput(attrs={'size': '60'}), required=False)
@@ -29,14 +31,37 @@ class CreateUserForm(UserCreationForm):
     unit = forms.ChoiceField()
     user_type = forms.ChoiceField(choices=user_type_choices )
     def __init__(self, *args, **kwargs):
-        sta = kwargs.pop('sta')
-        super(CreateUserForm, self).__init__(*args, **kwargs)
-        choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta)]
-        self.fields['unit'].choices = choices
+        sta = kwargs.pop('sta', None)
+        super().__init__(*args, **kwargs)
+        if sta:
+            choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta)]
+            self.fields['unit'].choices = choices
+        else:
+            logger.warning(f'no sta. failed to make unit choices')
 
     class Meta:
         model = User
         fields = ('username', 'password1', 'password2', 'first_name', 'last_name', 'unit', 'user_type' )
+
+class UpdateUserForm(forms.Form):
+    first_name = forms.CharField()
+    last_name = forms.CharField()
+    unit = forms.ChoiceField()
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        sta = kwargs.pop('sta', None)
+        super().__init__(*args, **kwargs)
+        if sta:
+            choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta)]
+            self.fields['unit'].choices = choices
+        if user:
+            self.fields['first_name'].initial = user.first_name
+            self.fields['last_name'].initial = user.last_name
+            self.fields['unit'].initial = user.profile.unit.pk
+        
+
+    
 
 class DakInForm(forms.Form):
     """

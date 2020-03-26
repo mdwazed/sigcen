@@ -24,8 +24,8 @@
                     <td>{{ unit.sta_name }}</td>
                     <td>{{ unit.unit_code }}</td>
                     <td>
-                        <a href="{% url 'update_unit' unit.pk %}" >Update</a>
-                        <a href="#">Delete</a>
+                        <a href="{% url 'update_unit' unit.pk %}" >Update |</a>
+                        <a href="{% url 'delete_unit' unit.pk %}">Delete</a>
                     </td>
                 </tr>
                 {% endfor %}

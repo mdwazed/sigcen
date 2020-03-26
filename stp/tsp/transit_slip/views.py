@@ -79,6 +79,167 @@ class Home(View):
         }
         return render(request, self.template_name, context)
 
+
+class UserBaseView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    provide base class for user admin realted task
+    """
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'ad':
+            return True
+        else:
+            return False
+
+class UserCreateView(UserBaseView):
+    """
+    creates new user. only admin users are allowed to access this page
+    """
+    template = 'registration/create_user.html'
+
+    def get_sta(self, request):
+        unit_id = request.session.get('unitid', None)
+        print(request.session['unitid'])
+        try:
+            sta = Unit.objects.get(pk=unit_id).sta_name
+        except ObjectDoesNotExist as e:
+            logger.warning(f'Sta not available. {e}')
+            return None
+        return sta
+
+    def get(self, request):
+        sta = self.get_sta(request)
+        if sta:
+            form = forms.CreateUserForm(sta=sta)
+        else:
+            err_msg = "No sta found to make unit choices."
+            return render(request, "transit_slip/generic_error.html", {'err_msg': err_msg})
+        return render(request, self.template, {'form': form})
+
+    def post(self, request):
+        sta = self.get_sta(request)
+        if sta:
+            form = forms.CreateUserForm(request.POST, sta=self.get_sta(request=request))
+        else:
+            err_msg = "No sta found to make unit choices."
+            return render(request, "transit_slip/generic_error.html", {'err_msg': err_msg})
+        if form.is_valid():
+            user = form.save()
+            user.refresh_from_db()  # load the profile instance created by the signal
+            selected_unit_id = form.cleaned_data.get('unit')
+            user.profile.unit = Unit.objects.get(pk=selected_unit_id)
+            user.profile.user_type = form.cleaned_data.get('user_type')
+            user.save()
+            logger.info(f'New user {user.username} created')
+            return redirect('user_list')
+        else:
+            return render(request, self.template, {'form': form})
+
+
+class UserUpdateView(UserBaseView):
+    """
+    allow admin to update user info
+    """
+    template = "registration/update_user.html"
+    def get_sta(self, request):
+        unit_id = request.session['unitid']
+        return Unit.objects.get(pk=unit_id).sta_name
+
+    def get(self, request, pk):
+        try:
+            user = User.objects.get(pk=pk)
+            sta = self.get_sta(request)
+        except ObjectDoesNotExist:
+            err_msg = "User not available."
+            return render(request, "transit_slip/generic_error.html", {'err_msg': err_msg})
+        form = forms.UpdateUserForm(user=user, sta=sta)
+
+        context = {
+            'form': form,
+        }
+        return render(request, self.template, context )
+
+    def post(self, request, pk):
+        try:
+            user = User.objects.get(pk=pk)
+            sta = self.get_sta(request)
+        except ObjectDoesNotExist:
+            err_msg = "User not available."
+            return render(request, "transit_slip/generic_error.html", {'err_msg': err_msg})
+        form = forms.UpdateUserForm(request.POST, sta=sta)
+        # print(form)
+        if form.is_valid():
+            user.first_name = form.cleaned_data["first_name"]            
+            user.last_name = form.cleaned_data["last_name"]            
+            user.profile.unit = Unit.objects.get(pk=form.cleaned_data["unit"])   
+            user.save()
+        else:
+            form = forms.UpdateUserForm(user=user, sta=sta)
+        return redirect('user_list')
+
+class ResetUserPasswordView(UserBaseView):
+    """
+    Allow admin to reset user passwd
+    """
+    template = "registration/reset_user_password.html"
+    def get(self, request, pk):
+        try:
+            user = User.objects.get(pk=pk)
+        except ObjectDoesNotExist as e:
+            logger.warning(f'User not found' + str(e))
+            err_msg = "User not found"
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+        print(user)
+        context = {
+            'target_user':user,
+        }
+        return render(request, self.template, context)
+
+    def post(self, request, pk=None):
+        try:
+            user = User.objects.get(username=request.POST['username'])
+        except ObjectDoesNotExist as e:
+            logger.warning(f'User not found' + str(e))
+            err_msg = "User not found"
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+        new_passwd_1 = request.POST['new-passwd-1']
+        new_passwd_2 = request.POST['new-passwd-2']
+        if type(new_passwd_1) is str and type(new_passwd_2) is str:
+            if new_passwd_1 == new_passwd_2:
+                user.set_password(new_passwd_1)
+                user.save()
+                logger.info(f'password of user {user.username} reset')
+                return redirect("user_list")
+
+
+@login_required
+@user_passes_test(admin_user_test)
+def user_list(request):
+    users = User.objects.all()
+    context = {
+        'users':users,
+    }
+    return render(request, 'registration/user_list.html', context)
+
+
+class UserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+    success_url = reverse_lazy("home")
+
+
+@login_required
+@user_passes_test(admin_user_test)
+def delete_user(request, pk):
+    try:
+        user = User.objects.get(pk=pk)
+    except ObjectDoesNotExist:
+        msg = "The system was unable to find appropriate user"
+        context = {
+            'msg': msg,
+        }
+        return render(request, "transit_slip/generic_info.html", context)
+    user.delete()
+    return redirect("user_list")
+
 @login_required
 @user_passes_test(admin_user_test)
 def add_new_sta(request):
@@ -133,96 +294,13 @@ class UnitUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return False
 
 
-@login_required
-@user_passes_test(admin_user_test)
-def user_list(request):
-    users = User.objects.all()
-    context = {
-        'users':users,
-    }
-    return render(request, 'registration/user_list.html', context)
+class UnitDeleteView(View):
+    def get(self, request, pk):
+        info = """Unit can't be deleted as it will leave inconsistant letter data in database.
+            To delete an unit delete all letter of the respective unit and then
+            delete the unit from the super admin panel."""
+        return render(request, 'transit_slip/generic_info.html', { 'info': info })
 
-@login_required
-@user_passes_test(admin_user_test)
-def create_user(request):
-    """
-    create new user
-    """
-    unit_id = request.session['unitid']
-    sta = Unit.objects.get(pk=unit_id).sta_name
-    if request.method == 'POST':
-        form = forms.CreateUserForm(request.POST, sta=sta)
-        if form.is_valid():
-            user = form.save()
-            user.refresh_from_db()  # load the profile instance created by the signal
-            selected_unit_id = form.cleaned_data.get('unit')
-            user.profile.unit = Unit.objects.get(pk=selected_unit_id)
-            user.profile.user_type = form.cleaned_data.get('user_type')
-            user.save()
-            # raw_password = form.cleaned_data.get('password1')
-            # user = authenticate(username=user.username, password=raw_password)
-            # login(request, user)
-            return redirect('user_list')
-    else:
-        form = forms.CreateUserForm(sta=sta)
-    return render(request, 'registration/create_user.html', {'form': form})
-    
-
-class UserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
-    success_url = reverse_lazy("home")
-
-class ResetUserPasswordView(LoginRequiredMixin, UserPassesTestMixin, View):
-
-    def test_func(self):
-        user_type = self.request.user.profile.user_type
-        if user_type == 'ad':
-            return True
-        else:
-            return False
-
-    def post(self, request):
-        user = User.objects.get(username=request.POST['username'])
-        new_passwd_1 = request.POST['new-passwd-1']
-        new_passwd_2 = request.POST['new-passwd-2']
-        if type(new_passwd_1) is str and type(new_passwd_2) is str:
-            if new_passwd_1 == new_passwd_2:
-                user.set_password(new_passwd_1)
-                user.save()
-                return redirect("user_list")
-
-class PreResetUserPasswordView(LoginRequiredMixin, UserPassesTestMixin, View):
-    template = "registration/reset_user_password.html"
-
-    def test_func(self):
-        user_type = self.request.user.profile.user_type
-        if user_type == 'ad':
-            return True
-        else:
-            return False
-
-    def post(self, request):
-        target_user = User.objects.get(username=request.POST['username'])
-        context = {
-            'target_user':target_user,
-        }
-        return render(request, self.template, context)
-
-class UserUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
-    pass
-
-@login_required
-@user_passes_test(admin_user_test)
-def delete_user(request):
-    try:
-        user = User.objects.get(username=request.POST['username'])
-    except ObjectDoesNotExist:
-        msg = "The system was unable to find appropriate user"
-        context = {
-            'msg': msg,
-        }
-        return render(request, "transit_slip/generic_info.html", context)
-    user.delete()
-    return redirect("user_list")
 
 class LetterView(LoginRequiredMixin, View):
     """
