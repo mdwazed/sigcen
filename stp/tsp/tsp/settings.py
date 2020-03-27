@@ -176,11 +176,6 @@ LOGGING = {
 }
 logging.config.dictConfig(LOGGING)
 
-try:
-    from .local_settings import *
-except ImportError:
-    pass
-
 # CORS header middleware config
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -189,8 +184,14 @@ CORS_ORIGIN_ALLOW_ALL = True
 #        'http://192.168.13.102:8006',
 # )
 
-# Domain of all sta
+# Domain of all sta for receiving remote dak
 DOMAINS = {
     'DHK':'127.0.0.1:8000',
     'JSR':'127.0.0.1:8000',
 }
+
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass
