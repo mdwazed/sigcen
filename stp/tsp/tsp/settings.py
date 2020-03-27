@@ -186,7 +186,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # Domain of all sta for receiving remote dak
 DOMAINS = {
-    'DHK':'192.168.13.250:8000',
+    'DHK':'192.168.13.102:8000',
     'JSR':'192.168.13.102:8000',
 }
 
