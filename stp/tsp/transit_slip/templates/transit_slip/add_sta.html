@@ -1,12 +1,38 @@
 {% extends 'transit_slip/layout.html' %}
 {% block content %}
 <div class="container">
-    <h4>Add New Sta Name</h4>
-    <form action="" method="POST">
-        {% csrf_token %}
-        {{form}}
-        <input type="submit" value="Submit">
-    </form>
+    <div>
+        <h4>Add New Sta Name</h4>
+        <form action="" method="POST">
+            {% csrf_token %}
+            {{form}}
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <div>
+        <h4>List of all sta</h4>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Id</th>
+                    <th scope="col">Sta Name</th>
+                    <th scope="col">Sta Full Name</th>
+                    <th scope="col">Update</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sta in stas %}
+                    <tr>
+                        <th scope="row">{{ sta.id }}</th>
+                        <td>{{ sta.sta_name }}</td>
+                        <td>{{ sta.sta_full_name }}</td>
+                        <td><a href="{% url 'update_sta' sta.pk %}">Update</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
 </div>
 
 {% endblock %}

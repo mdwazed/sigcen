@@ -57,6 +57,7 @@ urlpatterns = [
 
     # unit related path
     path('add_sta', views.add_new_sta, name= 'add_sta'),
+    path('update_sta/<int:pk>', views.UpdateStaView.as_view(), name= 'update_sta'),
     path('unit_list', views.unit_list_view, name= 'unit_list'),
     path('create_unit', views.UnitCreateView.as_view(), name= 'create_unit'),
     path('update_unit/<int:pk>', views.UnitUpdateView.as_view(), name= 'update_unit'),

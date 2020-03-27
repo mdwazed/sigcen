@@ -80,6 +80,18 @@ class Home(View):
         return render(request, self.template_name, context)
 
 
+class AdminPermissionView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    provide base class for user admin realted task
+    """
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'ad':
+            return True
+        else:
+            return False
+
+
 class UserBaseView(LoginRequiredMixin, UserPassesTestMixin, View):
     """
     provide base class for user admin realted task
@@ -91,7 +103,7 @@ class UserBaseView(LoginRequiredMixin, UserPassesTestMixin, View):
         else:
             return False
 
-class UserCreateView(UserBaseView):
+class UserCreateView(AdminPermissionView):
     """
     creates new user. only admin users are allowed to access this page
     """
@@ -136,7 +148,7 @@ class UserCreateView(UserBaseView):
             return render(request, self.template, {'form': form})
 
 
-class UserUpdateView(UserBaseView):
+class UserUpdateView(AdminPermissionView):
     """
     allow admin to update user info
     """
@@ -177,7 +189,7 @@ class UserUpdateView(UserBaseView):
             form = forms.UpdateUserForm(user=user, sta=sta)
         return redirect('user_list')
 
-class ResetUserPasswordView(UserBaseView):
+class ResetUserPasswordView(AdminPermissionView):
     """
     Allow admin to reset user passwd
     """
@@ -253,9 +265,46 @@ def add_new_sta(request):
             return render(request, 'transit_slip/generic_info.html', context)
     else:
         form = forms.StaForm()
-    return render(request, 'transit_slip/add_sta.html', {'form': form})
+        stas = Sta.objects.all()
+        context = {
+            'form': form,
+            'stas': stas,
+        }
+    return render(request, 'transit_slip/add_sta.html', context)
 
+class UpdateStaView(AdminPermissionView):
+    """
+    admin update sta info
+    """
+    template = 'transit_slip/add_sta.html'
 
+    def get(self, request, pk=None):
+        try:
+            sta = Sta.objects.get(pk=pk)
+        except ObjectDoesNotExist as e:
+            logger.warning(f'Intended sta for update not found. {e}')
+            err_msg = f'Intended sta for update not found.' + str(e)
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+        form = forms.StaForm(instance= sta)
+        context = {
+            'form': form,
+        }
+        return render(request, self.template, context)
+
+    def post(self, request, pk=None):
+        try:
+            sta = Sta.objects.get(pk=pk)
+        except ObjectDoesNotExist as e:
+            logger.warning(f'Intended sta for update not found. {e}')
+            err_msg = f'Intended sta for update not found.' + str(e)
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+        form = forms.StaForm(instance= sta, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('add_sta')
+        else:
+            form = forms.StaForm(instance=sta, data = request.POST)
+            return render(request, self.template, {'form': form})
 
 @login_required
 def unit_list_view(request):
