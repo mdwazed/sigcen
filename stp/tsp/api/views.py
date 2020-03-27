@@ -26,14 +26,12 @@ def transit_slip_detail(request, pk, format=None):
     """
     retrive a specific ts
     """
-    remote_host = request.META['REMOTE_ADDR']
-    
+    remote_sta = request.GET.get('local_sta', None)
     try: 
         ts = TransitSlip.objects.get(pk=pk)
     except ObjectDoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    domain = settings.DOMAINS.get(str(ts.dst)).split(":")[0]
-    if remote_host != domain:
+    if remote_sta != ts.dst.sta_name:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':

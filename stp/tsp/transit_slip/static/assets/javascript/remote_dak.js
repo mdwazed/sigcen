@@ -45,9 +45,11 @@ $(document).ready(function () {
 
         if (typeof domain != 'undefined' && ts_id !=''){
             url = 'http://'+ domain +'/api/ts_detail/' + ts_id;
+            var data_dict = { 'local_sta':'DHK' };
             $.ajax({
                 type: 'GET',
                 url: url,
+                data: data_dict,
                 dataType: 'json',
                 crossDomain: true,
                 xhrFields: {
