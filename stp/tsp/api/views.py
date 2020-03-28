@@ -26,6 +26,7 @@ def transit_slip_detail(request, pk, format=None):
     """
     retrive a specific ts
     """
+    
     remote_sta = request.GET.get('local_sta', None)
     try: 
         ts = TransitSlip.objects.get(pk=pk)

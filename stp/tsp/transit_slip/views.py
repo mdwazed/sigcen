@@ -73,9 +73,12 @@ class Home(View):
         user = request.user
         if user.is_authenticated:
             request.session['userid'] = user.pk
-            request.session['unitid'] = user.profile.unit.pk
+            try:
+                request.session['unitid'] = user.profile.unit.pk
+            except AttributeError:
+                pass
         context = {
-            'user': user
+            # 'user': user
         }
         return render(request, self.template_name, context)
 
