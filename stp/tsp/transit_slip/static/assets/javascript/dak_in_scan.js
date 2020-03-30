@@ -20,6 +20,7 @@ $(document).ready(function () {
             data: data_dict,
             dataType : 'json',
             success: function (response) {
+                console.log(response)
                 var ltr = response[0]
                 var row = "<tr><td>" + ltr.fields.from_unit + "</td><td>" + ltr.fields.to_unit +
                     "</td><td>" + ltr.fields.ltr_no + "</td><td>" + ltr.fields.date + "</td><td>" +
@@ -27,10 +28,10 @@ $(document).ready(function () {
                     "</td><td><input type='checkbox' name='received_ltr' value='" + ltr.pk + "' checked></td>" +
                     "<td><input type='checkbox' name='spl_pkg' value='" + ltr.pk + "' ></td></tr>"
 
-                $('tbody').append(row)
+                $('tbody').prepend(row)
             },
             error: function(){
-                alert('Can not receive this DAk. May be this DAK has been already received!!')
+                alert('Can not receive this DAk. May be this DAK has already been received or deleted!!')
             }
         });
         $(this).val('')

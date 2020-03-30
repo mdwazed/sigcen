@@ -6,15 +6,17 @@ from . import views
 
 urlpatterns = [
     path('test_view', views.test_view, name= 'test'),
+    path('not_auth_view/', views.not_auth_view, name= 'not_auth_view'),
     path('', views.Home.as_view(), name= 'home'),
     # user
-    path('user_list/', views.user_list, name= 'user_list'),
+    # path('user_list/', views.user_list, name= 'user_list'),
+    path('user_list/', views.UserListView.as_view(), name= 'user_list'),
     path('create_user/', views.UserCreateView.as_view(), name= 'create_user'),
     path('update_user_info/<int:pk>/', views.UserUpdateView.as_view(), name= 'update_user_info'),
     path('user_password_change', views.UserPasswordChangeView.as_view(), name= 'user_password_change'),
     # path('pre_reset_user_password', views.PreResetUserPasswordView.as_view(), name= 'pre_reset_user_password'),
     path('reset_user_password/<int:pk>/', views.ResetUserPasswordView.as_view(), name= 'reset_user_password'),
-    path('delete_user/<int:pk>/', views.delete_user, name= 'delete_user'),
+    path('delete_user/', views.DeleteUserView.as_view(), name= 'delete_user'),
 
     # Letter
     path('new_letter/', views.LetterView.as_view(), name= 'new_letter'),
@@ -48,18 +50,18 @@ urlpatterns = [
     path('ts_rcv_update', views.ts_rcv_update, name= 'ts_rcv_update'),
     path('fetch_letter_json', views.fetch_letter_json, name= 'fetch_letter_json'),
     # outgoing ltr
-    path('remote_ltr', views.RemoteLtrView.as_view(), name= 'remote_ltr'),
-    path('fetch_unit_names/', views.fetch_unit_names, name= 'fetch_unit_names'),
+    path('remote_ltr', views.RemoteLtrView.as_view(), name= 'remote_ltr'), # use in api call
+    path('fetch_unit_names/', views.fetch_unit_names, name= 'fetch_unit_names'), # used in API call
     path('search_outgoing_ltr/', views.SearchOutgoingLtrView.as_view(), name= 'search_outgoing_ltr'),
     path('deliver_ltr/', views.DeliverLetterView.as_view(), name= 'deliver_ltr'),
     path('save_delivery/', views.SaveDeliveryView.as_view(), name= 'save_delivery'),
     path('letter_delivery_state/<int:pk>', views.letter_delivery_state, name= 'letter_delivery_state'),
 
     # unit related path
-    path('add_sta', views.add_new_sta, name= 'add_sta'),
+    path('add_sta', views.StaAddView.as_view(), name= 'add_sta'),
     path('update_sta/<int:pk>', views.UpdateStaView.as_view(), name= 'update_sta'),
-    path('unit_list', views.unit_list_view, name= 'unit_list'),
-    path('create_unit', views.UnitCreateView.as_view(), name= 'create_unit'),
+    path('unit_list', views.UnitListView.as_view(), name= 'unit_list'),
+    path('create_unit/', views.UnitCreateView.as_view(), name= 'create_unit'),
     path('update_unit/<int:pk>', views.UnitUpdateView.as_view(), name= 'update_unit'),
     path('delete_unit/<int:pk>', views.UnitDeleteView.as_view(), name= 'delete_unit'),
     path('letter_delete_admin', views.letter_delete_admin_view, name= 'letter_delete_admin'),

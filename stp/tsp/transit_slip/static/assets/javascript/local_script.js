@@ -67,5 +67,21 @@ $('#ltr-delete').on('click', function (event) {
     }
 });
 
-//create summary of ts 
+// warn local admin before deleting a user
+$('.user-delete').on('click', function(event){
+    user_id = $(this).next().val();
+    url = '/delete_user/'
+    redirect_url = '/user_list/';
+    d = window.confirm("This will delete the user permanently. Are you sure?");
+    if (d == true){
+        console.log('deleting')
+        $.post(url, { 'csrfmiddlewaretoken': csrf_token, 'user_id': user_id }, function (data, status) {
+            if (status == 'success') {
+                window.location.replace(redirect_url);
+            } else {
+                alert('There was some problem deleting User. Please try later.')
+            }
+        });
+    }
+});
 

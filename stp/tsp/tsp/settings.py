@@ -187,10 +187,13 @@ CORS_ORIGIN_ALLOW_ALL = True
 # Domain of all sta for receiving remote dak
 # request will be sent to this domain
 DOMAINS = {
-    'DHK':'192.168.13.102:8006',
+    'DHK':'192.168.13.250:8006',
     'JSR':'192.168.13.102:8006',
+    'DEFAULT':'192.168.13.102:8006',
 }
 
+# layout of the system
+CENTRAL_SERVER = True
 
 try:
     from .local_settings import *

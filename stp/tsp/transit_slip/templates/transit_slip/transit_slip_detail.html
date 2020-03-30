@@ -4,7 +4,7 @@
 <div class="container">
     <div>
         <div style="text-align: center;">
-            <h5>Transit Slip, SSC JSR</h5>
+            <h5>Transit Slip, {{ request.user.profile.unit.unit_full_name }}</h5>
         </div>
         <div class="ts-head">
             <p>TS No: {{ transit_slip.id }}</p>

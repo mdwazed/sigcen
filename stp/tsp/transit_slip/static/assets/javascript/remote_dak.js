@@ -31,21 +31,22 @@ $(document).ready(function () {
         reinit_var();
         ts_id = $('#ts-no').val()
         from_sta = $('#id-sta').children("option:selected").text();
-        
+        console.log(local_sta)
         switch (from_sta){
-            case 'JSR':
-                domain = domains.JSR
-                break;
-            case 'DHK':
-                domain = domains.DHK;
-                break;
+            // case 'JSR':
+            //     domain = domains.JSR;
+            //     break;
+            // case 'DHK':
+            //     domain = domains.DHK;
+            //     break;
             default:
+                domain = domains.DEFAULT;
                 
         } 
-
+        // check from_sta and ts_no entered
         if (typeof domain != 'undefined' && ts_id !=''){
             url = 'http://'+ domain +'/api/ts_detail/' + ts_id;
-            var data_dict = { 'local_sta':'DHK' };
+            var data_dict = { 'local_sta': local_sta };
             $.ajax({
                 type: 'GET',
                 url: url,
@@ -105,7 +106,7 @@ $(document).ready(function () {
                         " remote sigcen about your reception of all DAK in this TS.");
         if (x == true) {
             url = 'http://' + domain + '/api/ts_detail/' + ts_id;
-            var data_dict = { 'csrfmiddlewaretoken': csrf_token, 'ts_id': ts_id };
+            var data_dict = { 'local_sta': local_sta, 'ts_id': ts_id, 'csrfmiddlewaretoken': csrf_token  };
             $.ajax({
                 type: 'POST',
                 url: url,
@@ -124,6 +125,7 @@ $(document).ready(function () {
                 },
                 error: function (xhr, status, error) {
                     console.log(status);
+                    console.log(xhr);
                     $('#err-banner').show();
                     $('#err-txt').html('Failed to receive the DAK.' + error);
                 },

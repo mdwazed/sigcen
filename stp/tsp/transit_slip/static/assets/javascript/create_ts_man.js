@@ -25,13 +25,14 @@ $(document).ready(function () {
 
         url = 'fetch_letter_json';
         console.log('invoking ajax call');
-        var data_dict = { 'date': date_str, 'u_string': u_string, 'csrfmiddlewaretoken': csrf_token };
+        var data_dict = { 'date': date_str, 'u_string': u_string, 'csrfmiddlewaretoken': csrf_token, 'ts_making': true };
         $.ajax({
             type: 'POST',
             url: url,
             data: data_dict,
             dataType: 'json',
             success: function (response) {
+                console.log(response)
                 var ltr = response[0]
                 console.log(ltr.pk);
                 var ltr_id = '<input type="hidden" name="ltr-ids" value="'+ ltr.pk +'" >';
@@ -40,9 +41,12 @@ $(document).ready(function () {
                     ltr.fields.u_string + rm_lnk_td + ltr_id;
                 
 
-                $('tbody').append($(row).on('click', function(){
+                $('tbody').prepend($(row).on('click', function(){
                     $(this).remove();
                 }));
+            },
+            error: function(){
+                alert('Failed to receive this DAK. details in syslog.')
             }
         });
         $(this).val('')

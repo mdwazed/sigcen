@@ -124,8 +124,12 @@
     width: fit-content;
 }
 
+.dak-state-container {
+    display: flex;
+}
+
 .dak-state {
-    width: 50%;
+    width: 40%;
 }
 
 .dak-state .td-1 {

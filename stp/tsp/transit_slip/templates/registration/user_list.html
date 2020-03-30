@@ -26,7 +26,11 @@
                     <td>
                         <a href="{% url 'update_user_info' user.pk %}">Update User |</a>
                         <a href="{% url 'reset_user_password' user.pk %}">Reset Password |</a>
-                        <a href="{% url 'delete_user' user.pk %}">Delete User</a>
+                        <button class="btn btn-link user-delete">
+                            <span style="color: red;">Delete User</span>    
+                        </button>
+                        <input type="hidden" value="{{ user.pk }}">
+                        {# <a href="{% url 'delete_user' user.pk %}">Delete User</a> #}
                     </td>
                 </tr>
                 {% endfor %}
@@ -34,4 +38,10 @@
         </table>
     </div>
 </div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        let csrf_token = '{{ csrf_token }}'
+    </script>
 {% endblock %}

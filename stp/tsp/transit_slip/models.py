@@ -1,8 +1,10 @@
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import date, datetime
+
 
 # Create your models here.
 # types of users. define access permission based on usr type.
@@ -121,13 +123,20 @@ class Letter(models.Model):
         return (f'/letter/{self.pk}')
 
     def get_current_status(self):
+        try:
+            dst_ltr = OutGoingLetter.objects.get(code=self.u_string, date=self.date)
+        except ObjectDoesNotExist:
+            pass
+
         if not self.ltr_receipt:
             return "In Unit"
         elif not self.transit_slip:
             return "In Sigcen"
         elif not self.transit_slip.received_on:
             return "In Transit"
-        elif self.transit_slip.received_on:
+        elif self.transit_slip.received_on and not dst_ltr.delivery_receipt:
+            return "DST SIGCEN"
+        elif dst_ltr.delivery_receipt:
             return "Delivered"
         else:
             return "Unknown"
@@ -144,4 +153,4 @@ class OutGoingLetter(models.Model):
                             blank=True, related_name='ltrs')
 
     def __str__(self):
-        return (f'{self.from_unit}--{self.to_unit}--{self.ts_info}')
+        return (f'{self.from_unit}--{self.to_unit}--{self.ts_info}--{self.code}')

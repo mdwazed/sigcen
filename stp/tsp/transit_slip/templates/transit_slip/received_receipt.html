@@ -3,7 +3,7 @@
 <div class="container receipt-print">
     <div>
         <div class="heading-with-right-btn">
-            <h5>Received Letters receipt - Static Signal Coy Jashore</h5>
+            <h5>Received Letters receipt - {{ request.user.profile.unit.unit_full_name }}</h5>
             <button class="btn btn-primary btn-sm not-to-be-print" onclick="printReceipt()">Print Receipt</button>
         </div>
         <div class="inline-info">
