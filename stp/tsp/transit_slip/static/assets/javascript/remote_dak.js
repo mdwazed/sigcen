@@ -45,7 +45,7 @@ $(document).ready(function () {
         } 
         // check from_sta and ts_no entered
         if (typeof domain != 'undefined' && ts_id !=''){
-            url = 'http://'+ domain +'/api/ts_detail/' + ts_id;
+            url = '/api/ts_detail/' + ts_id;
             var data_dict = { 'local_sta': local_sta };
             $.ajax({
                 type: 'GET',
@@ -105,7 +105,7 @@ $(document).ready(function () {
         let x = confirm("Did you received all the DAK? This action will confirm" +
                         " remote sigcen about your reception of all DAK in this TS.");
         if (x == true) {
-            url = 'http://' + domain + '/api/ts_detail/' + ts_id;
+            url = '/api/ts_detail/' + ts_id;
             var data_dict = { 'local_sta': local_sta, 'ts_id': ts_id, 'csrfmiddlewaretoken': csrf_token  };
             $.ajax({
                 type: 'POST',
