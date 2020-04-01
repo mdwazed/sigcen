@@ -14,7 +14,8 @@ from transit_slip.models import Letter, TransitSlip
 
 from datetime import datetime, date, timedelta
 import json
-
+import logging
+logger = logging.getLogger('transit_slip')
 # Create your views here.
 def test_view(request):
     """
@@ -29,20 +30,21 @@ def transit_slip_detail(request, pk, format=None):
     retrive a specific ts in response to get request.
     set ts_receive_at on post request
     """
-    print('ajax call receive')
+    print('processing remote api call')
     if request.method == 'GET':
         local_sta = request.GET.get('local_sta', None)
     else:
         local_sta = request.POST.get('local_sta', None)
-    print(f'local_sta: {local_sta}')
+    if not local_sta:
+        logger.warning(f'api call without local_sta arguments by user: {request.user}. ts_id: {pk}')
     try: 
         ts = TransitSlip.objects.get(pk=pk)
     except ObjectDoesNotExist:
-        print('ts not found')
+        logger.warning(f'object not found with given ts id in api call by user: {request.user}. ts_id: {pk}')
         return Response(status=status.HTTP_404_NOT_FOUND)
     print(f'ts-dst: {ts.dst}')
     if local_sta != ts.dst.sta_name:
-        print('domain mismatch')
+        logger.warning(f'local id and ts dst mismatch in api call by user: {request.user}. ts_id: {pk}')
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
@@ -57,6 +59,8 @@ def transit_slip_detail(request, pk, format=None):
         try:
             ts = TransitSlip.objects.get(pk=ts_id)
         except ObjectDoesNotExist:
+            logger.warning(f'object not found with given ts id while saving receive info \
+                            in api call by user: {request.user}. ts_id: {pk}')
             return Response(status=status.HTTP_404_NOT_FOUND)
         ts.received_on = datetime.now()
         ts.save()

@@ -75,6 +75,7 @@
     margin-top: 20px;
     height: 100px;
     background-size: contain;
+    background-repeat: no-repeat;
     display: flex;
     flex-direction: row-reverse;
     padding-right: 10%;
