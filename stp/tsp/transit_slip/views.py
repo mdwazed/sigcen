@@ -63,7 +63,7 @@ def test_view(request):
     return render(request, 'transit_slip/test_page.html', context)
 
 def not_auth_view(request):
-    err_msg = "You are not Auth to see this page."
+    err_msg = "You are not Auth to see this page. Contact Admin/Super Admin."
     return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
 
 class Home(View):
@@ -99,17 +99,6 @@ class AdminPermissionView(LoginRequiredMixin, UserPassesTestMixin, View):
         else:
             return False
 
-
-# class UserBaseView(LoginRequiredMixin, UserPassesTestMixin, View):
-#     """
-#     provide base class for user admin realted task
-#     """
-#     def test_func(self):
-#         user_type = self.request.user.profile.user_type
-#         if user_type == 'ad':
-#             return True
-#         else:
-#             return False
 
 class UserCreateView(AdminPermissionView):
     """
@@ -171,8 +160,11 @@ class UserUpdateView(AdminPermissionView):
         except ObjectDoesNotExist:
             err_msg = "User not available."
             return render(request, "transit_slip/generic_error.html", {'err_msg': err_msg})
-        form = forms.UpdateUserForm(user=user, sta=sta)
-
+        if not user.is_staff:
+            form = forms.UpdateUserForm(user=user, sta=sta)
+        else:
+            err_msg = "Shitty admin can't access super admin DAMM...."
+            return render(request, "transit_slip/generic_error.html", {'err_msg': err_msg})
         context = {
             'form': form,
         }
@@ -330,7 +322,7 @@ class UnitListView(AdminPermissionView):
         if request.user.is_staff is True:
             units = Unit.objects.all()
         else:
-            units = Unit.objects.filter(profile__unit__sta_name=request.user.profile.unit.sta_name)
+            units = Unit.objects.filter(sta_name=request.user.profile.unit.sta_name)
         context = {
             'units': units,
         }
