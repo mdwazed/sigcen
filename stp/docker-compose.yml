@@ -30,7 +30,7 @@ services:
       - ./tsp/media:/usr/share/nginx/media
       - ./tsp/static:/usr/share/nginx/static
     ports:
-      - "8006:8080"
+      - "80:8080"
     depends_on:
       - django
 

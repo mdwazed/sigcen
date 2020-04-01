@@ -237,7 +237,10 @@ class UserListView(AdminPermissionView):
     template = 'registration/user_list.html'
     def get(self, request):
         sta = request.user.profile.unit.sta_name
-        users = User.objects.filter(profile__unit__sta_name=sta)
+        if request.user.is_staff:
+            users = User.objects.all()
+        else:
+            users = User.objects.filter(profile__unit__sta_name=sta)
         context = {
             'users': users,
         }
