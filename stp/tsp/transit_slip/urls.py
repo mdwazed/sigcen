@@ -5,19 +5,15 @@ from django.conf.urls.static import static
 from . import views
 
 urlpatterns = [
-    path('test_view', views.test_view, name= 'test'),
     path('not_auth_view/', views.not_auth_view, name= 'not_auth_view'),
     path('', views.Home.as_view(), name= 'home'),
     # user
-    # path('user_list/', views.user_list, name= 'user_list'),
     path('user_list/', views.UserListView.as_view(), name= 'user_list'),
     path('create_user/', views.UserCreateView.as_view(), name= 'create_user'),
     path('update_user_info/<int:pk>/', views.UserUpdateView.as_view(), name= 'update_user_info'),
     path('user_password_change', views.UserPasswordChangeView.as_view(), name= 'user_password_change'),
-    # path('pre_reset_user_password', views.PreResetUserPasswordView.as_view(), name= 'pre_reset_user_password'),
     path('reset_user_password/<int:pk>/', views.ResetUserPasswordView.as_view(), name= 'reset_user_password'),
     path('delete_user/', views.DeleteUserView.as_view(), name= 'delete_user'),
-
     # Letter
     path('new_letter/', views.LetterView.as_view(), name= 'new_letter'),
     path('new_do/', views.DoView.as_view(), name= 'new_do'),
@@ -25,11 +21,9 @@ urlpatterns = [
     path('letter_list_despatched/', views.LetterListDespatchedView.as_view(), name= 'letter_list_despatched'),
     path('letter_delete/', views.letter_delete, name= 'letter_delete'),
     path('search_ltr', views.SearchLtrView.as_view(), name= 'search_ltr'),
-    # path('letter/', views.letter_details, name= 'letter_details'),
     path('letter_state/<int:pk>', views.letter_state, name= 'letter_state'),
     path('label/', views.label, name= 'label'),
     path('label/<int:pk>', views.label, name= 'label'),
-    # path('label_bulk/<str:ltr_no>', views.label_bulk, name= 'label_bulk'),
     path('label_bulk/<str:ltr_no>/<str:date_str>', views.label_bulk, name= 'label_bulk'),
     path('label_do/<int:pk>', views.label_do, name= 'label_do'),
     # sigcen user
@@ -56,7 +50,6 @@ urlpatterns = [
     path('deliver_ltr/', views.DeliverLetterView.as_view(), name= 'deliver_ltr'),
     path('save_delivery/', views.SaveDeliveryView.as_view(), name= 'save_delivery'),
     path('letter_delivery_state/<int:pk>', views.letter_delivery_state, name= 'letter_delivery_state'),
-
     # unit related path
     path('add_sta', views.StaAddView.as_view(), name= 'add_sta'),
     path('update_sta/<int:pk>', views.UpdateStaView.as_view(), name= 'update_sta'),
@@ -65,5 +58,4 @@ urlpatterns = [
     path('update_unit/<int:pk>', views.UnitUpdateView.as_view(), name= 'update_unit'),
     path('delete_unit/<int:pk>', views.UnitDeleteView.as_view(), name= 'delete_unit'),
     path('letter_delete_admin', views.letter_delete_admin_view, name= 'letter_delete_admin'),
-    # path('reset_user_passwd', views.ResetUserPassword.as_view(), name= 'reset_user_passwd'),
 ]

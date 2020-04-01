@@ -11,7 +11,7 @@
             <form action="" method=POST autocomplete="off">
                 {% csrf_token %}
                 <select name="unit-id">
-                    <option value="">To Unit</option>
+                    <option value="">Select Unit</option>
                     {% for unit_id, unit_name in unit_choices %}
                     <option value={{ unit_id }}>{{ unit_name }}</option>
                     {% endfor %}

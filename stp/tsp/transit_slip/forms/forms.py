@@ -34,7 +34,8 @@ class CreateUserForm(UserCreationForm):
         sta = kwargs.pop('sta', None)
         super().__init__(*args, **kwargs)
         if sta:
-            choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta)]
+            choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta
+                        ).order_by('sta_name')]
             self.fields['unit'].choices = choices
         else:
             logger.warning(f'no sta. failed to make unit choices')
@@ -53,7 +54,8 @@ class UpdateUserForm(forms.Form):
         sta = kwargs.pop('sta', None)
         super().__init__(*args, **kwargs)
         if sta:
-            choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta)]
+            choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta
+                        ).order_by('unit_name')]
             self.fields['unit'].choices = choices
         if user:
             self.fields['first_name'].initial = user.first_name
@@ -73,10 +75,10 @@ class DakInForm(forms.Form):
     def __init__(self, *args, **kwargs):
         sta = kwargs.pop('sta')
         super(DakInForm, self).__init__(*args, **kwargs)
-        choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta)]
+        choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta
+                    ).order_by('unit_name')]
         self.fields['unit'].choices = choices
-        self.fields['unit'].initial = '0'
-        # self.fields['code'].max_length=3
+        self.fields['unit'].initial = 'Select Unit'
         self.fields['date'].widget.attrs['class'] = 'datepicker'
         self.fields['date'].widget.attrs['autocomplete'] = 'off'
         
