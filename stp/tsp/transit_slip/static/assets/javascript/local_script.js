@@ -85,3 +85,8 @@ $('.user-delete').on('click', function(event){
     }
 });
 
+// change mouse on hover above accordion header
+$('.accordion-header').on('mouseover', function(){
+    $(this).css('cursor', 'pointer')
+})
+

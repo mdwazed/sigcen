@@ -5,7 +5,7 @@
 <div class="container">
     <div class="home-title">
         <div>
-            <h2>Digital DAK management system</h2>
+            <h2>Digital DAK Management System</h2>
         </div>
         <div>
             <img src="{% static 'assets/images/postman.jpg' %}" alt="postman image">
@@ -15,62 +15,82 @@
         <div class="instr">
             <div>
                 <h5>
-                    সিস্টেমটি ব্যবহার করার আগে নীচের ব্যবহারকারীর নির্দেশনাবলী মনোযোগ সহকারে পডুন। সম্পূর্ণ পাঠ্যের
-                    নির্দেশাবলীর জন্য আপনি
-                    যে প্রকারে ব্যবহারকরী তার উপর ক্লিক করুন।
+                    Please watch the instructions videos below before using the system.
+                    Click on the title as appropriate for you.
                 </h5>
             </div>
         
             <div class="card">
-                <div class="card-header" data-toggle="collapse" data-target="#unit-user-instr">
+                <div class="card-header accordion-header" data-toggle="collapse" data-target="#unit-user-instr">
                     <h4>Unit user</h4>
                 </div>
                 <div class="card-body collapse" id="unit-user-instr">
                     <div class="instr-text">
-                        Unit user এ Username এবং Password দিয়ে প্রবেশ করুন । পরবর্তীতে মেনু থেকে New Dak এ Click করে New Dak
-                        Entry করুন। Addr
-                        line 1 ফাঁকা রাখুন। Ltr no এ আপনার পত্র নং ও সংশ্লিষ্ট শাখা নং প্রবেশ করান। Date এর ঘরে যে দিন Dak Entry
-                        করবেন সেই দিন
-                        এর তারিখ সংক্রিয় ভাবে নিয়ে নিবে। প্রয়োজন হলে তারিখ পরিবর্তন করতে পারবেন। To Units এ আপনি কোন কোন Unit এ
-                        পত্র পাঠাতে চান
-                        তা Select করুন । সর্বশেষে Save করুন।
-        
-                        Dak List এর In House এ Status “In Unit” দেখে আপনি বুজতে পারবেন পত্রটি Dispasted হয়নি। QR Code Print
-                        দেওয়ার জন্য Misc এর
-                        Print Lable এ Click করুন এবং Dak List এর Despatched এ Status “In Transit” দেখে আপনি বুজতে পারবেন পত্রটি
-                        Dispasted হয়েছে
-                        ।
-        
-                        এক্ষেত্রে Despatched মেনুতে “Code” এবং “Recipt No” দিয়ে পত্র অনুসন্ধান করা যেতে পারে।
+                        <div class="alert alert-info">
+                            <a href="https://www.youtube.com/watch?v=MEzxIqPD8vU" 
+                                target="blank">Create new regular DAK</a>
+                        </div>
+                        <div class="alert alert-info">
+                            <a href="https://www.youtube.com/watch?v=Zr4wRp-g-30" 
+                                target="blank">Create DO letter</a>
+                        </div>
+                        <div class="alert alert-info">
+                            <a href="https://www.youtube.com/watch?v=p7xi6qeLom4" 
+                                target="blank">Track and get info of old DAK</a>
+                        </div>
         
                     </div>
                 </div>
             </div>
             <div class="card">
-                <div class="card-header" data-toggle="collapse" data-target="#sigcen-user-instr">
+                <div class="card-header accordion-header" data-toggle="collapse" data-target="#sigcen-user-instr">
                     <h4>Sigcen user</h4>
                 </div>
                 <div class="card-body collapse" id="sigcen-user-instr">
                     <div class="instr-text">
-                        বাংলা বর্ণমালা instruction for sigcen user. Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                        Quod sequi consectetur
-                        quibusdam? Autem esse pariatur unde officia nostrum dolores nobis? Maiores, quam modi velit beatae et
-                        nemo sit
-                        sed doloremque.
+                        <div class="alert alert-info">
+                            <a href="#">Manually Receive DAK from DR</a>
+                        </div>
+                        <div class="alert alert-info">
+                            <a href="#">Receive DAK from DR by scanning </a>
+                        </div>
+                        <div class="alert alert-info">
+                            <a href="#">Deliver DAK to DR </a>
+                        </div>
+                        <div class="alert alert-info">
+                            <a href="#">Search and get status of DAK </a>
+                        </div>
+                        <div class="alert alert-info">
+                            <a href="#">Auto create Transit slip</a>
+                        </div>
+                        <div class="alert alert-info">
+                            <a href="#">Create Transit slip manually</a>
+                        </div>
+                        <div class="alert alert-info">
+                            <a href="#">View current Transit slip and despatch</a>
+                        </div>
+                        <div class="alert alert-info">
+                            <a href="#">Create special package</a>
+                        </div>
+                        <div class="alert alert-info">
+                            <a href="#">View old transit slip and DAK they contain</a>
+                        </div>
+                        <div class="alert alert-info">
+                            <a href="#">Receive DAK from remote sigcen. </a>
+                        </div>
+
                     </div>
         
                 </div>
             </div>
         
             <div class="card">
-                <div class="card-header" data-toggle="collapse" data-target="#admin-user-instr">
+                <div class="card-header accordion-header" data-toggle="collapse" data-target="#admin-user-instr">
                     <h4>Admin user</h4>
                 </div>
                 <div class="card-body collapse" id="admin-user-instr">
                     <div class="instr-text">
-                        এ্যাডমিন ইউজার Admin use আইডি এ প্রবেশ করে পাসওয়ার্ড দিয়ে Login করবে। পরবর্তীতে Admin Bar এ ক্লিক করে
-                        Add/Edit/ Unit
-                        Select করবে।পরবর্তীতে কোন নতুন ইউনিট Add করতে হলে ইউনিটের নাম এবং স্টেশন Select করবে এবং Save করবে।
+                        Not uploaded yet.
                     </div>
                 </div>
             </div>

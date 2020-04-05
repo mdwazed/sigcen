@@ -248,7 +248,8 @@ class DeleteUserView(AdminPermissionView):
             logger.warning(f'Intended sta for update not found. {e}')
             err_msg = f'Intended sta for update not found.' + str(e)
             return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
-        user.delete()
+        if not user.is_staff:
+            user.delete()
         return HttpResponse(status=200)
 
 
