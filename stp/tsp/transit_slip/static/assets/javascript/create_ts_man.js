@@ -1,16 +1,17 @@
 // fetch letter to receive in sigcen by ajax call while scaning the QR code
 $(document).ready(function () {
+    let selected_sta
     // ensure scan-ts input remain invisible on page load
     $('#scan-ts').hide();
     // show scan-ts input box on selecting sta
     $('#id-sta').change(function(){
         $('#scan-ts').show();
-        var selected_sta = $(this).children("option:selected").text();
+        selected_sta = $(this).children("option:selected").text();
         $('#dst-sta').val(selected_sta);
     });
     //fetch ltr on scan
     $('#scan-ts').on('change', function () {
-        // console.log('changed')
+        console.log('changed')
         var code = $('#scan-ts').val()
         var str = code.split("-")
         var date_str = str[0].toString()
@@ -24,8 +25,9 @@ $(document).ready(function () {
 
 
         url = 'fetch_letter_json';
-        console.log('invoking ajax call');
-        var data_dict = { 'date': date_str, 'u_string': u_string, 'csrfmiddlewaretoken': csrf_token, 'ts_making': true };
+        console.log(`invoking ajax call with date ${date_str} u_string ${u_string} dst_data ${selected_sta}`);
+        var data_dict = { 'date': date_str, 'u_string': u_string, 'csrfmiddlewaretoken': csrf_token, 
+            'ts_making': true, 'dst_sta': selected_sta };
         $.ajax({
             type: 'POST',
             url: url,
@@ -45,8 +47,9 @@ $(document).ready(function () {
                     $(this).remove();
                 }));
             },
-            error: function(){
-                alert('Failed to receive this DAK. details in syslog.')
+            error: function(jqXHR){
+                alert('Failed to retrive this DAK.' + jqXHR.responseText)
+                console.log(jqXHR.responseText)
             }
         });
         $(this).val('')

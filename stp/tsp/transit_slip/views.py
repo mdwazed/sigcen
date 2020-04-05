@@ -1063,9 +1063,11 @@ def ts_rcv_update(request):
 @login_required
 @user_passes_test(not_unit_clk_test)
 def fetch_letter_json(request):
-    date = request.POST['date']
-    u_string = request.POST['u_string']
+    """ fetch lettter on scanning the qr code """
+    date = request.POST.get('date', None)
+    u_string = request.POST.get('u_string', None)
     ts_making = request.POST.get('ts_making', False)
+    dst_sta = request.POST.get('dst_sta', False)
 
     try:
         if not ts_making:
@@ -1074,10 +1076,11 @@ def fetch_letter_json(request):
                     ltr_receipt__isnull=True)
         else:
             ltr = Letter.objects.get(u_string=u_string, date=date, 
-                    from_unit__sta_name=request.user.profile.unit.sta_name,)
-    except ObjectDoesNotExist as e:
+                    from_unit__sta_name=request.user.profile.unit.sta_name,
+                    ltr_receipt__isnull=False, to_unit__sta_name__sta_name=dst_sta)
+    except Exception as e:
         logger.warning(f'No Letter returned with given criteria: {e}')
-        return HttpResponse('query mismatch',status=404)
+        return HttpResponse(str(e),status=404)
     serialize_ltr = serializers.serialize("json", [ltr,], use_natural_foreign_keys=True)
     return HttpResponse(serialize_ltr)
 
