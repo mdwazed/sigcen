@@ -20,12 +20,11 @@ $(document).ready(function () {
         var year = date_str.substr(4, 4)
         var date_str = year + '-' + mon + '-' + day
         var u_string = str[1]
-        // console.log(date_str)
         const rm_lnk_td = '<td><a class="ltr-remove-link" href="#">Remove</a></td></tr>'
 
 
         url = 'fetch_letter_json';
-        console.log(`invoking ajax call with date ${date_str} u_string ${u_string} dst_data ${selected_sta}`);
+        // console.log(`invoking ajax call with date ${date_str} u_string ${u_string} dst_data ${selected_sta}`);
         var data_dict = { 'date': date_str, 'u_string': u_string, 'csrfmiddlewaretoken': csrf_token, 
             'ts_making': true, 'dst_sta': selected_sta };
         $.ajax({
@@ -34,9 +33,7 @@ $(document).ready(function () {
             data: data_dict,
             dataType: 'json',
             success: function (response) {
-                console.log(response)
                 var ltr = response[0]
-                console.log(ltr.pk);
                 var ltr_id = '<input type="hidden" name="ltr-ids" value="'+ ltr.pk +'" >';
                 var row = "<tr><td>" + ltr.fields.from_unit + "</td><td>" + ltr.fields.to_unit +
                     "</td><td>" + ltr.fields.ltr_no + "</td><td>" + ltr.fields.date + "</td><td>" +
@@ -47,9 +44,8 @@ $(document).ready(function () {
                     $(this).remove();
                 }));
             },
-            error: function(jqXHR){
-                alert('Failed to retrive this DAK.' + jqXHR.responseText)
-                console.log(jqXHR.responseText)
+            error: function(jqXHR, error_type, exception){
+                alert(`${exception}-Failed to retrive this DAK.` + jqXHR.responseText)
             }
         });
         $(this).val('')

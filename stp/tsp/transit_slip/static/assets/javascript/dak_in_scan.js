@@ -30,8 +30,8 @@ $(document).ready(function () {
 
                 $('tbody').prepend(row)
             },
-            error: function(){
-                alert('Can not receive this DAk. May be this DAK has already been received or deleted!!')
+            error: function(jqXHR){
+                alert('Can not receive this DAk.' + jqXHR.responseText) 
             }
         });
         $(this).val('')

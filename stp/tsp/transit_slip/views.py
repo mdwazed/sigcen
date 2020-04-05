@@ -883,12 +883,13 @@ def transit_slip_ltrs(request):
     """
     if request.method == 'POST':
         try:
-            dst = Sta.objects.get(sta_name=request.POST['dst-sta'])
+            dst = Sta.objects.get(sta_name=request.POST.get('dst-sta'))
         except ObjectDoesNotExist:
             err_msg = 'No STA was selected. Please select a dst sta.'
             return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
         ltr_ids = request.POST.getlist('ltr-ids')
         if len(ltr_ids) <= 0:
+            logger.info(f'Zero length Transit slip create prevented')
             err_msg = 'No DAK was selected. One or more DAK needed.'
             return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
         date = datetime.today()
@@ -897,8 +898,9 @@ def transit_slip_ltrs(request):
         transit_slip.save()
         for ltr_id in ltr_ids:
             ltr = Letter.objects.get(pk=ltr_id)
-            ltr.transit_slip = transit_slip
-            ltr.save()
+            if not ltr.transit_slip:
+                ltr.transit_slip = transit_slip
+                ltr.save()
     return redirect('transit_slip_detail', transit_slip.pk)
 
 class CurrentTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -1077,7 +1079,8 @@ def fetch_letter_json(request):
         else:
             ltr = Letter.objects.get(u_string=u_string, date=date, 
                     from_unit__sta_name=request.user.profile.unit.sta_name,
-                    ltr_receipt__isnull=False, to_unit__sta_name__sta_name=dst_sta)
+                    ltr_receipt__isnull=False, to_unit__sta_name__sta_name=dst_sta,
+                    transit_slip__isnull=True)
     except Exception as e:
         logger.warning(f'No Letter returned with given criteria: {e}')
         return HttpResponse(str(e),status=404)

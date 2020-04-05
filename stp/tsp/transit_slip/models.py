@@ -126,7 +126,7 @@ class Letter(models.Model):
         try:
             dst_ltr = OutGoingLetter.objects.get(code=self.u_string, date=self.date)
         except ObjectDoesNotExist:
-            pass
+            dst_ltr = None
 
         if not self.ltr_receipt:
             return "In Unit"
@@ -134,10 +134,11 @@ class Letter(models.Model):
             return "In Sigcen"
         elif not self.transit_slip.received_on:
             return "In Transit"
-        elif self.transit_slip.received_on and not dst_ltr.delivery_receipt:
-            return "DST SIGCEN"
-        elif dst_ltr.delivery_receipt:
-            return "Delivered"
+        if dst_ltr:
+            if self.transit_slip.received_on and not dst_ltr.delivery_receipt:
+                return "DST SIGCEN"
+            elif dst_ltr.delivery_receipt:
+                return "Delivered"
         else:
             return "Unknown"
 
@@ -151,6 +152,7 @@ class OutGoingLetter(models.Model):
     received_at = models.DateTimeField(auto_now_add=True)
     delivery_receipt = models.ForeignKey(DeliveryReceipt, on_delete=models.SET_NULL, null=True,
                             blank=True, related_name='ltrs')
-
+    class Meta:
+        unique_together = ('date', 'code',)
     def __str__(self):
         return (f'{self.from_unit}--{self.to_unit}--{self.ts_info}--{self.code}')
