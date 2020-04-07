@@ -317,21 +317,22 @@ class UpdateStaView(AdminPermissionView):
         else:
             return redirect('not_auth_view')
 
-class UnitListView(AdminPermissionView):
+class UnitListView(LoginRequiredMixin, View):
     """
     display list of units from own sta in admin panel.
     """
     template = 'transit_slip/unit_list.html'
 
     def get(self, request):
-        if request.user.is_staff is True:
-            units = Unit.objects.all().order_by('unit_name')
-        else:
-            units = Unit.objects.filter(sta_name=request.user.profile.unit.sta_name)
+        # if request.user.is_staff is True:
+        units = Unit.objects.all().order_by('unit_name')
+        # else:
+            # units = Unit.objects.filter(sta_name=request.user.profile.unit.sta_name)
         context = {
             'units': units,
         }
         return render(request, self.template, context)
+
 
 class UnitCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """
