@@ -7,6 +7,7 @@ from . import views
 urlpatterns = [
     path('not_auth_view/', views.not_auth_view, name= 'not_auth_view'),
     path('', views.Home.as_view(), name= 'home'),
+    path('misc_admin_info/', views.MiscAdminInfo.as_view(), name= 'misc_admin_info'),
     # user
     path('user_list/', views.UserListView.as_view(), name= 'user_list'),
     path('create_user/', views.UserCreateView.as_view(), name= 'create_user'),

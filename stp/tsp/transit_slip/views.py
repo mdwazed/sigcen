@@ -69,16 +69,22 @@ class Home(View):
     
     def get(self, request, *args, **kwargs):
         # if request.user.is_authenticated:
+        f = open('counter.txt', 'r+')
+        f.write("hello")
+        count = f.read()
+        # count = count + 1
+        print(f'current count:{count}')
         user = request.user
         if user.is_authenticated:
             request.session['userid'] = user.pk
+            request.session.set_expiry(1800)
+            
             try:
                 request.session['unitid'] = user.profile.unit.pk
             except AttributeError as e:
                 logger.warnig(f'user logoin without unitid. {e}') 
                 request.session['unitid'] = None
         context = {
-            # 'user': user
         }
         return render(request, self.template_name, context)
 
@@ -1354,3 +1360,21 @@ def letter_delivery_state(request, pk):
             'letter': ltr,
         }
         return render(request, "transit_slip/letter_delivery_state.html", context )
+
+class MiscAdminInfo(LoginRequiredMixin, UserPassesTestMixin, View):
+    """ Display misc info for site admin"""
+    template = "transit_slip/misc_admin_info.html"
+    def test_func(self):
+        user = self.request.user
+        if user.is_staff == True:
+            return True
+        else:
+            return False
+
+    def get(self, request):
+        data = request.META.get('REMOTE_ADDR')
+        print(data)
+        context = {
+            'data': data,
+        }
+        return render(request, self.template, context)

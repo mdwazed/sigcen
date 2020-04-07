@@ -177,9 +177,9 @@ LOGGING = {
 logging.config.dictConfig(LOGGING)
 
 # CORS header middleware config
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
 
-# CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_ALLOW_ALL = False
 # CORS_ORIGIN_WHITELIST = (
 #        'http://192.168.13.102:8006',
 # )
