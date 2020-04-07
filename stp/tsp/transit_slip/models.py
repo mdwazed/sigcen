@@ -38,7 +38,7 @@ class Unit(models.Model):
     unit_name = models.CharField(max_length=50)
     unit_full_name = models.CharField(max_length=100, null=True, blank=True)
     sta_name = models.ForeignKey(Sta, on_delete=models.PROTECT,)
-    unit_code = models.IntegerField(default=0)
+    unit_code = models.IntegerField(unique=True)
 
     def __str__(self):
         return self.unit_name
