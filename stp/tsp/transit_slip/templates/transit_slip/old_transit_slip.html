@@ -46,10 +46,13 @@
                                             </td>
                                             <td>
                                                 {% if ts.received_on == None %}
+                                                    {% comment %}
                                                     <p><input type="text" class="datepicker" name="received-on" style="width: 100px;">
                                                         <span><button class="btn btn-sm btn-outline-secondary received-on-save">Save</button></span>
                                                         <input type="hidden" value="{{ts.id}}">
                                                     </p>
+                                                    {% endcomment %}
+                                                    <p>Not Received Yet</p>
                                                 {% else %}
                                                     <p>{{  ts.received_on }}</p>
                                                 {% endif %}

@@ -17,6 +17,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from transit_slip.models import (User, Letter, Unit, Sta, TransitSlip, LetterReceipt,
                                     OutGoingLetter, DeliveryReceipt)
 from transit_slip.forms import forms
+from transit_slip import utility
+
 from datetime import datetime, date, timedelta
 from random import randint
 from PIL import Image
@@ -30,41 +32,13 @@ import itertools
 
 logger = logging.getLogger('transit_slip')
 
-def get_default_letter_no(type):
-    if type == 'regular':
-        prefix = '23.01.955.__.__.01.01.'
-        current_date = datetime.today().strftime('%d.%m.%Y')
-        return prefix + current_date 
-    elif type == 'do':
-        return 'PF:'
-
-def admin_user_test(user):
-    if user.profile.user_type == 'ad':
-        return True
-    else:
-        return False
-
-def not_unit_clk_test(user):
-    if user.profile.user_type == 'sc' or user.profile.user_type == 'ad':
-        return True
-    else:
-        return False
-def local_units(request):
-    """
-    returns the local units list. useful for select options.
-    """
-    sta = request.user.profile.unit.sta_name
-    units = Unit.objects.filter(sta_name=sta).order_by('unit_name')
-    return units
-
 def not_auth_view(request):
     err_msg = "You are not Auth to see this page. Contact Admin/Super Admin."
     return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
 
 class Home(View):
-    """
-    Render home page with user instr
-    """
+    """ Render home page with user instr """
+
     template_name = "transit_slip/home.html"
     
     def get(self, request, *args, **kwargs):
@@ -89,9 +63,8 @@ class Home(View):
         return render(request, self.template_name, context)
 
 class AdminPermissionView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """
-    provide base class for user admin realted task
-    """
+    """ provide base class for user admin realted task """
+
     def test_func(self):
         user_type = self.request.user.profile.user_type
         if user_type == 'ad':
@@ -100,9 +73,8 @@ class AdminPermissionView(LoginRequiredMixin, UserPassesTestMixin, View):
             return False
 
 class UserCreateView(AdminPermissionView):
-    """
-    creates new user. only admin users are allowed to access this page
-    """
+    """ creates new user. only admin users are allowed to access this page """
+
     template = 'registration/create_user.html'
 
     def get_sta(self, request):
@@ -143,10 +115,10 @@ class UserCreateView(AdminPermissionView):
             return render(request, self.template, {'form': form})
 
 class UserUpdateView(AdminPermissionView):
-    """
-    allow admin to update user info
-    """
+    """ allow admin to update user info """
+
     template = "registration/update_user.html"
+
     def get_sta(self, request):
         unit_id = request.session['unitid']
         return Unit.objects.get(pk=unit_id).sta_name
@@ -187,10 +159,10 @@ class UserUpdateView(AdminPermissionView):
         return redirect('user_list')
 
 class ResetUserPasswordView(AdminPermissionView):
-    """
-    Allow admin to reset user passwd
-    """
+    """ Allow admin to reset user passwd """
+
     template = "registration/reset_user_password.html"
+
     def get(self, request, pk):
         try:
             user = User.objects.get(pk=pk)
@@ -221,10 +193,10 @@ class ResetUserPasswordView(AdminPermissionView):
                 return redirect("user_list")
 
 class UserListView(AdminPermissionView):
-    """
-    list user of the admin's respective sta
-    """
+    """ list user of the admin's respective sta """
+
     template = 'registration/user_list.html'
+
     def get(self, request):
         sta = request.user.profile.unit.sta_name
         if request.user.is_staff:
@@ -239,9 +211,8 @@ class UserListView(AdminPermissionView):
 
 
 class UserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
-    """
-    user changes own passwd
-    """
+    """ user changes own passwd """
+
     success_url = reverse_lazy("home")
 
 
@@ -281,9 +252,8 @@ class StaAddView(AdminPermissionView):
 
 
 class UpdateStaView(AdminPermissionView):
-    """
-    admin update sta info
-    """
+    """ admin update sta info """
+
     template = 'transit_slip/add_sta.html'
 
     def get(self, request, pk=None):
@@ -318,9 +288,8 @@ class UpdateStaView(AdminPermissionView):
             return redirect('not_auth_view')
 
 class UnitListView(LoginRequiredMixin, View):
-    """
-    display list of units from own sta in admin panel.
-    """
+    """ display list of units from own sta in admin panel. """
+
     template = 'transit_slip/unit_list.html'
 
     def get(self, request):
@@ -335,9 +304,8 @@ class UnitListView(LoginRequiredMixin, View):
 
 
 class UnitCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-    """
-    Allow only super admin to create new unit.
-    """
+    """ Allow only super admin to create new unit. """
+
     model = Unit
     fields = "__all__"
     template_name = "transit_slip/unit_add_update.html"
@@ -385,7 +353,7 @@ class LetterView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         cur_date = datetime.today()
-        init_ltr_no = get_default_letter_no(type='regular')
+        init_ltr_no = utility.get_default_letter_no(request, type='regular')
         form = forms.LetterForm(initial={'ltr_no':init_ltr_no, 'date': cur_date})
         units = Unit.objects.all()
         context = {
@@ -432,14 +400,13 @@ class LetterView(LoginRequiredMixin, View):
         return redirect(letter_list_inhouse)
             
 class DoView(LoginRequiredMixin, View):
-    """
-    create new DO
-    """
+    """ create new DO """
+
     template_name = 'transit_slip/new_do.html'
 
     def get(self, request, *args, **kwargs):
         cur_date = datetime.today()
-        init_ltr_no = get_default_letter_no(type='do')
+        init_ltr_no = utility.get_default_letter_no(request, type='do')
         form = forms.LetterForm(initial={'ltr_no':init_ltr_no, 'date': cur_date})
         units = Unit.objects.all()
         context = {
@@ -552,9 +519,8 @@ def letter_list_inhouse(request):
     return render(request, 'transit_slip/letter_list.html', context)
 
 class LetterListDespatchedView(LoginRequiredMixin, View):
-    """
-    list ltr which has been despatched to sigcen
-    """
+    """ list ltr which has been despatched to sigcen """
+
     template = 'transit_slip/letter_list.html'
     
     def get(self, request, *args, **kwargs):
@@ -650,9 +616,8 @@ def label_do(request, pk=None):
 
 
 class DakInManualView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """
-    Manually receive DAK from various unit at sigcen
-    """
+    """ Manually receive DAK from various unit at sigcen """
+
     template = 'transit_slip/dak_in_manual.html'
     
     def test_func(self):
@@ -699,9 +664,8 @@ class DakInManualView(LoginRequiredMixin, UserPassesTestMixin, View):
         return render(request, self.template, context)
 
 class DakInScanView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """
-    Receive DAK by scanning from various unit at sigcen
-    """
+    """ Receive DAK by scanning from various unit at sigcen """
+
     template = 'transit_slip/dak_in_scan.html'
 
     def test_func(self):
@@ -764,7 +728,7 @@ class DakReceive(LoginRequiredMixin, UserPassesTestMixin, View):
         return redirect('receive_receipt', ltr_receipt.pk)
 
 @login_required
-@user_passes_test(not_unit_clk_test)
+@user_passes_test(utility.not_unit_clk_test)
 def receipt_list(request):
     receipt_lists = LetterReceipt.objects.filter(
                 received_by__profile__unit__sta_name=request.user.profile.unit.sta_name
@@ -775,7 +739,7 @@ def receipt_list(request):
     return render(request, 'transit_slip/receipt_list.html', context)
 
 @login_required
-@user_passes_test(not_unit_clk_test)
+@user_passes_test(utility.not_unit_clk_test)
 def receive_receipt(request, pk):
     receipt = LetterReceipt.objects.get(pk=pk)
     receive_ltrs = Letter.objects.filter(ltr_receipt=receipt)
@@ -839,6 +803,7 @@ class CreateTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
         return render(request, self.template, context)
 
 class CreateTransitSlipManualView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """ creates transit slip by scanning the qr code """
     template = 'transit_slip/create_transit_slip_manually.html'
     stas = Sta.objects.all().order_by('sta_name') 
 
@@ -859,9 +824,8 @@ class CreateTransitSlipManualView(LoginRequiredMixin, UserPassesTestMixin, View)
     
 
 class TransitSlipDetailView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """
-    displays a transit slip with given id
-    """
+    """ displays a transit slip with given id """
+
     template = 'transit_slip/transit_slip_detail.html'
 
     def test_func(self):
@@ -883,7 +847,7 @@ class TransitSlipDetailView(LoginRequiredMixin, UserPassesTestMixin, View):
         return render(request, self.template, context)
 
 @login_required
-@user_passes_test(not_unit_clk_test)
+@user_passes_test(utility.not_unit_clk_test)
 def transit_slip_ltrs(request):
     """
     create the actual transit slip fetching letters from the CreateTransitSlipView
@@ -911,6 +875,8 @@ def transit_slip_ltrs(request):
     return redirect('transit_slip_detail', transit_slip.pk)
 
 class CurrentTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """ displays transit slip awaiting to despatch """
+
     template = 'transit_slip/current_transit_slip.html'
 
     def test_func(self):
@@ -956,6 +922,8 @@ class CurrentTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 
 class OldTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """ displays transitslip which has already been despatched """
+
     template = 'transit_slip/old_transit_slip.html'
 
     def test_func(self):
@@ -1021,7 +989,7 @@ class CreateSplPkgView(LoginRequiredMixin, UserPassesTestMixin, View):
         return render(request, self.template, context)
 
 @login_required 
-@user_passes_test(not_unit_clk_test)
+@user_passes_test(utility.not_unit_clk_test)
 def generate_spl_pkg_ts(request):
     """
     create transit slip of spl pkg
@@ -1047,7 +1015,7 @@ def generate_spl_pkg_ts(request):
 
 
 @login_required        
-@user_passes_test(not_unit_clk_test)
+@user_passes_test(utility.not_unit_clk_test)
 def transit_slip_despatch(request, id):
     t_slip = TransitSlip.objects.get(pk=id)
     t_slip.despatched_on = datetime.today()
@@ -1055,7 +1023,7 @@ def transit_slip_despatch(request, id):
     return redirect('current_transit_slip')
 
 @login_required
-@user_passes_test(not_unit_clk_test)
+@user_passes_test(utility.not_unit_clk_test)
 def ts_rcv_update(request):
     ts_id = int(request.POST['ts_id'])
     date = datetime.strptime(request.POST['date'], '%d-%m-%Y')
@@ -1070,7 +1038,7 @@ def ts_rcv_update(request):
     return HttpResponse("Received date updated...")
 
 @login_required
-@user_passes_test(not_unit_clk_test)
+@user_passes_test(utility.not_unit_clk_test)
 def fetch_letter_json(request):
     """ fetch lettter on scanning the qr code """
     date = request.POST.get('date', None)
@@ -1095,6 +1063,7 @@ def fetch_letter_json(request):
     return HttpResponse(serialize_ltr)
 
 class TransitSlipPrintView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """ print transit slip. why a separate view? """
     template = 'transit_slip/transit_slip_print.html'
 
     def test_func(self):
@@ -1116,6 +1085,10 @@ class TransitSlipPrintView(LoginRequiredMixin, UserPassesTestMixin, View):
         return render(request, self.template, context)
 
 class SearchLtrView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    Search letter for sigcen clk. also work as a parent view for other varient 
+    of search.
+    """
     template = 'transit_slip/search_ltr.html'
 
     def test_func(self):
@@ -1126,7 +1099,7 @@ class SearchLtrView(LoginRequiredMixin, UserPassesTestMixin, View):
             return False
 
     def get_unit_choices(self, request):
-        units = local_units(request)
+        units = utility.local_units(request)
         unit_choices = [(unit.pk, unit.unit_name) for unit in units]
         return unit_choices
 
