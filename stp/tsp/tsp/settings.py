@@ -136,6 +136,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
+USE_X_FORWARDED_HOST = True
+
 # DJANGO_LOG_LEVEL = 'DEBUG'
 
 LOGGING = {
