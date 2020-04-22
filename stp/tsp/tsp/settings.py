@@ -137,6 +137,15 @@ LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
 USE_X_FORWARDED_HOST = True
+CSRF_TRUSTED_ORIGINS = ['digidak-2086196476.ap-southeast-1.elb.amazonaws.com',]
+
+# CORS header middleware config
+# CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ORIGIN_ALLOW_ALL = False
+# CORS_ORIGIN_WHITELIST = (
+#        'http://192.168.13.102:8006',
+# )
 
 # DJANGO_LOG_LEVEL = 'DEBUG'
 
@@ -175,13 +184,7 @@ LOGGING = {
 }
 logging.config.dictConfig(LOGGING)
 
-# CORS header middleware config
-# CORS_ORIGIN_ALLOW_ALL = True
 
-CORS_ORIGIN_ALLOW_ALL = False
-# CORS_ORIGIN_WHITELIST = (
-#        'http://192.168.13.102:8006',
-# )
 
 # Domain of all sta for receiving remote dak
 # request will be sent to this domain
