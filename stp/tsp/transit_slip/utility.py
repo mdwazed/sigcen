@@ -43,6 +43,10 @@ def get_ltr_prefix(sta):
         return "23.01.919.__.__.01.01."
     elif sta == "DHK":
         return "23.01.901.__.__.01.01."
+    elif sta == "SYL":
+        return "23.01.917.__.__.01.01."
+    elif sta == "JLB":
+        return "23.01.918.__.__.01.01."
     else:
         return None
 
