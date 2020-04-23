@@ -43,7 +43,8 @@ class Home(View):
     
     def get(self, request, *args, **kwargs):
         # print(request.headers)
-        logger.info(request.headers)
+        http_referer = request.META.get('HTTP_REFERER', None)
+        logger.info(f'http referer: {http_referer}')
         user = request.user
         if user.is_authenticated:
             request.session['userid'] = user.pk
