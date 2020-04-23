@@ -136,8 +136,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
-USE_X_FORWARDED_HOST = True
-CSRF_TRUSTED_ORIGINS = ['digidak-2086196476.ap-southeast-1.elb.amazonaws.com',]
+# USE_X_FORWARDED_HOST = True
+CSRF_TRUSTED_ORIGINS = ['https://pg.digidakstatic.com',]
 
 # CORS header middleware config
 # CORS_ORIGIN_ALLOW_ALL = True
