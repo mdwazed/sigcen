@@ -137,7 +137,8 @@ LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
 # USE_X_FORWARDED_HOST = True
-CSRF_TRUSTED_ORIGINS = ['https://pg.digidakstatic.com/:80','https://pg.digidakstatic.com/accounts/login/']
+CSRF_COOKIE_DOMAIN = 'pg.digidakstatic.com'
+CSRF_TRUSTED_ORIGINS = ['https://pg.digidakstatic.com/:80',]
 
 # CORS header middleware config
 # CORS_ORIGIN_ALLOW_ALL = True
