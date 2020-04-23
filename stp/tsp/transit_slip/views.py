@@ -42,12 +42,8 @@ class Home(View):
     template_name = "transit_slip/home.html"
     
     def get(self, request, *args, **kwargs):
-        # if request.user.is_authenticated:
-        f = open('counter.txt', 'r+')
-        f.write("hello")
-        count = f.read()
-        # count = count + 1
-        print(f'current count:{count}')
+        # print(request.headers)
+        logger.info(request.headers)
         user = request.user
         if user.is_authenticated:
             request.session['userid'] = user.pk

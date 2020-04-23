@@ -2,5 +2,5 @@
 2.  install docker and docker-compose
 3.  run docker containers
 3.  create super user and add role, unit of super user
-4.  import stas to db
-5.  import units to db
+4.  migrate db
+
