@@ -45,10 +45,6 @@ class Home(View):
     
     def get(self, request, *args, **kwargs):
         # print(request.headers)
-        http_referer = request.META.get('HTTP_REFERER', None)
-        http_referer = urlparse(http_referer)
-        logger.info(f'http referer: {http_referer.netloc}')
-        logger.info(f'trusted origins: {settings.CSRF_TRUSTED_ORIGINS}')
         user = request.user
         if user.is_authenticated:
             request.session['userid'] = user.pk
