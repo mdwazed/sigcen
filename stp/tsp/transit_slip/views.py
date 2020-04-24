@@ -30,6 +30,8 @@ import logging
 import json
 import itertools
 
+from urllib.parse import urlparse
+
 logger = logging.getLogger('transit_slip')
 
 def not_auth_view(request):
@@ -44,6 +46,7 @@ class Home(View):
     def get(self, request, *args, **kwargs):
         # print(request.headers)
         http_referer = request.META.get('HTTP_REFERER', None)
+        http_referer = urlparse(http_referer)
         logger.info(f'http referer: {http_referer.netloc}')
         logger.info(f'trusted origins: {settings.CSRF_TRUSTED_ORIGINS}')
         user = request.user
