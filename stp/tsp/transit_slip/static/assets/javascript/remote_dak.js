@@ -88,9 +88,8 @@ $(document).ready(function () {
                         $('#ts-info').val(from_sta+"-"+ts_id)
                     }
                 },
-                error: function(xhr, status, error){
-                    console.log(status);
-                    $('#err-txt').html(error)
+                error: function(response, status, error){
+                    $('#err-txt').html(response.responseText)
                     $('#err-banner').show();
                 },
             });
@@ -123,14 +122,12 @@ $(document).ready(function () {
                     }
 
                 },
-                error: function (xhr, status, error) {
-                    console.log(status);
-                    console.log(xhr);
+                error: function (response, status, error) {
                     $('#err-banner').show();
-                    $('#err-txt').html('Failed to receive the DAK.' + error);
+                    $('#err-txt').html('Failed to receive the DAK.' + response.responseText);
                 },
                 complete: function () {
-                    console.log('completed');
+                    // console.log('completed');
                 }
             });
 

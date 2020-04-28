@@ -29,6 +29,8 @@ import urllib
 import logging
 import json
 import itertools
+import base64
+from io import BytesIO
 
 from urllib.parse import urlparse
 
@@ -86,7 +88,7 @@ class UserCreateView(AdminPermissionView):
     def get(self, request):
         sta = self.get_sta(request)
         if sta:
-            form = forms.CreateUserForm(sta=sta)
+            form = forms.CreateUserForm(sta=sta, user=request.user)
         else:
             err_msg = "No sta found to make unit choices."
             return render(request, "transit_slip/generic_error.html", {'err_msg': err_msg})
@@ -95,7 +97,7 @@ class UserCreateView(AdminPermissionView):
     def post(self, request):
         sta = self.get_sta(request)
         if sta:
-            form = forms.CreateUserForm(request.POST, sta=self.get_sta(request=request))
+            form = forms.CreateUserForm(request.POST, sta=sta, user=request.user)
         else:
             err_msg = "No sta found to make unit choices."
             return render(request, "transit_slip/generic_error.html", {'err_msg': err_msg})
@@ -116,19 +118,14 @@ class UserUpdateView(AdminPermissionView):
 
     template = "registration/update_user.html"
 
-    def get_sta(self, request):
-        unit_id = request.session['unitid']
-        return Unit.objects.get(pk=unit_id).sta_name
-
     def get(self, request, pk):
         try:
             user = User.objects.get(pk=pk)
-            sta = self.get_sta(request)
         except ObjectDoesNotExist:
             err_msg = "User not available."
             return render(request, "transit_slip/generic_error.html", {'err_msg': err_msg})
         if not user.is_staff:
-            form = forms.UpdateUserForm(user=user, sta=sta)
+            form = forms.UpdateUserForm(user=user)
         else:
             err_msg = "Shitty admin can't access super admin DAMM...."
             return render(request, "transit_slip/generic_error.html", {'err_msg': err_msg})
@@ -140,19 +137,18 @@ class UserUpdateView(AdminPermissionView):
     def post(self, request, pk):
         try:
             user = User.objects.get(pk=pk)
-            sta = self.get_sta(request)
         except ObjectDoesNotExist:
             err_msg = "User not available."
             return render(request, "transit_slip/generic_error.html", {'err_msg': err_msg})
-        form = forms.UpdateUserForm(request.POST, sta=sta)
+        form = forms.UpdateUserForm(request.POST)
         # print(form)
         if form.is_valid():
             user.first_name = form.cleaned_data["first_name"]            
             user.last_name = form.cleaned_data["last_name"]            
-            user.profile.unit = Unit.objects.get(pk=form.cleaned_data["unit"])   
+            user.is_active = form.cleaned_data["is_active"]   
             user.save()
         else:
-            form = forms.UpdateUserForm(user=user, sta=sta)
+            form = forms.UpdateUserForm(user=user)
         return redirect('user_list')
 
 class ResetUserPasswordView(AdminPermissionView):
@@ -219,8 +215,8 @@ class DeleteUserView(AdminPermissionView):
         try:
             user = User.objects.get(pk=user_id)
         except ObjectDoesNotExist as e:
-            logger.warning(f'Intended sta for update not found. {e}')
-            err_msg = f'Intended sta for update not found.' + str(e)
+            logger.warning(f'Intended user for update not found. {e}')
+            err_msg = f'Intended user for update not found.' + str(e)
             return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
         if not user.is_staff:
             user.delete()
@@ -380,7 +376,7 @@ class LetterView(LoginRequiredMixin, View):
                     qr_code_name = str(date.today().strftime("%d%m%Y")) + '-' + str(letter.u_string)
                     file_name = qr_code_name + '.png'
                     file_path = settings.MEDIA_ROOT
-                    file_url = file_path + '/qr_code/' +date.today().strftime("%Y/%m/%d/")+ file_name
+                    file_url = file_path + '/qr_code/' + date.today().strftime("%Y/%m/%d/") + file_name
                     directory = os.path.dirname(file_url)
                     if not os.path.exists(directory):
                         os.makedirs(directory)
@@ -491,15 +487,17 @@ def letter_state(request, pk=None):
         except ObjectDoesNotExist as e:
             err_msg = "letter not found in system." + str(e)
             return render(request, 'transit_slip/letter_details.html', {'err_msg':err_msg})
-
+        through_sigcens = json.loads(letter.transit_slip.through_sigcens)
         try:
             dst_ltr = OutGoingLetter.objects.get(date=letter.date, code=letter.u_string)
         except (ObjectDoesNotExist, MultipleObjectsReturned) as e:
-            print(str(e))
+            # not yet received by dst sigcen. continue with home sigcen info.
             dst_ltr = None
+            
         context = {
             'letter': letter,
             'dst_ltr': dst_ltr,
+            'through_sigcens': through_sigcens,
         }
         return render(request, 'transit_slip/letter_state.html', context)
 
@@ -836,18 +834,50 @@ class TransitSlipDetailView(LoginRequiredMixin, UserPassesTestMixin, View):
         transit_slip = TransitSlip.objects.get(pk=id)
         ltrs = Letter.objects.filter(transit_slip=transit_slip)
         ltr_count = len(ltrs)
+        qr_code = qrcode.make(transit_slip.id)
+        buffered = BytesIO()
+        qr_code.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue())
+        img_str = img_str.decode('utf-8')
         context = {
             'transit_slip' : transit_slip, 
             'ltrs' : ltrs,
             'ltr_count' : ltr_count,
+            'qr_code': img_str,
         }
         return render(request, self.template, context)
+        
+
+# class TransitSlipPrintView(LoginRequiredMixin, UserPassesTestMixin, View):
+#     """ print transit slip. why a separate view? """
+#     template = 'transit_slip/transit_slip_print.html'
+
+#     def test_func(self):
+#         user_type = self.request.user.profile.user_type
+#         if user_type == 'sc' or user_type == 'ad':
+#             return True
+#         else:
+#             return False
+
+#     def get(self, request, id):
+#         transit_slip = TransitSlip.objects.get(pk=id)
+#         ltrs = Letter.objects.filter(transit_slip=transit_slip)
+#         ltr_count = len(ltrs)
+#         qr_code = qrcode.make(transit_slip.id)
+#         context = {
+#             'transit_slip' : transit_slip, 
+#             'ltrs' : ltrs,
+#             'ltr_count': ltr_count,
+#             'qr_code': qr_code,
+#         }
+#         return render(request, self.template, context)
 
 @login_required
 @user_passes_test(utility.not_unit_clk_test)
 def transit_slip_ltrs(request):
     """
     create the actual transit slip fetching letters from the CreateTransitSlipView
+    and createTransitSlipManualView
     """
     if request.method == 'POST':
         try:
@@ -872,7 +902,7 @@ def transit_slip_ltrs(request):
     return redirect('transit_slip_detail', transit_slip.pk)
 
 class CurrentTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """ displays transit slip awaiting to despatch """
+    """ displays transit slip awaiting to despatch both originating and through """
 
     template = 'transit_slip/current_transit_slip.html'
 
@@ -887,15 +917,38 @@ class CurrentTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
         t_slips = TransitSlip.objects.filter(despatched_on=None, 
                 prepared_by__profile__unit__sta_name=request.user.profile.unit.sta_name
                 ).order_by('dst')
-        summary_dict = self.get_summary(t_slips)
+        through_pkgs = self.get_through_pkgs(request)
+        summary_dict = self.get_summary(t_slips, through_pkgs)
         # print(summary_dict)
         context = {
             't_slips' : t_slips,
+            'through_pkgs': through_pkgs,
             'summary_dict' : summary_dict,
         }
         return render(request, self.template, context)
 
-    def get_summary(self, t_slips):
+    def get_through_pkgs(self, request):
+        t_slips = TransitSlip.objects.filter(despatched_on__isnull=False,
+        received_on__isnull=True)
+        through_pkgs = []
+        for t_slip in t_slips:
+            if t_slip.through_sigcens:
+                # print(t_slip.through_sigcens)
+                through_sigcens = json.loads(t_slip.through_sigcens)
+                for sigcen in through_sigcens:
+                    sta = sigcen.get('sigcen')
+                    if (sta == request.user.profile.unit.sta_name.sta_name
+                        and not sigcen.get('despatched_at', None)
+                    ):
+                        through_pkgs.append(t_slip)
+        return through_pkgs
+
+
+    def get_summary(self, own_t_slips, through_pkgs):
+        get_s_key = lambda x : x.dst.sta_name
+        t_slips = list(own_t_slips) + through_pkgs
+        t_slips.sort(key=get_s_key)
+
         ts_list =[]
         for t_slip in t_slips:
             ts_touple = (t_slip.dst.sta_name, t_slip.ltr_count(), t_slip.id)
@@ -903,8 +956,6 @@ class CurrentTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
         key_f = lambda x: x[0]
         sum_dict = {}
         for key, group in itertools.groupby(ts_list, key_f):
-            # print(key + ":" + str(list(group)))
-
             ltr_count = 0
             ts_count=0
             ts_ids = []
@@ -916,7 +967,72 @@ class CurrentTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
             # print(ts_ids)
         return sum_dict
 
+class ThroughPkgView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """ receive through pkg in transit sigcens """
+    template = 'transit_slip/through_pkg.html'
+    def test_func(self):
+        user_type = self.request.user.profile.user_type
+        if user_type == 'sc' or user_type == 'ad':
+            return True
+        else:
+            return False
 
+    def get(self, request):
+        return render(request, self.template, context= {})
+
+    def post(self, request):
+        ts_no = request.POST['ts_no']
+        try:
+            ts = TransitSlip.objects.get(pk=ts_no)
+        except ObjectDoesNotExist as e:
+            return HttpResponse(e, status=404)
+        if ts.dst != request.user.profile.unit.sta_name:
+            # through sigcen entry in transit_slip
+            sigcen = str(request.user.profile.unit.sta_name)
+            received_at = datetime.now().strftime("%d/%m/%Y %H:%M")
+            received_by = request.user.username
+            despatched_at = None
+            receive_info = {'sigcen':sigcen, 'received_at': received_at, 'received_by': received_by,
+                            'despatched_at': despatched_at}
+            if not ts.through_sigcens:
+                through_sigcens = []
+                through_sigcens.append(receive_info)
+            else:
+                through_sigcens = json.loads(ts.through_sigcens)
+                for sigcen in through_sigcens:
+                    sta_name = sigcen.get('sigcen')
+                    print(f'sta_name: ${sta_name}')
+                    if sta_name == str(request.user.profile.unit.sta_name):
+                        return HttpResponse("Duplicate receive not possible.", status=403)
+                        
+                through_sigcens.append(receive_info)
+            ts.through_sigcens = json.dumps(through_sigcens)
+            ts.save()
+            # ts.refresh_from_db()
+            # print(ts.through_sigcens)
+
+            ts_id = str(ts.id) 
+            ts_from = str(ts.from_sta())
+            ts_to = str(ts.dst)
+            ts_date = (ts.date).strftime("%d-%m-%Y %H:%M")
+            ts_info = {'ts_id':ts_id, 'ts_from': ts_from, 'ts_to': ts_to, 'ts_date': ts_date}   
+            serialize_ts = json.dumps(ts_info)
+            return HttpResponse( serialize_ts, status=200)
+        else:
+            return HttpResponse("This is not a through pkg", status=403)
+
+def through_pkg_despatch(request):
+    ts = TransitSlip.objects.get(pk=request.POST['ts_id'])
+    through_sigcens = json.loads(ts.through_sigcens)
+    for sigcen_info in through_sigcens:
+        if sigcen_info.get('sigcen') == request.user.profile.unit.sta_name.sta_name:
+            sigcen_info['despatched_at'] = datetime.now().strftime("%d/%m/%Y %H:%M")
+            
+            updated_info = json.dumps(through_sigcens)
+            ts.through_sigcens = updated_info
+            ts.save()
+            return HttpResponse(status=201)
+    return HttpResponse(status=404)
 
 class OldTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
     """ displays transitslip which has already been despatched """
@@ -1059,27 +1175,7 @@ def fetch_letter_json(request):
     serialize_ltr = serializers.serialize("json", [ltr,], use_natural_foreign_keys=True)
     return HttpResponse(serialize_ltr)
 
-class TransitSlipPrintView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """ print transit slip. why a separate view? """
-    template = 'transit_slip/transit_slip_print.html'
 
-    def test_func(self):
-        user_type = self.request.user.profile.user_type
-        if user_type == 'sc' or user_type == 'ad':
-            return True
-        else:
-            return False
-
-    def get(self, request, id):
-        transit_slip = TransitSlip.objects.get(pk=id)
-        ltrs = Letter.objects.filter(transit_slip=transit_slip)
-        ltr_count = len(ltrs)
-        context = {
-            'transit_slip' : transit_slip, 
-            'ltrs' : ltrs,
-            'ltr_count': ltr_count,
-        }
-        return render(request, self.template, context)
 
 class SearchLtrView(LoginRequiredMixin, UserPassesTestMixin, View):
     """

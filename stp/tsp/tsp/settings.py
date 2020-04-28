@@ -137,6 +137,8 @@ LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
 CSRF_TRUSTED_ORIGINS = ['.digidakstatic.com',]
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True
 
 # CORS header middleware config
 # CORS_ORIGIN_ALLOW_ALL = True

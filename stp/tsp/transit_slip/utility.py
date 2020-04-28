@@ -1,5 +1,6 @@
 """ provide all utility functions"""
 
+from django.shortcuts import render
 from transit_slip.models import Unit
 from datetime import datetime
     
@@ -26,6 +27,10 @@ def local_units(request):
     units = Unit.objects.filter(sta_name=sta).order_by('unit_name')
     return units
 
+def render_generic_err(request, err_msg):
+    """ Renders different error msg with custom text """
+    return render(request, 'transit_slip/generic_error.html', {'err_msg': err_msg})
+
 def get_ltr_prefix(sta):
     if sta == "JSR":
         return "23.01.955.__.__.01.01."
@@ -47,6 +52,50 @@ def get_ltr_prefix(sta):
         return "23.01.917.__.__.01.01."
     elif sta == "JLB":
         return "23.01.918.__.__.01.01."
+    elif sta == "JNB":
+        return "23.01.956.__.__.01.01."
+    elif sta == "MRP":
+        return "23.01.902.__.__.01.01."
+    elif sta == "RJP":
+        return "23.01.903.__.__.01.01."
+    elif sta == "MWA":
+        return "23.01.908.__.__.01.01."
+    elif sta == "BSL":
+        return "23.01.907.__.__.01.01."
+    elif sta == "RAMU":
+        return "23.01.910.__.__.01.01."
+    elif sta == "FSK":
+        return "23.01.910.__.__.01.01."
+    elif sta == "ALKM":
+        return "23.01.960.__.__.01.01."
+    elif sta == "JBAD":
+        return "23.01.912.__.__.01.01."
+    elif sta == "QBAD":
+        return "23.01.914.__.__.01.01."
+    elif sta == "RAJ":
+        return "23.01.913.__.__.01.01."
+    elif sta == "MYN":
+        return "23.01.920.__.__.01.01."
+    elif sta == "BBC":
+        return "23.01.921.__.__.01.01."
+    elif sta == "AC&S":
+        return "23.01.925.__.__.01.01."
+    elif sta == "BMA":
+        return "23.01.926.__.__.01.01."
+    elif sta == "GMR":
+        return "23.01.927.__.__.01.01."
+    elif sta == "BBON":
+        return "23.01.929.__.__.01.01."
+    elif sta == "RMT":
+        return "23.01.931.__.__.01.01."
+    elif sta == "KPT":
+        return "23.01.932.__.__.01.01."
+    elif sta == "SDP":
+        return "23.01.967.__.__.01.01."
+    elif sta == "SMS":
+        return "23.01.968.__.__.01.01."
+    elif sta == "KHC":
+        return "23.01.930.__.__.01.01."
     else:
         return None
 

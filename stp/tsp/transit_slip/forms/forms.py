@@ -32,8 +32,13 @@ class CreateUserForm(UserCreationForm):
     user_type = forms.ChoiceField(choices=user_type_choices )
     def __init__(self, *args, **kwargs):
         sta = kwargs.pop('sta', None)
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        if sta:
+        if sta and user.is_staff:
+            choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.all()]
+            self.fields['unit'].choices = choices
+
+        elif sta and not user.is_staff:
             choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta
                         ).order_by('sta_name')]
             self.fields['unit'].choices = choices
@@ -47,20 +52,15 @@ class CreateUserForm(UserCreationForm):
 class UpdateUserForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
-    unit = forms.ChoiceField()
+    is_active = forms.BooleanField(required=False, widget=forms.CheckboxInput)
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
-        sta = kwargs.pop('sta', None)
         super().__init__(*args, **kwargs)
-        if sta:
-            choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta
-                        ).order_by('unit_name')]
-            self.fields['unit'].choices = choices
         if user:
             self.fields['first_name'].initial = user.first_name
             self.fields['last_name'].initial = user.last_name
-            self.fields['unit'].initial = user.profile.unit.pk
+            self.fields['is_active'].initial = user.is_active
         
 
     

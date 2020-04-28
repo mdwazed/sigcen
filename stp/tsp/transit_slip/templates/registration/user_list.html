@@ -13,6 +13,7 @@
                     <th>Full Name</th>
                     <th>User Unit</th>
                     <th>User Type</th>
+                    <th>Active</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -23,6 +24,7 @@
                     <td>{{ user.first_name }}&nbsp;{{ user.last_name }}</td>
                     <td>{{ user.profile.unit }}</td>
                     <td>{{ user.profile.get_user_type_display }}</td>
+                    <td>{{ user.is_active }}</td>
                     <td>
                         <a href="{% url 'update_user_info' user.pk %}">Update User |</a>
                         <a href="{% url 'reset_user_password' user.pk %}">Reset Password |</a>

@@ -74,7 +74,31 @@
             </table>
         </div>
         <div class="dak-state">
-            <h5>Remote sigcen</h5>
+            <h5>Through Sigcen</h5>
+            {% for sigcen in through_sigcens%}
+                <table class="table table-sm sate-table">
+                    <tr>
+                        <td class="td-1">Sigcen:</td>
+                        <td class="td-2">{{ sigcen.sigcen }}</td>
+                    </tr>
+                    <tr>
+                        <td class="td-1">Received at:</td>
+                        <td class="td-2">{{ sigcen.received_at }}</td>
+                    </tr>
+                    <tr>
+                        <td class="td-1">Received By:</td>
+                        <td class="td-2">{{ sigcen.received_by }}</td>
+                    </tr>
+                    <tr>
+                        <td class="td-1">Despatch at:</td>
+                        <td class="td-2">{{ sigcen.despatched_at }}</td>
+                    </tr>
+                </table>
+            {% endfor %}
+
+        </div>
+        <div class="dak-state">
+            <h5>DST sigcen</h5>
             <table class="table table-sm state-table">
                 <tr>
                     <td class="td-1">TS INFO :</td>

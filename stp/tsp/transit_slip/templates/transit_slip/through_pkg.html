@@ -1,0 +1,32 @@
+{% extends 'transit_slip/layout.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div>
+        <h5>Through Packages</h5>
+        <div class="card">
+            <div class="card-head">
+                <input type="text" class="" id="scan-input" autofocus>
+            </div>
+            <div class="card-body">
+                <h4>Received</h4>
+                <h4>ID: <span id="ts-id"></span> </h1>
+                <h4>From: <span id="ts-from" style="color: red;"></span> </h1>
+                <h4>To: <span id="ts-to" style="color: red;"></span> </h1>
+                <h4>Date: <span id="ts-date"></span> </h1>
+            </div>
+
+        </div>
+
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    var csrf_token = '{{ csrf_token }}'
+</script>
+
+<script src="{% static 'assets/javascript/through_pkg.js' %}"></script>
+{% endblock %}

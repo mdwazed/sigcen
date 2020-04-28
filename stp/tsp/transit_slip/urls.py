@@ -51,6 +51,9 @@ urlpatterns = [
     path('deliver_ltr/', views.DeliverLetterView.as_view(), name= 'deliver_ltr'),
     path('save_delivery/', views.SaveDeliveryView.as_view(), name= 'save_delivery'),
     path('letter_delivery_state/<int:pk>', views.letter_delivery_state, name= 'letter_delivery_state'),
+    # through packet
+    path('through_pkg', views.ThroughPkgView.as_view(), name= 'through_pkg'),
+    path('through_pkg_despatch', views.through_pkg_despatch, name= 'through_pkg_despatch'),
     # unit related path
     path('add_sta', views.StaAddView.as_view(), name= 'add_sta'),
     path('update_sta/<int:pk>', views.UpdateStaView.as_view(), name= 'update_sta'),

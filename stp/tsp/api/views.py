@@ -16,13 +16,6 @@ from datetime import datetime, date, timedelta
 import json
 import logging
 logger = logging.getLogger('transit_slip')
-# Create your views here.
-def test_view(request):
-    """
-    Check the functionality of the system
-    """
-    return HttpResponse('test view functioning well')
-
 
 @api_view(['GET', 'POST'])
 def transit_slip_detail(request, pk, format=None):
@@ -40,16 +33,16 @@ def transit_slip_detail(request, pk, format=None):
     try: 
         ts = TransitSlip.objects.get(pk=pk)
     except ObjectDoesNotExist:
-        logger.warning(f'object not found with given ts id in api call by user: {request.user}. ts_id: {pk}')
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        err_txt = f'object not found with given ts id in api call by user: {request.user}. ts_id: {pk}'
+        logger.warning(err_txt)
+        return Response(err_txt, status=status.HTTP_404_NOT_FOUND)
     print(f'ts-dst: {ts.dst}')
     if local_sta != ts.dst.sta_name:
-        logger.warning(f'local id and ts dst mismatch in api call by user: {request.user}. ts_id: {pk}')
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        err_txt = f'local id and ts dst mismatch in api call by user: {request.user}. ts_id: {pk}'
+        logger.warning(err_txt)
+        return Response(err_txt, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        print('ajax get receive')
-
         serializer = TransitSlipSerializer(ts)
         return Response(serializer.data)
 
@@ -59,9 +52,10 @@ def transit_slip_detail(request, pk, format=None):
         try:
             ts = TransitSlip.objects.get(pk=ts_id)
         except ObjectDoesNotExist:
-            logger.warning(f'object not found with given ts id while saving receive info \
-                            in api call by user: {request.user}. ts_id: {pk}')
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            err_txt = f'object not found with given ts id while saving receive info \
+                            in api call by user: {request.user}. ts_id: {pk}'
+            logger.warning(err_txt)
+            return Response(err_txt, status=status.HTTP_404_NOT_FOUND)
         ts.received_on = datetime.now()
         ts.save()
         return Response(status=status.HTTP_204_NO_CONTENT)

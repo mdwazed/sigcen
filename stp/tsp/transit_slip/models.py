@@ -37,7 +37,7 @@ class Sta(models.Model):
 class Unit(models.Model):
     unit_name = models.CharField(max_length=50)
     unit_full_name = models.CharField(max_length=100, null=True, blank=True)
-    sta_name = models.ForeignKey(Sta, on_delete=models.PROTECT,)
+    sta_name = models.ForeignKey(Sta, on_delete=models.SET_NULL, null=True)
     unit_code = models.IntegerField(unique=True)
 
     def __str__(self):
@@ -48,7 +48,8 @@ class Unit(models.Model):
 
 class TransitSlip(models.Model):
     date = models.DateTimeField()
-    dst = models.ForeignKey(Sta, on_delete=models.PROTECT)
+    dst = models.ForeignKey(Sta, on_delete=models.SET_NULL, null=True)
+    through_sigcens = models.CharField(max_length=500, null=True)
     prepared_by = models.ForeignKey(User, on_delete=models.PROTECT)
     despatched_on = models.DateField(null=True, blank=True, )
     received_on = models.DateTimeField(null=True, blank=True)
@@ -56,6 +57,10 @@ class TransitSlip(models.Model):
     def ltr_count(self):
         ltr_count = Letter.objects.filter(transit_slip=self).count()
         return ltr_count
+
+    def from_sta(self):
+        sta = self.prepared_by.profile.unit.sta_name
+        return sta
 
 class LetterReceipt(models.Model):
     received_at_sigcen = models.DateTimeField(null=True)
@@ -78,7 +83,7 @@ class DeliveryReceipt(models.Model):
 class Profile(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT, blank=True, null=True)
+    unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, blank=True, null=True)
     user_type = models.CharField(max_length=2, blank=True, null=True,
                 choices=user_type_choices, default='uc')
 
