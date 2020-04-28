@@ -487,7 +487,8 @@ def letter_state(request, pk=None):
         except ObjectDoesNotExist as e:
             err_msg = "letter not found in system." + str(e)
             return render(request, 'transit_slip/letter_details.html', {'err_msg':err_msg})
-        through_sigcens = json.loads(letter.transit_slip.through_sigcens)
+        if letter.transit_slip.through_sigcens:
+            through_sigcens = json.loads(letter.transit_slip.through_sigcens)
         try:
             dst_ltr = OutGoingLetter.objects.get(date=letter.date, code=letter.u_string)
         except (ObjectDoesNotExist, MultipleObjectsReturned) as e:
