@@ -11,7 +11,6 @@ $(document).ready(function () {
     });
     //fetch ltr on scan
     $('#scan-ts').on('change', function () {
-        console.log('changed')
         var code = $('#scan-ts').val()
         var str = code.split("-")
         var date_str = str[0].toString()
@@ -20,7 +19,7 @@ $(document).ready(function () {
         var year = date_str.substr(4, 4)
         var date_str = year + '-' + mon + '-' + day
         var u_string = str[1]
-        const rm_lnk_td = '<td><a class="ltr-remove-link" href="#">Remove</a></td></tr>'
+        const rm_lnk_td = '</td><td><a class="ltr-remove-link" href="#">Remove</a></td></tr>'
 
 
         url = 'fetch_letter_json';
@@ -38,11 +37,16 @@ $(document).ready(function () {
                 var row = "<tr><td>" + ltr.fields.from_unit + "</td><td>" + ltr.fields.to_unit +
                     "</td><td>" + ltr.fields.ltr_no + "</td><td>" + ltr.fields.date + "</td><td>" +
                     ltr.fields.u_string + rm_lnk_td + ltr_id;
+                // var row = "<tr><td>" + ltr.fields.from_unit + "</td><td>" + ltr.fields.to_unit +
+                //     "</td><td>" + ltr.fields.ltr_no + "</td><td>" + ltr.fields.date + "</td><td>" +
+                //     ltr.fields.u_string + rm_lnk_td + ltr_id;
                 
-
-                $('tbody').prepend($(row).on('click', function(){
-                    $(this).remove();
+                $('tbody').prepend($(row).on('click', 'a', function(){
+                    $(this).closest('tr').remove();
                 }));
+                // $('tbody').prepend($(row).on('click', function(){
+                //     $(this).remove();
+                // }));
             },
             error: function(jqXHR, error_type, exception){
                 alert(`${exception}-Failed to retrive this DAK.` + jqXHR.responseText)
@@ -50,6 +54,10 @@ $(document).ready(function () {
         });
         $(this).val('')
     });
+
+    function remove_ltr(event){
+        console.log('removing');
+    }
 
     
     

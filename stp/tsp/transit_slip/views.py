@@ -989,7 +989,8 @@ class ThroughPkgView(LoginRequiredMixin, UserPassesTestMixin, View):
             ts = TransitSlip.objects.get(pk=ts_no)
         except ObjectDoesNotExist as e:
             return HttpResponse(e, status=404)
-        if ts.dst != request.user.profile.unit.sta_name:
+        if ((ts.dst != request.user.profile.unit.sta_name) and
+            (ts.prepared_by.profile.unit.sta_name != request.user.profile.unit.sta_name)):
             # through sigcen entry in transit_slip
             sigcen = str(request.user.profile.unit.sta_name)
             received_at = datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -1011,8 +1012,6 @@ class ThroughPkgView(LoginRequiredMixin, UserPassesTestMixin, View):
                 through_sigcens.append(receive_info)
             ts.through_sigcens = json.dumps(through_sigcens)
             ts.save()
-            # ts.refresh_from_db()
-            # print(ts.through_sigcens)
 
             ts_id = str(ts.id) 
             ts_from = str(ts.from_sta())
