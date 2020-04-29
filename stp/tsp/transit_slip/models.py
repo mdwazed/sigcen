@@ -8,20 +8,22 @@ from datetime import date, datetime
 
 # Create your models here.
 # types of users. define access permission based on usr type.
-user_type_choices = {
+user_type_choices = [
         ('uc', 'Unit clk'),
         ('ad', 'Admin'),
         ('sc', 'Sigcen clk'),
-    }
+    ]
+        
 # letter classification to choose620
 
-classification_choices = {
-    ('rs', 'Restricted'),
-    ('cf', 'Confidential'),
-    ('sc', 'Secret'),
-    ('ts', 'Top Secret'),
-    ('uc', 'Unclass'),
-}
+classification_choices = [
+        ('rs', 'Restricted'),
+        ('cf', 'Confidential'),
+        ('sc', 'Secret'),
+        ('ts', 'Top Secret'),
+        ('uc', 'Unclass'),
+    ]
+    
 
     
 class Sta(models.Model):
@@ -39,6 +41,8 @@ class Unit(models.Model):
     unit_full_name = models.CharField(max_length=100, null=True, blank=True)
     sta_name = models.ForeignKey(Sta, on_delete=models.SET_NULL, null=True)
     unit_code = models.IntegerField(unique=True)
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, default=None,
+            null=True, blank=True)
 
     def __str__(self):
         return self.unit_name

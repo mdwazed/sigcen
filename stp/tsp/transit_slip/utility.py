@@ -3,6 +3,7 @@
 from django.shortcuts import render
 from transit_slip.models import Unit
 from datetime import datetime
+from django.db.models import F
     
 def get_default_letter_no(request, type):
     if type == 'regular':
@@ -30,6 +31,13 @@ def local_units(request):
 def render_generic_err(request, err_msg):
     """ Renders different error msg with custom text """
     return render(request, 'transit_slip/generic_error.html', {'err_msg': err_msg})
+
+def get_delivery_unit_choices(request):
+    sta = request.user.profile.unit.sta_name
+    units = [(unit.id, unit.unit_name) for unit in Unit.objects.filter(parent=F('id'),
+            sta_name=sta).order_by('unit_name')]
+    return units
+
 
 def get_ltr_prefix(sta):
     if sta == "JSR":

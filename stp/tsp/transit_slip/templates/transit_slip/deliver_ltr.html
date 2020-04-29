@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container">
     <div>
-        <h5>DAK Delivery- {{ user_unit }}</h5>
+        <h5 style="text-align: center;">DAK Delivery- {{ request.user.profile.unit.unit_name }}</h5>
     </div>
     {% if err_txt %}
         <div class="p-2 mb-1 bg-warning text-white d-flex justify-content-around">
@@ -32,7 +32,7 @@
     </div>
     {% if letters %}
         <div>
-            <div class="p-2 mb-1 bg-info text-white d-flex justify-content-around">
+            <div class="p-2 mb-1 bg-info text-body d-flex justify-content-around">
                 <h5>Unit: {{ unit }}</h5>
                 <h5>DAK Count: {{ letters | length }}</h5>
 
@@ -57,6 +57,7 @@
                                     <td>{{ letter.to_unit }}</td>
                                     <td>{{ letter.ltr_no }}</td>
                                     <td>{{ letter.date | date:"d/m/Y" }}</td>
+                                    <input type="hidden" name="ltr-ids" value="{{ letter.id }}">
                                 </tr>
                                 {% endfor %}
                             </tbody>

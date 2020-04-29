@@ -13,6 +13,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import F, Q
 
 from transit_slip.models import (User, Letter, Unit, Sta, TransitSlip, LetterReceipt,
                                     OutGoingLetter, DeliveryReceipt)
@@ -21,6 +22,8 @@ from transit_slip import utility
 
 from datetime import datetime, date, timedelta
 from random import randint
+from io import BytesIO
+from urllib.parse import urlparse
 from PIL import Image
 import qrcode
 import uuid
@@ -30,9 +33,7 @@ import logging
 import json
 import itertools
 import base64
-from io import BytesIO
 
-from urllib.parse import urlparse
 
 logger = logging.getLogger('transit_slip')
 
@@ -316,7 +317,7 @@ class UnitCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 class UnitUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Unit
-    fields = ['unit_name', 'unit_full_name', 'sta_name', 'unit_code']
+    fields = ['unit_name', 'unit_full_name', 'sta_name', 'unit_code', 'parent']
     template_name = "transit_slip/unit_add_update.html"
     success_url = reverse_lazy("unit_list")
 
@@ -642,23 +643,27 @@ class DakInManualView(LoginRequiredMixin, UserPassesTestMixin, View):
         if form.is_valid():
             unit = form.cleaned_data['unit']
             date = form.cleaned_data['date']
-            # if searched by unique code or assigne code=none
-            if form.cleaned_data['code']:
-                code = form.cleaned_data['code']
-            else:
-                code = None
-            # search letter wothout code
-            if not code:
+            code = form.cleaned_data['code']
+        
+            if date and code:
+                letters = Letter.objects.filter(from_unit=unit, date=date, 
+                    u_string=code, ltr_receipt=None).order_by('-created_at')
+            elif date:
                 letters = Letter.objects.filter(from_unit=unit, date=date, 
                     ltr_receipt=None).order_by('-created_at')
+            elif code:
+                letters = Letter.objects.filter(from_unit=unit, u_string=code, 
+                    ltr_receipt=None).order_by('-created_at')
             else:
-                letters = Letter.objects.filter(from_unit=unit, date=date, u_string=code)
-
-
+                letters = Letter.objects.filter(from_unit=unit, 
+                    ltr_receipt=None).order_by('-created_at')[:50]
             context = {
                 'form' : form,
                 'letters' : letters
             }
+        else:
+            err_msg = "form validation failed."
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
         return render(request, self.template, context)
 
 class DakInScanView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -1357,27 +1362,29 @@ def fetch_unit_names(request):
 class DeliverLetterView(SearchLtrView):
     template = 'transit_slip/deliver_ltr.html'
     err_txt = None
-    
+    def get(self, request):
+        unit_choices = utility.get_delivery_unit_choices(request)
+        context = {
+            'unit_choices': unit_choices,
+        }
+        return render(request, self.template, context)
     def post(self, request):
         err_txt = None
         letters = None
         unit = None
         null_return = False
-        user_unit = request.session.get('unitid')
         if not request.POST['unit-id']:
             err_txt = "No unit was selected!!"
         else:
-            
             try:
                 unit = Unit.objects.get(pk=request.POST.get('unit-id'))
-                letters = OutGoingLetter.objects.filter(to_unit=unit, delivery_receipt=None)
+                child_units = Unit.objects.filter(parent=unit)
+                letters = OutGoingLetter.objects.filter(Q(to_unit__in=child_units), delivery_receipt=None)
                 null_return=True if letters.count()==0 else False
             except ObjectDoesNotExist as e:
                 err_txt = "Something went wrong while fetching unit." + str(e)
-        unit_choices = self.get_unit_choices(request)
-        user_unit = self.get_user_unit(request)
+        unit_choices = utility.get_delivery_unit_choices(request)
         context = {
-                'user_unit': user_unit,
                 'unit' : unit,
                 'letters': letters,
                 'unit_choices': unit_choices,
@@ -1388,11 +1395,11 @@ class DeliverLetterView(SearchLtrView):
 
 class SaveDeliveryView(View):
     def post(self, request):
-        print(request.POST)
         err_txt = None
         try:
-            unit = Unit.objects.get(pk=request.POST.get('unit-id'))
-            letters = OutGoingLetter.objects.filter(to_unit=unit, delivery_receipt=None)
+            ltr_ids = request.POST.getlist("ltr-ids")
+            letters = OutGoingLetter.objects.filter(pk__in=ltr_ids)
+            print(letters)
         except ObjectDoesNotExist as e:
             err_txt = "Something went wrong while fetching unit." + str(e)
         if not err_txt:
