@@ -55,7 +55,7 @@ $('#ltr-delete').on('click', function (event) {
     url = '/letter_delete/';
     redirect_url = '/letter_list_inhouse/';
     let r = window.confirm("Are you sure!! This will DELETE the DAK parmanently. If you already have " +
-            "printed the Label it will be invalid. ");
+            "printed the Label sigcen will notable to receive this DAK anymore.");
     if (r == true) {
         $.post(url, { 'csrfmiddlewaretoken': csrf_token, 'ltr_id': ltr_id }, function (data, status) {
             if (status == 'success' && data == 'true') {
