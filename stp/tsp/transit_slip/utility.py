@@ -1,6 +1,7 @@
 """ provide all utility functions"""
 
 from django.shortcuts import render
+from django.core.exceptions import IntegrityError
 from transit_slip.models import Unit
 from datetime import datetime
 from django.db.models import F
@@ -39,15 +40,17 @@ def get_delivery_unit_choices(request):
     units = [(unit.id, unit.unit_name) for unit in Unit.objects.filter(parent=F('id'),
             sta_name=sta).order_by('unit_name')]
     return units
+
 def process_local_ltrs(request, units):
-    print('getting local ltrs')
     ltrs = Letter.objects.filter(to_unit__in=units, ltr_receipt__isnull=False,
             from_unit__sta_name=request.user.profile.unit.sta_name, delivered_locally=False)
     for ltr in ltrs:
-
         outgoing_ltr = OutGoingLetter(from_unit=ltr.from_unit, to_unit=ltr.to_unit,
                     date=ltr.date, code=ltr.u_string, ltr_no=ltr.ltr_no, ts_info='Local',)
-        outgoing_ltr.save()
+        try:
+            outgoing_ltr.save()
+        except IntegrityError:
+            pass
         ltr.delivered_locally=True
         ltr.save()
 
