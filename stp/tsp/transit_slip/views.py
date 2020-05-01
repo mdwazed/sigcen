@@ -391,7 +391,7 @@ class LetterView(LoginRequiredMixin, View):
                     return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
             else:
                 return render(request, self.template_name, context)
-        return redirect(letter_list_inhouse)
+        return redirect('/letter_list/inhouse')
             
 class DoView(LoginRequiredMixin, View):
     """ create new DO """
@@ -450,7 +450,7 @@ class DoView(LoginRequiredMixin, View):
                     return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
             else:
                 return render(request, self.template_name, context)
-        return redirect(letter_list_inhouse)
+        return redirect('letter_list/inhouse')
 
 
 @login_required
@@ -490,7 +490,7 @@ def letter_state(request, pk=None):
             return render(request, 'transit_slip/letter_details.html', {'err_msg':err_msg})
         try:
             through_sigcens = json.loads(letter.transit_slip.through_sigcens)
-        except AttributeError:
+        except (AttributeError, TypeError): # transit slip not yet assigned
             through_sigcens = None
         try:
             dst_ltr = OutGoingLetter.objects.get(date=letter.date, code=letter.u_string)
@@ -506,26 +506,39 @@ def letter_state(request, pk=None):
         return render(request, 'transit_slip/letter_state.html', context)
 
 
-@login_required
-def letter_list_inhouse(request):
-    unit = Unit.objects.get(pk=request.session['unitid'])
-    letters = Letter.objects.filter(from_unit=unit, ltr_receipt=None,).order_by('-created_at')
-    context = {
-        'letters' : letters,
-        'unit' : unit,
-        'caller': 'inhouse',
-    }
-    return render(request, 'transit_slip/letter_list.html', context)
+# @login_required
+# def letter_list_inhouse(request):
+#     unit = Unit.objects.get(pk=request.session['unitid'])
+#     letters = Letter.objects.filter(from_unit=unit, ltr_receipt=None,).order_by('-created_at')
+#     context = {
+#         'letters' : letters,
+#         'unit' : unit,
+#         'caller': 'inhouse',
+#     }
+#     return render(request, 'transit_slip/letter_list.html', context)
 
-class LetterListDespatchedView(LoginRequiredMixin, View):
+class LetterListView(LoginRequiredMixin, View):
     """ list ltr which has been despatched to sigcen """
 
     template = 'transit_slip/letter_list.html'
     
     def get(self, request, *args, **kwargs):
         unit = Unit.objects.get(pk=request.session['unitid'])
-        letters = Letter.objects.filter(from_unit=unit, 
-                date__gte=datetime.today()-timedelta(days=10)).exclude(ltr_receipt=None)[:400]
+        catagory = kwargs.pop('catagory')
+        print(catagory)
+        if catagory == 'inhouse':
+            letters = Letter.status_objects.get_unit_ltrs().filter(
+                from_unit=request.user.profile.unit).order_by('-created_at')[:200]
+            
+        elif catagory == 'despatched':
+            letters = Letter.status_objects.get_despatched_letters().filter(
+                from_unit=request.user.profile.unit)[:200]
+        elif catagory == 'local_delivered':
+            letters = Letter.status_objects.get_local_delivered_ltrs().filter(
+                from_unit=request.user.profile.unit)[:200]
+        # letters = Letter.objects.filter(from_unit=unit, 
+                # date__gte=datetime.today()-timedelta(days=10)).exclude(ltr_receipt=None)[:400]
+        # letters = Letter.status_objects.get_unit_letters()
         context = {
         'letters' : letters,
         'unit' : unit,
@@ -534,32 +547,37 @@ class LetterListDespatchedView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         try:
+            catagory = kwargs.pop('catagory')
             from_date = datetime.strptime(request.POST['from-date'], '%d-%m-%Y')
             to_date = datetime.strptime(request.POST['to-date'], '%d-%m-%Y')
-            unit = Unit.objects.get(pk=request.session['unitid'])
+            unit = request.user.profile.unit
         except ValueError:
             err_msg = "Error: Either From or To date is missing"
             return render(request, 'transit_slip/generic_error.html', {'err_msg': err_msg})
-        letters = Letter.objects.filter(from_unit=unit, 
-            date__gte=from_date, date__lte=to_date,).exclude(ltr_receipt=None)[:200]    
+        if catagory == 'inhouse':
+            letters = Letter.status_objects.get_unit_ltrs().filter(from_unit=unit,
+                date__gte=from_date, date__lte=to_date)[:200]
+        elif catagory == 'despatched':
+            letters = Letter.status_objects.get_despatched_letters().filter(from_unit=unit, 
+                date__gte=from_date, date__lte=to_date,)[:200]  
+        elif catagory == 'local_delivered':
+            letters = Letter.status_objects.get_local_delivered_ltrs().filter(from_unit=unit, 
+                date__gte=from_date, date__lte=to_date,)[:200]
         context = {
         'letters' : letters,
-        'unit' : unit,
         }
         return render(request, self.template, context)
 
 @login_required
 def letter_delete(request):
     if request.method == 'POST':
-        print('letter delete called')
         try:
-
             ltr = Letter.objects.get(pk=request.POST['ltr_id'])
             print(request.POST['ltr_id'])
             ltr.delete()
-            return HttpResponse('true')
+            return HttpResponse(status=204)
         except Exception:
-            return HttpResponse('false')
+            return HttpResponse(status=404)
 
 @login_required
 def label(request, pk=None):
@@ -892,6 +910,9 @@ def transit_slip_ltrs(request):
             dst = Sta.objects.get(sta_name=request.POST.get('dst-sta'))
         except ObjectDoesNotExist:
             err_msg = 'No STA was selected. Please select a dst sta.'
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+        if (dst == request.user.profile.unit.sta_name):
+            err_msg = 'Same STA TS not allowed.'
             return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
         ltr_ids = request.POST.getlist('ltr-ids')
         if len(ltr_ids) <= 0:
@@ -1361,6 +1382,7 @@ def fetch_unit_names(request):
 
 class DeliverLetterView(SearchLtrView):
     template = 'transit_slip/deliver_ltr.html'
+    
     err_txt = None
     def get(self, request):
         unit_choices = utility.get_delivery_unit_choices(request)
@@ -1379,10 +1401,14 @@ class DeliverLetterView(SearchLtrView):
             try:
                 unit = Unit.objects.get(pk=request.POST.get('unit-id'))
                 child_units = Unit.objects.filter(parent=unit)
-                letters = OutGoingLetter.objects.filter(Q(to_unit__in=child_units), delivery_receipt=None)
+                utility.process_local_ltrs(request, child_units) # save local ltrs from Letter to OutGoingLtr
+                letters = OutGoingLetter.objects.filter(Q(to_unit__in=child_units),
+                        delivery_receipt=None)
                 null_return=True if letters.count()==0 else False
             except ObjectDoesNotExist as e:
-                err_txt = "Something went wrong while fetching unit." + str(e)
+                err_msg = "Unit not found." + str(e)
+                return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+            
         unit_choices = utility.get_delivery_unit_choices(request)
         context = {
                 'unit' : unit,
@@ -1424,6 +1450,16 @@ class SaveDeliveryView(View):
             return render(request, "transit_slip/generic_info.html", {'info':info})
         else:
             return render(request, "transit_slip/generic_error.html", {'err_msg': err_txt})
+
+def letter_local_deliver(request):
+    print('delivering local letter')
+    if request.method == "POST":
+        ltr_id = request.POST.get('ltr_id') 
+        ltr = Letter.objects.get(pk=ltr_id)
+        ltr.delivered_locally = True
+        ltr.save()
+    return HttpResponse(status=204)
+
 
 def letter_delivery_state(request, pk):
     if request.method == "GET":

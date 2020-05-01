@@ -18,8 +18,8 @@ urlpatterns = [
     # Letter
     path('new_letter/', views.LetterView.as_view(), name= 'new_letter'),
     path('new_do/', views.DoView.as_view(), name= 'new_do'),
-    path('letter_list_inhouse/', views.letter_list_inhouse, name= 'letter_list_inhouse'),
-    path('letter_list_despatched/', views.LetterListDespatchedView.as_view(), name= 'letter_list_despatched'),
+    # path('letter_list/<str:catagory>/', views.letter_list_inhouse, name= 'letter_list_inhouse'),
+    path('letter_list/<catagory>/', views.LetterListView.as_view(), name= 'letter_list'),
     path('letter_delete/', views.letter_delete, name= 'letter_delete'),
     path('search_ltr', views.SearchLtrView.as_view(), name= 'search_ltr'),
     path('letter_state/<int:pk>', views.letter_state, name= 'letter_state'),
@@ -49,6 +49,7 @@ urlpatterns = [
     path('fetch_unit_names/', views.fetch_unit_names, name= 'fetch_unit_names'), # used in API call
     path('search_outgoing_ltr/', views.SearchOutgoingLtrView.as_view(), name= 'search_outgoing_ltr'),
     path('deliver_ltr/', views.DeliverLetterView.as_view(), name= 'deliver_ltr'),
+    path('letter_local_deliver/', views.letter_local_deliver, name= 'letter_local_deliver'),
     path('save_delivery/', views.SaveDeliveryView.as_view(), name= 'save_delivery'),
     path('letter_delivery_state/<int:pk>', views.letter_delivery_state, name= 'letter_delivery_state'),
     # through packet

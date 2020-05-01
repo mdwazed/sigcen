@@ -104,12 +104,20 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
-    
+
+class LetterQuerySet(models.QuerySet):
+    def get_unit_ltrs(self):
+        return self.filter(ltr_receipt__isnull=True, delivered_locally=False)
+    def get_despatched_letters(self):
+        return self.filter(ltr_receipt__isnull=False)
+    def get_local_delivered_ltrs(self):
+        return self.filter(ltr_receipt__isnull=True, delivered_locally=True)
+
 class Letter(models.Model):
     letter_type = models.CharField(max_length=3, default='reg') # reg or do letter. decide in views
     classification = models.CharField(choices=classification_choices, default='rs', max_length=2, blank=True, null=True )
     addr_line_1 = models.CharField(max_length=100, blank=True, null=True) #name of receipient
-    addr_line_2 = models.CharField(max_length=50, blank=True, null=True) # appt of receipient
+    addr_line_2 = models.CharField(max_length=50, blank=True, null=True) # appt/rank/other
     ltr_no = models.CharField(max_length=50)
     date = models.DateField()
     from_unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='from_unit',)
@@ -121,12 +129,15 @@ class Letter(models.Model):
     ltr_receipt = models.ForeignKey(LetterReceipt, on_delete=models.SET_NULL, null=True)
     # despatched_at = models.DateTimeField(null=True)
     transit_slip = models.ForeignKey(TransitSlip, related_name='ltrs', on_delete=models.SET_NULL, blank=True, null=True)
+    delivered_locally = models.BooleanField(default=False)
+    objects = models.Manager()
+    status_objects = LetterQuerySet.as_manager()
 
     class Meta:
         unique_together = ('date', 'u_string',)
 
     def __str__(self):
-        return (f'letter from {self.from_unit} u_string{self.u_string}')
+        return (f'letter from {self.from_unit} u_string{self.u_string} to {self.to_unit}')
 
     def get_absolute_url(self):
         return (f'/letter/{self.pk}')
@@ -137,11 +148,15 @@ class Letter(models.Model):
         except ObjectDoesNotExist:
             dst_ltr = None
 
-        if not self.ltr_receipt:
+        if not self.ltr_receipt and not self.delivered_locally:
             return "In Unit"
-        elif not self.transit_slip:
+        elif not self.ltr_receipt and self.delivered_locally:
+            return "Delivered(L)"
+        elif self.ltr_receipt and self.delivered_locally:
+            return "Delivered(LtS)"
+        elif self.ltr_receipt and not self.transit_slip:
             return "In Sigcen"
-        elif not self.transit_slip.received_on:
+        elif self.transit_slip and not self.transit_slip.received_on:
             return "In Transit"
         if dst_ltr:
             if self.transit_slip.received_on and not dst_ltr.delivery_receipt:
@@ -157,7 +172,7 @@ class OutGoingLetter(models.Model):
     date = models.DateField()
     code = models.CharField(max_length=5)
     ltr_no = models.CharField(max_length=50)
-    ts_info = models.CharField(max_length=10)
+    ts_info = models.CharField(max_length=10) 
     received_at = models.DateTimeField(auto_now_add=True)
     delivery_receipt = models.ForeignKey(DeliveryReceipt, on_delete=models.SET_NULL, null=True,
                             blank=True, related_name='ltrs')

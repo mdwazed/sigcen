@@ -26,7 +26,7 @@
                         <button class="btn btn-outline-primary" type="submit" name="submit">Search</button>
                     </div>
                     <div class="alert alert-warning" role="alert">
-                        Max 400 DAK will be shown as a result of this search. 
+                        Max 200 DAK will be shown as a result of this search. 
                         Please select the date carefully to find your desired DAK. 
                     </div>
     
@@ -36,7 +36,7 @@
     </div>
     
     <div>
-        <h5>Recent Letters of {{ unit.unit_name }} </h5>
+        <h5>Recent Letters of {{ request.user.profile.unit.unit_name }} </h5>
         <table id="data_table_id" class="display">
             <thead>
                 <tr>
@@ -61,11 +61,12 @@
                         {% if letter.get_current_status == "In Unit" %}
                         <td>
                             {% if letter.letter_type == 'reg' %}
-                                <a href="{% url 'label_bulk' letter.ltr_no|urlencode:"" letter.date|date:'dmY' %}" target="blank">Print Label</a>
+                                <a href="{% url 'label_bulk' letter.ltr_no|urlencode:"" letter.date|date:'dmY' %}" target="blank">Print</a>
                             {% elif letter.letter_type == 'do' %}
-                                <a href="{% url 'label_do' letter.pk %}" target="blank">Print Label</a>
+                                <a href="{% url 'label_do' letter.pk %}" target="blank">Print</a>
                             {% endif %}
-                            ||<button class="btn btn-sm btn-danger" id="ltr-delete">Delete</button>
+                            ||<button type="button" class="btn btn-link ltr-delete" id="ltr-delete">Delete</button>
+                            ||<button type="button" class="btn btn-link ltr-deliver" id="ltr-deliver">Deliver</button>
                             <input type="hidden" value="{{letter.id}}">
                         </td>
                         {% else %}

@@ -4,6 +4,8 @@ from django.shortcuts import render
 from transit_slip.models import Unit
 from datetime import datetime
 from django.db.models import F
+
+from transit_slip.models import (User, Letter, OutGoingLetter)
     
 def get_default_letter_no(request, type):
     if type == 'regular':
@@ -37,7 +39,17 @@ def get_delivery_unit_choices(request):
     units = [(unit.id, unit.unit_name) for unit in Unit.objects.filter(parent=F('id'),
             sta_name=sta).order_by('unit_name')]
     return units
+def process_local_ltrs(request, units):
+    print('getting local ltrs')
+    ltrs = Letter.objects.filter(to_unit__in=units, ltr_receipt__isnull=False,
+            from_unit__sta_name=request.user.profile.unit.sta_name, delivered_locally=False)
+    for ltr in ltrs:
 
+        outgoing_ltr = OutGoingLetter(from_unit=ltr.from_unit, to_unit=ltr.to_unit,
+                    date=ltr.date, code=ltr.u_string, ltr_no=ltr.ltr_no, ts_info='Local',)
+        outgoing_ltr.save()
+        ltr.delivered_locally=True
+        ltr.save()
 
 def get_ltr_prefix(sta):
     if sta == "JSR":

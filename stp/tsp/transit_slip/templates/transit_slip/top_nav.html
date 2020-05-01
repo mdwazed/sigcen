@@ -139,8 +139,9 @@
                             DAK List
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <a class="dropdown-item" href="{% url 'letter_list_inhouse' %}">In House</a>
-                            <a class="dropdown-item" href="{% url 'letter_list_despatched' %}">Despatched</a>
+                            <a class="dropdown-item" href="{% url 'letter_list' 'inhouse' %}">In House</a>
+                            <a class="dropdown-item" href="{% url 'letter_list' 'despatched' %}">Despatched</a>
+                            <a class="dropdown-item" href="{% url 'letter_list' 'local_delivered' %}">Local Deliver</a>
                         </div>
                     </li>
                     <li class="nav-item">

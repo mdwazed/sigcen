@@ -49,19 +49,41 @@ $('#ltr-delete-admin').on('click', function(event){
     }
 });
 // delete a letter by user only before received by sigcen
-$('#ltr-delete').on('click', function (event) {
-    ltr_id = $(this).next().val();
-    // console.log($(this));
+$('.ltr-delete').on('click', function (event) {
+    ltr_id = $(this).siblings('input').val();
+    // console.log($(this).siblings('input').val());
     url = '/letter_delete/';
-    redirect_url = '/letter_list_inhouse/';
+    redirect_url = '/letter_list/inhouse/';
     let r = window.confirm("Are you sure!! This will DELETE the DAK parmanently. If you already have " +
-            "printed the Label sigcen will notable to receive this DAK anymore.");
+            "printed the Label sigcen will not be able to receive this DAK anymore.");
     if (r == true) {
-        $.post(url, { 'csrfmiddlewaretoken': csrf_token, 'ltr_id': ltr_id }, function (data, status) {
-            if (status == 'success' && data == 'true') {
+        $.post(url, { 'csrfmiddlewaretoken': csrf_token, 'ltr_id': ltr_id },
+            function (data, status, jqXHR) {
+                console.log(data)
+                console.log(status)
+                console.log(jqXHR.status)
+            if (jqXHR.status == 204) {
                 window.location.replace(redirect_url);
             } else {
                 alert('There was some problem deleting DAK. Please try later.')
+            }
+        });
+    }
+});
+
+// deliver local dak by unit DR
+$('.ltr-deliver').on('click', function (event) {
+    ltr_id = $(this).siblings('input').val();
+    url = '/letter_local_deliver/';
+    redirect_url = '/letter_list/inhouse/';
+    let r = window.confirm("Be sure you have delivered the DAK to unit DR.");
+    if (r == true) {
+        $.post(url, { 'csrfmiddlewaretoken': csrf_token, 'ltr_id': ltr_id }, 
+            function (data, status, jqXHR) {
+            if (jqXHR.status == 204) {
+                window.location.replace(redirect_url);
+            } else {
+                alert('There was some problem delivering the local DAK. Please try later.')
             }
         });
     }
@@ -85,7 +107,7 @@ $('.user-delete').on('click', function(event){
     }
 });
 
-// change mouse on hover above accordion header
+// change mouse on hover above accordion header on home page
 $('.accordion-header').on('mouseover', function(){
     $(this).css('cursor', 'pointer')
 })

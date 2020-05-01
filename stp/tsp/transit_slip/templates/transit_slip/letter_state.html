@@ -21,17 +21,17 @@
                 </tr>
                 <tr>
                     <td class="td-1">Date :</td>
-                    <td class="td-2">{{ letter.date | date:"d-m-Y" }}</td>
+                    <td class="td-2">{{ letter.date | date:"d/m/Y" }}</td>
                 </tr>
                 
                 <tr>
                     <td class="td-1">DAK Created at :</td>
-                    <td class="td-2">{{ letter.created_at | date:"d-m-Y H:i" }}hrs</td>
+                    <td class="td-2">{{ letter.created_at | date:"d/m/Y H:i" }}hrs</td>
                 </tr>
                 <tr>
                     <td class="td-1">Received at sigcen :</td>
                     <td class="td-2">
-                        {{ letter.ltr_receipt.received_at_sigcen | default_if_none:"Not Received" | date:"d-m-Y H:i" }}hrs</td>
+                        {{ letter.ltr_receipt.received_at_sigcen | default_if_none:"Not Received" | date:"d/m/Y H:i" }}hrs</td>
                 </tr>
                 <tr>
                     <td class="td-1">Received By:</td>
@@ -115,6 +115,10 @@
                 <tr>
                     <td class="td-1">Received at :</td>
                     <td class="td-2">{{ dst_ltr.received_at | date:'d/m/Y H:i'}}</td>
+                </tr>
+                <tr>
+                    <td class="td-1">Delivered at :</td>
+                    <td class="td-2">{{ dst_ltr.delivery_receipt.delivered_at | date:'d/m/Y H:i' }}</td>
                 </tr>
                 <tr>
                     <td class="td-1">Delivered By :</td>
