@@ -1,7 +1,7 @@
 """ provide all utility functions"""
 
 from django.shortcuts import render
-from django.core.exceptions import IntegrityError
+from django.db import IntegrityError
 from transit_slip.models import Unit
 from datetime import datetime
 from django.db.models import F
