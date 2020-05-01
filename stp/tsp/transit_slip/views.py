@@ -532,13 +532,10 @@ class LetterListView(LoginRequiredMixin, View):
             
         elif catagory == 'despatched':
             letters = Letter.status_objects.get_despatched_letters().filter(
-                from_unit=request.user.profile.unit)[:200]
+                from_unit=request.user.profile.unit).order_by('-created_at')[:200]
         elif catagory == 'local_delivered':
             letters = Letter.status_objects.get_local_delivered_ltrs().filter(
-                from_unit=request.user.profile.unit)[:200]
-        # letters = Letter.objects.filter(from_unit=unit, 
-                # date__gte=datetime.today()-timedelta(days=10)).exclude(ltr_receipt=None)[:400]
-        # letters = Letter.status_objects.get_unit_letters()
+                from_unit=request.user.profile.unit).order_by('-created_at')[:200]
         context = {
         'letters' : letters,
         'unit' : unit,
@@ -556,13 +553,13 @@ class LetterListView(LoginRequiredMixin, View):
             return render(request, 'transit_slip/generic_error.html', {'err_msg': err_msg})
         if catagory == 'inhouse':
             letters = Letter.status_objects.get_unit_ltrs().filter(from_unit=unit,
-                date__gte=from_date, date__lte=to_date)[:200]
+                date__gte=from_date, date__lte=to_date).order_by('-created_at')[:200]
         elif catagory == 'despatched':
             letters = Letter.status_objects.get_despatched_letters().filter(from_unit=unit, 
-                date__gte=from_date, date__lte=to_date,)[:200]  
+                date__gte=from_date, date__lte=to_date,).order_by('-created_at')[:200]  
         elif catagory == 'local_delivered':
             letters = Letter.status_objects.get_local_delivered_ltrs().filter(from_unit=unit, 
-                date__gte=from_date, date__lte=to_date,)[:200]
+                date__gte=from_date, date__lte=to_date,).order_by('-created_at')[:200]
         context = {
         'letters' : letters,
         }
