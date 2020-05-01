@@ -518,7 +518,7 @@ def letter_state(request, pk=None):
 #     return render(request, 'transit_slip/letter_list.html', context)
 
 class LetterListView(LoginRequiredMixin, View):
-    """ list ltr which has been despatched to sigcen """
+    """ lists ltrs of various type ie. inhouse, despatched, local delivered  """
 
     template = 'transit_slip/letter_list.html'
     
@@ -662,16 +662,16 @@ class DakInManualView(LoginRequiredMixin, UserPassesTestMixin, View):
         
             if date and code:
                 letters = Letter.objects.filter(from_unit=unit, date=date, 
-                    u_string=code, ltr_receipt=None).order_by('-created_at')
+                    u_string=code, ltr_receipt=None, delivered_locally=None).order_by('-created_at')
             elif date:
                 letters = Letter.objects.filter(from_unit=unit, date=date, 
-                    ltr_receipt=None).order_by('-created_at')
+                    ltr_receipt=None, delivered_locally=None).order_by('-created_at')
             elif code:
                 letters = Letter.objects.filter(from_unit=unit, u_string=code, 
-                    ltr_receipt=None).order_by('-created_at')
+                    ltr_receipt=None, delivered_locally=None).order_by('-created_at')
             else:
                 letters = Letter.objects.filter(from_unit=unit, 
-                    ltr_receipt=None).order_by('-created_at')[:50]
+                    ltr_receipt=None, delivered_locally=None).order_by('-created_at')[:50]
             context = {
                 'form' : form,
                 'letters' : letters
@@ -1449,12 +1449,16 @@ class SaveDeliveryView(View):
             return render(request, "transit_slip/generic_error.html", {'err_msg': err_txt})
 
 def letter_local_deliver(request):
+    """deliver local dak by unit DR and saved as delivered"""
     print('delivering local letter')
     if request.method == "POST":
         ltr_id = request.POST.get('ltr_id') 
         ltr = Letter.objects.get(pk=ltr_id)
-        ltr.delivered_locally = True
-        ltr.save()
+        print(ltr.to_unit.sta_name)
+        print(request.user.profile.unit.sta_name)
+        if ltr.to_unit.sta_name == request.user.profile.unit.sta_name:
+            ltr.delivered_locally = True
+            ltr.save()
     return HttpResponse(status=204)
 
 
