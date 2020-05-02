@@ -652,26 +652,24 @@ class DakInManualView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def post(self, request, *args, **kwargs):
         # print(request.POST)
-        unit_id = request.session['unitid']
-        sta = Unit.objects.get(pk=unit_id).sta_name
+        sta = request.user.profile.unit.sta_name
         form = forms.DakInForm(request.POST, sta=sta)
         if form.is_valid():
             unit = form.cleaned_data['unit']
             date = form.cleaned_data['date']
             code = form.cleaned_data['code']
-        
             if date and code:
                 letters = Letter.objects.filter(from_unit=unit, date=date, 
-                    u_string=code, ltr_receipt=None, delivered_locally=None).order_by('-created_at')
+                    u_string=code, ltr_receipt=None, delivered_locally=False).order_by('-created_at')
             elif date:
                 letters = Letter.objects.filter(from_unit=unit, date=date, 
-                    ltr_receipt=None, delivered_locally=None).order_by('-created_at')
+                    ltr_receipt=None, delivered_locally=False).order_by('-created_at')
             elif code:
                 letters = Letter.objects.filter(from_unit=unit, u_string=code, 
-                    ltr_receipt=None, delivered_locally=None).order_by('-created_at')
+                    ltr_receipt=None, delivered_locally=False).order_by('-created_at')
             else:
                 letters = Letter.objects.filter(from_unit=unit, 
-                    ltr_receipt=None, delivered_locally=None).order_by('-created_at')[:50]
+                    ltr_receipt=None, delivered_locally=False).order_by('-created_at')[:50]
             context = {
                 'form' : form,
                 'letters' : letters
