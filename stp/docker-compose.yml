@@ -15,7 +15,7 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./tsp/media:/usr/share/nginx/media
       - ./tsp/static:/usr/share/nginx/static
-      - ./tsp/info.log: /var/log/digdaklog.log
+      - ./tsp/info.log:/var/log/digdaklog.log
     ports:
       - "80:8080"
     depends_on:
