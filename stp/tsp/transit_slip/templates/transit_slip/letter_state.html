@@ -1,7 +1,12 @@
 {% extends 'transit_slip/layout.html' %}
 {% block content %}
 <div class="container">
-    <h5>State of DAK: {{ letter.ltr_no }}</h5>
+    <h5>State of DAK: {{ letter.ltr_no }} From {{letter.from_unit}} ==> 
+        <span style="color: red;">
+            {{ letter.get_current_status }}
+        </span>
+        
+    </h5>
     
     <div class="dak-state-container">
         <div class="dak-state">
@@ -98,7 +103,7 @@
 
         </div>
         <div class="dak-state">
-            <h5>DST sigcen</h5>
+            <h5>DST sigcen ({{dst_ltr.to_unit.sta_name}})</h5>
             <table class="table table-sm state-table">
                 <tr>
                     <td class="td-1">TS INFO :</td>

@@ -161,6 +161,7 @@
 .dak-state-container {
     display: flex;
     justify-content: space-around;
+    margin-top: 40px;
 }
 
 .dak-state h5{
