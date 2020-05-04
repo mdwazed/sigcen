@@ -432,14 +432,14 @@ class DoView(LoginRequiredMixin, View):
                     file_name = qr_code_name + '.png'
                     file_path = settings.MEDIA_ROOT
                     # file_url = file_path + '/qr_code/' + file_name
-                    file_url = file_path + '/qr_code/' +date.today().strftime("%Y/%m/%d/")+ file_name
+                    file_url = file_path + '/qr_code/' + date.today().strftime("%Y/%m/%d/") + file_name
                     directory = os.path.dirname(file_url)
                     if not os.path.exists(directory):
                         os.makedirs(directory)
                     img = qrcode.make(qr_code_name)
                     img.save(file_url)
                     # letter.qr_image_url = file_name
-                    letter.qr_image_url = 'qr_code/' +date.today().strftime("%Y/%m/%d/")+ file_name
+                    letter.qr_image_url = 'qr_code/' + date.today().strftime("%Y/%m/%d/")+ file_name
                     # letter.to_unit = Unit.objects.get(pk=address)
                     # print(letter.to_unit)
                     letter.save()
