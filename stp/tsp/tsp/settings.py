@@ -80,14 +80,15 @@ WSGI_APPLICATION = 'tsp.wsgi.application'
 
 DATABASES = {
 
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME' : 'stp',
-    #     'USER' : 'root',
-    #     'PASSWORD' : '7620',
-	#     'HOST' : 'docker-local-mysql',
-	#     'PORT' : 3306,
-    # }
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME' : 'stp',
+        'USER' : 'root',
+        'PASSWORD' : '7620',
+	    # 'HOST' : 'docker-local-mysql',
+	    'HOST' : 'localhost',
+	    'PORT' : 3306,
+    }
 }
 
 
@@ -172,7 +173,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': '/var/log/digidakinfo.log',
+            'filename': 'info.log',
             'formatter': 'verbose',
         },
     },
