@@ -450,7 +450,7 @@ class DoView(LoginRequiredMixin, View):
                     return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
             else:
                 return render(request, self.template_name, context)
-        return redirect('letter_list/inhouse')
+        return redirect('/letter_list/inhouse')
 
 
 @login_required
