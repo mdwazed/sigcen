@@ -1,0 +1,35 @@
+{% extends 'transit_slip/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h4>DAK - RTU</h4>
+    <div class="flex-div">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">Original DAK</h6>
+                <p>From: <span>{{ ltr.rtu_of.from_unit }}</span> </p>
+                <p>To: <span>{{ ltr.rtu_of.to_unit }}</span> </p>
+                <p>Ltr No: <span>{{ ltr.rtu_of.ltr_no }}</span> </p>
+                <p>Date: <span>{{ ltr.rtu_of.date | date:"d/m/Y" }}</span> </p>
+                <p>Code: <span>{{ ltr.rtu_of.u_string }}</span> </p>
+                <p>Ts Info: <span>{{ ltr.rtu_of.transit_slip.pk }}</span> </p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">RTU DAK</h6>
+                <p>From: <span>{{ ltr.from_unit }}</span> </p>
+                <p>To: <span>{{ ltr.to_unit }}</span> </p>
+                <p>Ltr No: <span>{{ ltr.ltr_no }}</span> </p>
+                <p>Date: <span>{{ ltr.date | date:"d/m/Y" }}</span> </p>
+                <p>Code: <span>{{ ltr.u_string }}</span> </p>
+                <p>Ts Info: <span>{{ ltr.transit_slip.pk }}</span> </p>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+{% endblock %}
+

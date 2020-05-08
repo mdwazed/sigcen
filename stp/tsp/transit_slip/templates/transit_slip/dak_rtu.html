@@ -1,0 +1,70 @@
+{% extends 'transit_slip/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="search-bar card">
+        <div class="card-body">
+            <h6>DAK - RTU</h6>
+            <input type="text" name="rtu-dak-code" id="rtu-dak-code">
+        </div>
+    
+        <div class="card-footer" id="ltr-detail">
+            <p>From:&nbsp; <span id="from-unit"></span> </p>
+            <p>To:&nbsp;<span id="to-unit"></span></p>
+            <p>Ltr No:&nbsp;<span id="ltr-no"></span></p>
+            <p>Date:&nbsp;<span id="ltr-date"></span></p>
+            <button id="btn-dak-rtu">DAK RTU</button>
+            <input type="hidden" name="orig-pk" id="orig-pk">
+        </div>
+    </div>
+
+    <div style="margin-top: 50px;" >
+        <h5>Recent RTU DAK </h5>
+        <table id="data_table_id" class="display">
+            <thead>
+                <tr>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Date</th>
+                    <th>Code</th>
+                    <th>Ltr No</th>
+                    <th>Status</th>
+                    <th>Misc</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for letter in letters %}
+                <tr>
+                    <td>{{ letter.from_unit }}</td>
+                    <td>{{ letter.to_unit }}</td>
+                    <td>{{ letter.date }}</td>
+                    <td>{{ letter.u_string }}</td>
+                    <td>{{ letter.ltr_no }}</td>
+                    <td>{{ letter.get_current_status }}</td>
+                    <td>
+                        <a href="{% url 'label' letter.pk %}" target="blank">Label</a> ||
+                        <form action="{% url 'rtu_ltr_details' %}" method="POST">
+                            {% csrf_token %}
+                            <button class="btn btn-link btn-rtu-details" type="submit">Details</button>
+                            <input type="hidden" name="rtu-ltr-pk" value="{{ letter.pk }}">
+                        </form>
+                        
+                        
+                    </td>
+                </tr>
+                {% endfor %}
+    
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block script %}
+    <script>
+        let csrf_token = '{{ csrf_token }}';
+    </script>
+{% endblock %}
