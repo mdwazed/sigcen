@@ -59,14 +59,11 @@ $('.ltr-delete').on('click', function (event) {
     if (r == true) {
         $.post(url, { 'csrfmiddlewaretoken': csrf_token, 'ltr_id': ltr_id },
             function (data, status, jqXHR) {
-                console.log(data)
-                console.log(status)
-                console.log(jqXHR.status)
-            if (jqXHR.status == 204) {
-                window.location.replace(redirect_url);
-            } else {
-                alert('There was some problem deleting DAK. Please try later.')
-            }
+                if (jqXHR.status == 204) {
+                    window.location.replace(redirect_url);
+                } else {
+                    alert('There was some problem deleting DAK. Please try later.')
+                }
         });
     }
 });
@@ -76,7 +73,8 @@ $('.ltr-deliver').on('click', function (event) {
     ltr_id = $(this).siblings('input').val();
     url = '/letter_local_deliver/';
     redirect_url = '/letter_list/inhouse/';
-    let r = window.confirm("Be sure you have delivered the DAK to unit DR.");
+    let r = window.confirm("Be sure you have delivered the DAK to unit. Sigcen can not receive" + 
+                        "this DAK if you proceed.");
     if (r == true) {
         $.post(url, { 'csrfmiddlewaretoken': csrf_token, 'ltr_id': ltr_id }, 
             function (data, status, jqXHR) {
@@ -112,3 +110,46 @@ $('.accordion-header').on('mouseover', function(){
     $(this).css('cursor', 'pointer')
 })
 
+// fetch ltr for rtu
+$('#rtu-dak-code').on('change', function (event){
+    let date_code = $('#rtu-dak-code').val();
+    let url = '/fetch_ltr/';
+    $.post(url, { 'csrfmiddlewaretoken': csrf_token, 'date_code': date_code },
+        function (data) {
+            ltr = data[0];
+            console.log(ltr);
+            $('#from-unit').text(ltr.fields.from_unit);
+            $('#to-unit').text(ltr.fields.to_unit);
+            $('#ltr-no').text(ltr.fields.ltr_no);
+            $('#ltr-date').text(ltr.fields.date);
+            $('#orig-pk').val(ltr.pk);
+
+    }, 'json');
+});
+
+// create rtu dak entry
+$('#btn-dak-rtu').on('click', function(event){
+    let orig_pk = $('#orig-pk').val()
+    console.log(orig_pk)
+    let url = '/create_rtu_ltr/'
+    $.post(url, {'csrfmiddlewaretoken': csrf_token, 'orig_pk': orig_pk},
+    function(data, textStatus, jqXHR){
+        console.log(data)
+        console.log(jqXHR.status)
+        if(jqXHR.status == 204) {
+            alert("rtu ltr created.")
+        }
+    });
+
+});
+
+// details btn on rtu page
+// $('.btn-rtu-details').on('click', function(){
+
+//     let rtu_pk = $(this).siblings('input').val()
+//     let url = '/rtu_ltr_details/'
+//     $.post(url, { 'csrfmiddlewaretoken': csrf_token, 'rtu_pk': rtu_pk},
+//     function(data, textStatus, jqXHR){
+        
+//     });
+// })

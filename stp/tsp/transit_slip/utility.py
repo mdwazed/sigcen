@@ -7,8 +7,13 @@ from datetime import datetime
 from django.db.models import F
 
 from transit_slip.models import (User, Letter, OutGoingLetter)
-    
+from io import BytesIO
+import qrcode
+import base64
+
+
 def get_default_letter_no(request, type):
+    """ provide letter no based on user sta and type eg. DO, regular """
     if type == 'regular':
         sta = request.user.profile.unit.sta_name.sta_name
         prefix = get_ltr_prefix(sta)
@@ -24,8 +29,9 @@ def not_unit_clk_test(user):
         return False
 
 def local_units(request):
-    """
+    """ 
     returns the local units list. useful for select options.
+    includes child units as well.
     """
     sta = request.user.profile.unit.sta_name
     units = Unit.objects.filter(sta_name=sta).order_by('unit_name')
@@ -36,6 +42,7 @@ def render_generic_err(request, err_msg):
     return render(request, 'transit_slip/generic_error.html', {'err_msg': err_msg})
 
 def get_delivery_unit_choices(request):
+    """ returns the parent units only based on user sta """
     sta = request.user.profile.unit.sta_name
     units = [(unit.id, unit.unit_name) for unit in Unit.objects.filter(parent=F('id'),
             sta_name=sta).order_by('unit_name')]
@@ -122,4 +129,11 @@ def get_ltr_prefix(sta):
     else:
         return None
 
-
+def get_qr_code(str):
+    """ convert str to qrcode image and return base64 img str """
+    qr_code = qrcode.make(str)
+    buffered = BytesIO()
+    qr_code.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue())
+    img_str = img_str.decode('utf-8')
+    return img_str

@@ -5,6 +5,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import date, datetime
 
+from io import BytesIO
+import qrcode, base64
 
 # Create your models here.
 # types of users. define access permission based on usr type.
@@ -130,6 +132,8 @@ class Letter(models.Model):
     # despatched_at = models.DateTimeField(null=True)
     transit_slip = models.ForeignKey(TransitSlip, related_name='ltrs', on_delete=models.SET_NULL, blank=True, null=True)
     delivered_locally = models.BooleanField(default=False)
+    # if RTU ltr then ref to the orign ltr goes here
+    rtu_of = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
     objects = models.Manager()
     status_objects = LetterQuerySet.as_manager()
 
@@ -158,13 +162,25 @@ class Letter(models.Model):
             return "In Sigcen"
         elif self.transit_slip and not self.transit_slip.received_on:
             return "In Transit"
-        if dst_ltr:
+        elif dst_ltr:
             if self.transit_slip.received_on and not dst_ltr.delivery_receipt:
                 return "DST SIGCEN"
             elif dst_ltr.delivery_receipt:
                 return "Delivered"
         else:
             return "Unknown"
+
+        
+    def qr_code(self):
+        """ convert str to qrcode image and return base64 img str """
+        code_str = str(self.date.strftime("%d%m%Y")) + '-' + str(self.u_string)
+
+        qr_code = qrcode.make(code_str)
+        buffered = BytesIO()
+        qr_code.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue())
+        img_str = img_str.decode('utf-8')
+        return img_str
 
 class OutGoingLetter(models.Model):
     from_unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='orig_unit')

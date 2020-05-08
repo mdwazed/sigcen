@@ -23,7 +23,7 @@ urlpatterns = [
     path('search_ltr', views.SearchLtrView.as_view(), name= 'search_ltr'),
     path('letter_state/<int:pk>', views.letter_state, name= 'letter_state'),
     path('label/', views.label, name= 'label'),
-    path('label/<int:pk>', views.label, name= 'label'),
+    path('label/<int:pk>/', views.label, name= 'label'),
     path('label_bulk/<str:ltr_no>/<str:date_str>', views.label_bulk, name= 'label_bulk'),
     path('label_do/<int:pk>', views.label_do, name= 'label_do'),
     # sigcen user
@@ -43,6 +43,7 @@ urlpatterns = [
     path('transit_slip_despatch/<int:id>', views.transit_slip_despatch, name= 'transit_slip_despatch'),
     path('ts_rcv_update', views.ts_rcv_update, name= 'ts_rcv_update'),
     path('fetch_letter_json', views.fetch_letter_json, name= 'fetch_letter_json'),
+    path('outstanding_dak', views.OutStandingDakView.as_view(), name= 'outstanding_dak'),
     # outgoing ltr
     path('remote_ltr', views.RemoteLtrView.as_view(), name= 'remote_ltr'), # use in api call
     path('fetch_unit_names/', views.fetch_unit_names, name= 'fetch_unit_names'), # used in API call
@@ -51,6 +52,10 @@ urlpatterns = [
     path('letter_local_deliver/', views.letter_local_deliver, name= 'letter_local_deliver'),
     path('save_delivery/', views.SaveDeliveryView.as_view(), name= 'save_delivery'),
     path('letter_delivery_state/<int:pk>', views.letter_delivery_state, name= 'letter_delivery_state'),
+    path('dak_rtu/', views.DakRtuView.as_view(), name= 'dak_rtu'),
+    path('fetch_ltr/', views.fetch_ltr, name= 'fetch_ltr'),
+    path('create_rtu_ltr/', views.create_rtu_ltr, name= 'create_rtu_ltr'),
+    path('rtu_ltr_details/', views.rtu_ltr_details, name= 'rtu_ltr_details'),
     # through packet
     path('through_pkg', views.ThroughPkgView.as_view(), name= 'through_pkg'),
     path('through_pkg_despatch', views.through_pkg_despatch, name= 'through_pkg_despatch'),

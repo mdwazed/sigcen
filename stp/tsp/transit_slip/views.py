@@ -13,7 +13,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db.models import F, Q
+from django.db.models import F, Q, Count
 
 from transit_slip.models import (User, Letter, Unit, Sta, TransitSlip, LetterReceipt,
                                     OutGoingLetter, DeliveryReceipt)
@@ -359,14 +359,12 @@ class LetterView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         to_units = request.POST.getlist('to_units')
+        err_msg = None
         for to_unit_id in to_units:
             post_data = request.POST.copy()
             form = forms.LetterForm(post_data)
             units = Unit.objects.all()
-            context = {
-                'form' : form,
-                'units' : units,
-            }
+            
             if form.is_valid():
                 try:
                     letter = form.save(commit=False)
@@ -387,10 +385,16 @@ class LetterView(LoginRequiredMixin, View):
                     letter.save()
                 except Exception as e:
                     logger.warning(f'letter creation failed. {e}')
-                    err_msg = "New letter cration failed. Try again."
-                    return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+                    err_msg = "One or more new DAK cration failed. Check in house list" \
+                                " and create the failed DAK again."
             else:
+                context = {
+                    'form' : form,
+                    'units' : units,
+                }
                 return render(request, self.template_name, context)
+        if err_msg:
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
         return redirect('/letter_list/inhouse')
             
 class DoView(LoginRequiredMixin, View):
@@ -602,7 +606,6 @@ def label_bulk(request, ltr_no, date_str):
     """
     ltr_no = urllib.parse.unquote(ltr_no)
     date = datetime.strptime(date_str, '%d%m%Y')
-    print(ltr_no)
     letters = Letter.objects.filter(ltr_no=ltr_no, date=date)
     context = {
         'letters' : letters,
@@ -1451,13 +1454,12 @@ def letter_local_deliver(request):
     print('delivering local letter')
     if request.method == "POST":
         ltr_id = request.POST.get('ltr_id') 
-        ltr = Letter.objects.get(pk=ltr_id)
-        print(ltr.to_unit.sta_name)
-        print(request.user.profile.unit.sta_name)
-        if ltr.to_unit.sta_name == request.user.profile.unit.sta_name:
+        if ltr_id:
+            ltr = Letter.objects.get(pk=ltr_id)
             ltr.delivered_locally = True
             ltr.save()
-    return HttpResponse(status=204)
+            return HttpResponse(status=204)
+        return HttpResponse(status=404)
 
 
 def letter_delivery_state(request, pk):
@@ -1471,6 +1473,109 @@ def letter_delivery_state(request, pk):
             'letter': ltr,
         }
         return render(request, "transit_slip/letter_delivery_state.html", context )
+
+class OutStandingDakView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """ Displays dak waiting for delivery for a certain time """
+    template = "transit_slip/outstanding_dak.html"
+    def test_func(self):
+        user = self.request.user.profile
+        if user.user_type == 'sc':
+            return True
+        else:
+            return False
+
+    def get(self, request):
+        context = {
+
+        }
+        return render (request, self.template, context)
+    def post(self, request):
+        days = int(request.POST.get('days-outstanding'))
+        sta = request.user.profile.unit.sta_name
+        if days:
+            search_date = date.today() - timedelta(days=days)
+            ltrs = OutGoingLetter.objects.filter(received_at__lte=search_date, delivery_receipt__isnull=True,
+                to_unit__sta_name=sta).values('to_unit__unit_name').annotate(ltr_count=Count('to_unit'))
+        else:
+            ltrs = OutGoingLetter.objects.filter(delivery_receipt__isnull=True,
+                to_unit__sta_name=sta).values('to_unit__unit_name').annotate(ltr_count=Count('to_unit'))
+        context = {
+            'ltrs' : ltrs,
+        }
+        return render(request, self.template, context)
+
+def fetch_ltr(request):
+    if request.method == 'POST':
+        date_code = request.POST.get('date_code')
+        try:
+            date, code = date_code.split('-')
+            date = datetime.strptime(date, "%d%m%Y")
+        except ValueError as e:
+            print(e)
+        
+        ltr = Letter.objects.get(u_string=code, date=date)
+        print(ltr)
+
+        serialize_ltr = serializers.serialize("json", [ltr], use_natural_foreign_keys=True)
+        return HttpResponse(serialize_ltr)
+
+def create_rtu_ltr(request):
+    if request.method == 'POST':
+        orig_pk = request.POST.get('orig_pk')
+        ltr = Letter.objects.get(pk=orig_pk)
+        rtu_ltr_no = 'RTU-' + ltr.ltr_no
+        from_unit = request.user.profile.unit
+        u_string = str(randint(10000, 99999))
+        # qr_code_name = str(date.today().strftime("%d%m%Y")) + '-' + str(u_string)
+        rtu_ltr = Letter(classification=ltr.classification, ltr_no=rtu_ltr_no,
+            date=ltr.date, from_unit= from_unit, to_unit=ltr.from_unit,
+             u_string=u_string, rtu_of=ltr, )
+        rtu_ltr.save()
+        # print(rtu_ltr)
+        return HttpResponse('response', status=204)
+
+def rtu_ltr_details(request):
+    """ show details of original and rtu ltrs """
+    rtu_ltr = Letter.objects.get(pk=request.POST.get('rtu-ltr-pk'))
+    context = {
+        'ltr': rtu_ltr,
+    }
+
+    return render(request, 'transit_slip/rtu_ltr_details.html', context)
+
+class DakRtuView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """ Dak RTU in case of not possible delivery """
+    template = "transit_slip/dak_rtu.html"
+    def test_func(self):
+        user = self.request.user.profile
+        if user.user_type == 'sc':
+            return True
+        else:
+            return False
+
+    def get(self, request):
+        unit = request.user.profile.unit
+        rtu_ltrs = Letter.objects.filter(from_unit=unit, rtu_of__isnull=False)
+        context = {
+            'letters' : rtu_ltrs, 
+        }
+        return render(request, self.template, context)
+
+    def post(self, request):
+        date_code = request.POST.get('rtu-dak-code')
+        try:
+            date, code = date_code.split('-')
+            date = datetime.strptime(date, "%d%m%Y")
+        except ValueError as e:
+            print(e)
+        
+        ltr = Letter.objects.get(u_string=code, date=date)
+        print(ltr)
+
+        context = {
+
+        }
+        return render(request, self.template, context)
 
 class MiscAdminInfo(LoginRequiredMixin, UserPassesTestMixin, View):
     """ Display misc info for site admin"""

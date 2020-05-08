@@ -31,7 +31,8 @@
         <div class="qr-code">
             
             <div>
-                <img src="/media/{{letter.qr_image_url}}" alt="qr code image">
+                <!-- <img src="/media/{{letter.qr_image_url}}" alt="qr code image"> -->
+                <img src="data:image/png;base64,{{letter.qr_code}}" alt="QR_CODE" />
                 <p>{{ letter.date |date:"dmY-"}}{{ letter.u_string }}</p>
             </div>
             
