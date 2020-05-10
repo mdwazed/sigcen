@@ -56,6 +56,9 @@ urlpatterns = [
     path('fetch_ltr/', views.fetch_ltr, name= 'fetch_ltr'),
     path('create_rtu_ltr/', views.create_rtu_ltr, name= 'create_rtu_ltr'),
     path('rtu_ltr_details/', views.rtu_ltr_details, name= 'rtu_ltr_details'),
+    path('delivery_setup/', views.DeliverySetupView.as_view(), name= 'delivery_setup'),
+    path('get_parent/', views.get_parent, name= 'get_parent'),
+    path('change_parent/', views.change_parent, name= 'change_parent'),
     # through packet
     path('through_pkg', views.ThroughPkgView.as_view(), name= 'through_pkg'),
     path('through_pkg_despatch', views.through_pkg_despatch, name= 'through_pkg_despatch'),

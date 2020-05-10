@@ -1474,6 +1474,52 @@ def letter_delivery_state(request, pk):
         }
         return render(request, "transit_slip/letter_delivery_state.html", context )
 
+class DeliverySetupView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """ setup which DR can receive DAK of which unit """
+
+    template = "transit_slip/delivery_setup.html"
+    def test_func(self):
+        user = self.request.user.profile
+        if user.user_type == 'ad':
+            return True
+        else:
+            return False
+
+    def get(self, request):
+        units = utility.local_units(request)
+        context = {
+            'units' : units,
+        }
+        return render(request, self.template, context)
+
+
+def get_parent(request):
+    """ get parent unit of a given child unit id """
+    if request.method == 'POST':
+        child_id = int(request.POST.get('child_unit_id'))
+        try:
+            child_unit = Unit.objects.get(id=child_id)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        parent_unit_name = child_unit.parent.unit_name
+        return HttpResponse(parent_unit_name, status=200)
+
+def change_parent(request):
+    """ change parent of a given child for delivery """
+    if request.method == 'POST':
+        child_id = int(request.POST.get('child_unit_id'))
+        parent_id = int(request.POST.get('parent_unit_id'))
+        try:
+            child_unit = Unit.objects.get(id=child_id)
+            parent_unit = Unit.objects.get(id=parent_id)
+            child_unit.parent = parent_unit
+            child_unit.save()
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        return HttpResponse(status=204)
+
+
+
 class OutStandingDakView(LoginRequiredMixin, UserPassesTestMixin, View):
     """ Displays dak waiting for delivery for a certain time """
     template = "transit_slip/outstanding_dak.html"

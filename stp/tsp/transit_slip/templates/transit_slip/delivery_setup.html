@@ -1,0 +1,46 @@
+{% extends 'transit_slip/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h3>Delivery Setup</h3>
+    <div class="flex-div">
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+                <h5 class="card-title">Select Unit</h5>
+                <select name="child-unit" id="child-unit">
+                    <option value="">Select Unit</option>
+                    {% for unit in units %}
+                        <option value="{{ unit.id }}">{{ unit.unit_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+                <h5 class="card-title">DAK delivered to DR :</h5>
+                <p class="card-text" id="parent-unit-name"></p>
+                <button class="btn btn-warning btn-sm" id="btn-change-unit">Change</button>
+                <div class="card-footer" id="change-parent-unit-div">
+                    <select name="parent-unit" id="parent-unit">
+                        <option value="">Select Unit</option>
+                        {% for unit in units %}
+                        <option value="{{ unit.id }}">{{ unit.unit_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button class="btn btn-secondary btn-sm" id="btn-change-unit-save">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+{% endblock %}
+
+
+{% block script %}
+<script>
+    let csrf_token = '{{ csrf_token }}';
+</script>
+{% endblock %}

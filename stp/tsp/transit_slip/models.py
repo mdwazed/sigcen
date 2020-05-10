@@ -19,11 +19,11 @@ user_type_choices = [
 # letter classification to choose620
 
 classification_choices = [
-        ('rs', 'Restricted'),
-        ('cf', 'Confidential'),
-        ('sc', 'Secret'),
-        ('ts', 'Top Secret'),
-        ('uc', 'Unclass'),
+        ('rs', 'RESTRICTED'),
+        ('cf', 'CONFIDENTIAL'),
+        ('sc', 'SECRET'),
+        ('ts', 'TOP SECRET'),
+        ('uc', 'UNCLASS'),
     ]
     
 
@@ -108,6 +108,7 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 class LetterQuerySet(models.QuerySet):
+    """ custom manager of letter """
     def get_unit_ltrs(self):
         return self.filter(ltr_receipt__isnull=True, delivered_locally=False)
     def get_despatched_letters(self):

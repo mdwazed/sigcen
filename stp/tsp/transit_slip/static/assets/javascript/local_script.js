@@ -143,13 +143,42 @@ $('#btn-dak-rtu').on('click', function(event){
 
 });
 
-// details btn on rtu page
-// $('.btn-rtu-details').on('click', function(){
+// fetch parent unit of selected child unit for delivery setup
+// hide change option during load
+$('#change-parent-unit-div').hide()
+$('#btn-change-unit').hide()
+$('#child-unit').on('change', function(event){
+    let child_unit_id = $('#child-unit').val()
+    let url = '/get_parent/'
+    $.post(url, { 'csrfmiddlewaretoken': csrf_token, 'child_unit_id': child_unit_id},
+    function(data, textStatus, jqXHR){
+        if (jqXHR.status == 200){
+            $('#parent-unit-name').text(data)
+            $('#btn-change-unit').show()
+        } else {
+            alert("failed to retrive unit.")
+        }
+    });
+});
 
-//     let rtu_pk = $(this).siblings('input').val()
-//     let url = '/rtu_ltr_details/'
-//     $.post(url, { 'csrfmiddlewaretoken': csrf_token, 'rtu_pk': rtu_pk},
-//     function(data, textStatus, jqXHR){
-        
-//     });
-// })
+$('#btn-change-unit').on('click', function(event){
+    console.log('change btn clicked');
+    $('#change-parent-unit-div').show()
+});
+
+$('#btn-change-unit-save').on('click', function(event){
+    let parent_unit_id  = $('#parent-unit').val();
+    let child_unit_id = $('#child-unit').val()
+    console.log(parent_unit_id);
+    let url = '/change_parent/'
+    $.post(url, { 'csrfmiddlewaretoken': csrf_token, 'child_unit_id': child_unit_id,
+                'parent_unit_id': parent_unit_id },
+        function (data, textStatus, jqXHR) {
+            if (jqXHR.status == 204) {
+                alert("Delivery option changed Successfully.");
+                location.reload();
+            }else {
+                alert("failed to retrive unit. Try again later.")
+            }
+        });
+});
