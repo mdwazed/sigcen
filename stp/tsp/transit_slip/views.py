@@ -73,36 +73,29 @@ class AdminPermissionView(LoginRequiredMixin, UserPassesTestMixin, View):
             return False
 
 class UserCreateView(AdminPermissionView):
-    """ creates new user. only admin users are allowed to access this page """
+    """ Admin can create user of their respective admin AOR  """
 
     template = 'registration/create_user.html'
 
-    def get_sta(self, request):
-        unit_id = request.session.get('unitid', None)
-        try:
-            sta = Unit.objects.get(pk=unit_id).sta_name
-        except ObjectDoesNotExist as e:
-            logger.warning(f'Sta not available. {e}')
-            return None
-        return sta
+    # def get_sta(self, request):
+    #     unit_id = request.session.get('unitid', None)
+    #     try:
+    #         sta = Unit.objects.get(pk=unit_id).sta_name
+    #     except ObjectDoesNotExist as e:
+    #         logger.warning(f'Sta not available. {e}')
+    #         return None
+    #     return sta
 
     def get(self, request):
-        sta = self.get_sta(request)
-        if sta:
-            form = forms.CreateUserForm(sta=sta, user=request.user)
-        else:
-            err_msg = "No sta found to make unit choices."
-            return render(request, "transit_slip/generic_error.html", {'err_msg': err_msg})
+        stas = request.user.profile.get_admin_stas()
+        form = forms.CreateUserForm(stas=stas, user=request.user)
         return render(request, self.template, {'form': form})
 
     def post(self, request):
-        sta = self.get_sta(request)
-        if sta:
-            form = forms.CreateUserForm(request.POST, sta=sta, user=request.user)
-        else:
-            err_msg = "No sta found to make unit choices."
-            return render(request, "transit_slip/generic_error.html", {'err_msg': err_msg})
+        stas = request.user.profile.get_admin_stas()
+        form = forms.CreateUserForm(request.POST, stas=stas, user=request.user)
         if form.is_valid():
+            # save user.auth attr
             user = form.save()
             user.refresh_from_db()  # load the profile instance created by the signal
             selected_unit_id = form.cleaned_data.get('unit')
@@ -187,16 +180,17 @@ class ResetUserPasswordView(AdminPermissionView):
                 return redirect("user_list")
 
 class UserListView(AdminPermissionView):
-    """ list user of the admin's respective sta """
+    """ list user of the admin's respective stas """
 
     template = 'registration/user_list.html'
 
     def get(self, request):
-        sta = request.user.profile.unit.sta_name
         if request.user.is_staff:
             users = User.objects.all()
         else:
-            users = User.objects.filter(profile__unit__sta_name=sta)
+            stas = request.user.profile.get_admin_stas()
+            print(stas)
+            users = User.objects.filter(profile__unit__sta_name__sta_name__in=stas)
         context = {
             'users': users,
         }
@@ -208,6 +202,44 @@ class UserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     """ user changes own passwd """
 
     success_url = reverse_lazy("home")
+
+
+class ChangeAdminAorView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """ Edit stations an admin can administer """
+    template = 'transit_slip/change_admin_aor.html'
+
+    def test_func(self):
+        if self.request.user.is_staff is True:
+            return True
+        else:
+            return False
+    def handle_no_permission(self):
+        # overrides method to handle not auth req
+        err_msg = "You are not Auth to see this page."
+        return render(self.request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+
+    def get(self, request):
+        admin_users = User.objects.filter(profile__user_type='ad')
+        stas = Sta.objects.all()
+        context = {
+            'admin_users': admin_users,
+            'stas': stas,
+        }
+        return render(request, self.template, context)
+
+    def post(self, request):
+        admin_user_id = int(request.POST.get('admin-user'))
+        admin_stas = request.POST.getlist('stas')
+        admin_stas_json = json.dumps(admin_stas)
+        try:
+            admin_user = User.objects.get(pk=admin_user_id)
+            admin_user.profile.admin_stas = admin_stas_json
+            admin_user.save()
+        except ObjectDoesNotExist as e:
+            err_msg = f'Intended user not found.' + str(e)
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+        
+        return redirect('/user_list/')
 
 
 class DeleteUserView(AdminPermissionView):

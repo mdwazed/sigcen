@@ -7,6 +7,7 @@ from datetime import date, datetime
 
 from io import BytesIO
 import qrcode, base64
+import json
 
 # Create your models here.
 # types of users. define access permission based on usr type.
@@ -92,11 +93,22 @@ class Profile(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, blank=True, null=True)
     user_type = models.CharField(max_length=2, blank=True, null=True,
                 choices=user_type_choices, default='uc')
+    admin_stas = models.CharField(max_length=150, null=True, blank=True)
 
     def __str__(self):
         return self.user.username
     def get_user_type(self):
         return self.user_type
+    def get_admin_stas(self):
+        if self.admin_stas:
+            sta_names = []
+            stas = json.loads(self.admin_stas)
+            for sta in stas:
+                sta_obj = Sta.objects.get(pk=sta)
+                sta_names.append(sta_obj.sta_name)
+            return sta_names
+        else:
+            return None
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

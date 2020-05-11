@@ -143,6 +143,8 @@ $('#btn-dak-rtu').on('click', function(event){
 
 });
 
+////////////////  delivery setup related function //////////////////
+
 // fetch parent unit of selected child unit for delivery setup
 // hide change option during load
 $('#change-parent-unit-div').hide()
@@ -181,4 +183,15 @@ $('#btn-change-unit-save').on('click', function(event){
                 alert("failed to retrive unit. Try again later.")
             }
         });
+});
+/////////////////  end delivary setup ///////////////////////
+
+// prevent submission of form if no admin in selected in change-admin-aor
+$('#save-admin-aor').on('click', function(event){
+    // event.preventDefault()
+    admin_user = $('#admin-user').val()
+    // alert(admin_user)
+    if (!admin_user){
+        event.preventDefault()
+    }
 });

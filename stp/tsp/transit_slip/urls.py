@@ -15,6 +15,7 @@ urlpatterns = [
     path('user_password_change', views.UserPasswordChangeView.as_view(), name= 'user_password_change'),
     path('reset_user_password/<int:pk>/', views.ResetUserPasswordView.as_view(), name= 'reset_user_password'),
     path('delete_user/', views.DeleteUserView.as_view(), name= 'delete_user'),
+    path('change_admin_aor/', views.ChangeAdminAorView.as_view(), name= 'change_admin_aor'),
     # Letter
     path('new_letter/', views.LetterView.as_view(), name= 'new_letter'),
     path('new_do/', views.DoView.as_view(), name= 'new_do'),

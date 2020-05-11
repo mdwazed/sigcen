@@ -1,0 +1,41 @@
+{% extends 'transit_slip/layout.html' %}
+{% block content %}
+<div class="container">
+    <div>
+        <h3>Change Admin AOR</h3>
+        
+    </div>
+    <form action="{% url 'change_admin_aor' %}" method="POST">
+        {% csrf_token %}
+    <div class="flex-div">
+            <div class="card">
+                <select id="admin-user" name="admin-user" style="width: 200px;">
+                    <option value="">Select Admin</option>
+                    {% for user in admin_users %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="card">
+                <select id="id-sta" name="stas" class="basic-multiple"
+                    multiple="multiple" style="width: 300px;">
+                    {% for sta in stas %}
+                    <option value="{{sta.id}}">{{sta.sta_name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <button class="btn btn-primary" id="save-admin-aor">Save</button>
+            </div>
+        
+        
+    </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    let csrf_token = '{{ csrf_token }}'
+</script>
+{% endblock %}

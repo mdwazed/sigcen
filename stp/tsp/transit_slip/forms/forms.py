@@ -31,15 +31,16 @@ class CreateUserForm(UserCreationForm):
     unit = forms.ChoiceField()
     user_type = forms.ChoiceField(choices=user_type_choices )
     def __init__(self, *args, **kwargs):
-        sta = kwargs.pop('sta', None)
+        stas = kwargs.pop('stas', None)
+        # print(f'form stas: {stas}')
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        if sta and user.is_staff:
+        if user.is_staff:
             choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.all()]
             self.fields['unit'].choices = choices
 
-        elif sta and not user.is_staff:
-            choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name=sta
+        elif not user.is_staff:
+            choices = [(unit.pk, unit.unit_name) for unit in Unit.objects.filter(sta_name__sta_name__in=stas
                         ).order_by('sta_name')]
             self.fields['unit'].choices = choices
         else:

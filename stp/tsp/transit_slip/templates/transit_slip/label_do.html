@@ -1,4 +1,5 @@
 {% extends 'transit_slip/layout.html' %}
+{% load static %}
 {% block topnav %}
 {% endblock %}
 
@@ -36,7 +37,7 @@
                 
             </div>
             
-    
+            
     
         </div>
     
@@ -47,7 +48,15 @@
                 <img src="data:image/png;base64,{{letter.qr_code}}" alt="QR_CODE" />
 
                 <p>{{ letter.date |date:"dmY-"}}{{ letter.u_string }}</p>
+                    <p class="label-credit">
+                        Sys Dev: Maj Wazed,sigs
+                    </p>
             </div>
+            {% comment %}
+            <div class="label-credit">
+                <p>Dev: Maj Wazed,sigs</p>
+            </div>
+            {% endcomment %}
         </div>
         
     </div>
