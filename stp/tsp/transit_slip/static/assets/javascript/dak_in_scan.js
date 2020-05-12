@@ -22,8 +22,11 @@ $(document).ready(function () {
             success: function (response) {
                 console.log(response)
                 var ltr = response[0]
+                date = new Date(ltr.fields.date)
                 var row = "<tr><td>" + ltr.fields.from_unit + "</td><td>" + ltr.fields.to_unit +
-                    "</td><td>" + ltr.fields.ltr_no + "</td><td>" + ltr.fields.date + "</td><td>" +
+                    "</td><td>" + ltr.fields.ltr_no + "</td><td>" + 
+                    date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear() + 
+                    "</td><td>" +
                     ltr.fields.u_string +
                     "</td><td><input type='checkbox' name='received_ltr' value='" + ltr.pk + "' checked></td>" +
                     "<td><input type='checkbox' name='spl_pkg' value='" + ltr.pk + "' ></td></tr>"

@@ -1214,6 +1214,7 @@ def fetch_letter_json(request):
     """ fetch lettter on scanning the qr code """
     date = request.POST.get('date', None)
     u_string = request.POST.get('u_string', None)
+    # if this call is for selecting ltr for transit slip
     ts_making = request.POST.get('ts_making', False)
     dst_sta = request.POST.get('dst_sta', False)
 

@@ -30,7 +30,7 @@
                     <th>Date</th>
                     <th>Code</th>
                     <th>Ltr no</th>
-                    <th></th>
+                    <th>State</th>
                 </tr>
             </thead>
             <tbody>
@@ -42,7 +42,9 @@
                     <td>{{ ltr.date| date:"d/m/Y" }}</td>
                     <td>{{ ltr.u_string }}</td>
                     <td>{{ ltr.ltr_no }}</td>
-                    <td></td>
+                    <td>
+                        <a href="{% url 'letter_state' ltr.id %}">State</a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
