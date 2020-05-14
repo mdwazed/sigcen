@@ -1,7 +1,10 @@
 {% extends 'transit_slip/layout.html' %}
 {% block content %}
 <div class="container">
-    {{data}}
+    <div>
+        <p> Today DAK Created: {{todays_ltr_count}} </p>
+        <p> Last 7 days DAK Created: {{last_wk_ltr_count}} </p>
+    </div>
 
 </div>
 

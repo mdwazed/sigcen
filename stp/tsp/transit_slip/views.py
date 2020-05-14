@@ -1667,9 +1667,13 @@ class MiscAdminInfo(LoginRequiredMixin, UserPassesTestMixin, View):
             return False
 
     def get(self, request):
-        data = request.META.get('REMOTE_ADDR')
-        print(data)
+        print(date.today())
+        todays_ltr_count = Letter.objects.filter(created_at__gte=date.today()).count()
+        last_wk_ltr_count = Letter.objects.filter(created_at__gte=date.today()-timedelta(days=7)).count()
+        # ltrs = Letter.objects.filter(u_string=35517)
+        # print(ltrs)
         context = {
-            'data': data,
+            'todays_ltr_count': todays_ltr_count,
+            'last_wk_ltr_count': last_wk_ltr_count,
         }
         return render(request, self.template, context)
