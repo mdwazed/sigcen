@@ -1669,11 +1669,13 @@ class MiscAdminInfo(LoginRequiredMixin, UserPassesTestMixin, View):
     def get(self, request):
         print(date.today())
         todays_ltr_count = Letter.objects.filter(created_at__gte=date.today()).count()
+        last_day_ltr_count = Letter.objects.filter(created_at__gte=date.today()-timedelta(days=1)).count()
         last_wk_ltr_count = Letter.objects.filter(created_at__gte=date.today()-timedelta(days=7)).count()
         # ltrs = Letter.objects.filter(u_string=35517)
         # print(ltrs)
         context = {
             'todays_ltr_count': todays_ltr_count,
+            'last_day_ltr_count': last_day_ltr_count,
             'last_wk_ltr_count': last_wk_ltr_count,
         }
         return render(request, self.template, context)
