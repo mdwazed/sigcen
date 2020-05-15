@@ -17,7 +17,12 @@
     display: flex;
     /* justify-content: space-around; */
     align-items: flex-start;
-    
+}
+
+.flex-div-even-spaced {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
 }
 
 .flex-div div {
@@ -246,3 +251,4 @@
     color:  #006e00;
     
 }
+

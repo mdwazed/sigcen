@@ -1,12 +1,100 @@
 {% extends 'transit_slip/layout.html' %}
 {% block content %}
 <div class="container">
-    <div>
-        <p> Today DAK Created: {{todays_ltr_count}} </p>
-        <p> DAK Created till now from yesterday: {{last_day_ltr_count}} </p>
-        <p> Last 7 days DAK Created: {{last_wk_ltr_count}} </p>
+    <div class="card card-header">
+        <h4>Dak Creation statististics</h4>
     </div>
-
+    <div class="card card-body">
+        <p> DAK Created today: {{todays_ltr_count}} </p>
+        <p> DAK Created till now from yesterday: {{last_day_ltr_count}} </p>
+        <p> DAK Created in last 7 days: {{last_wk_ltr_count}} </p>
+    </div>
+    <div>
+        <div class="card card-header">
+            <h4>Group By</h4>
+        </div>
+        <div class="card card-body">
+            <div class="flex-div-even-spaced">
+                <div>
+                    <h5>Last Day</h5>
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">Sta</th>
+                                <th scope="col">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ltr in last_day_ltr_gp_by_sta %}
+                            <tr>
+                                <td>{{ ltr.from_unit__sta_name__sta_name }}</td>
+                                <td>{{ltr.ltr_count}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h5>Last 7 Day</h5>
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">Sta</th>
+                                <th scope="col">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ltr in last_wk_ltr_gp_by_sta %}
+                            <tr>
+                                <td>{{ ltr.from_unit__sta_name__sta_name }}</td>
+                                <td>{{ltr.ltr_count}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h5>Last Day</h5>
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">Unit</th>
+                                <th scope="col">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ltr in last_day_ltr_gp_by_unit %}
+                            <tr>
+                                <td>{{ ltr.from_unit__unit_name }}</td>
+                                <td>{{ltr.ltr_count}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h5>Last 7 Day</h5>
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">Unit</th>
+                                <th scope="col">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ltr in last_wk_ltr_gp_by_unit %}
+                            <tr>
+                                <td>{{ ltr.from_unit__unit_name }}</td>
+                                <td>{{ltr.ltr_count}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+    </div>
 </div>
 
 {% endblock %}
