@@ -1672,13 +1672,13 @@ class MiscAdminInfo(LoginRequiredMixin, UserPassesTestMixin, View):
         last_day_ltr_count = Letter.objects.filter(created_at__gte=date.today()-timedelta(days=1)).count()
         last_wk_ltr_count = Letter.objects.filter(created_at__gte=date.today()-timedelta(days=7)).count()
         last_day_ltr_gp_by_unit = Letter.objects.filter(created_at__gte=date.today()-timedelta(days=1
-            )).values('from_unit__unit_name').annotate(ltr_count=Count('from_unit'))
+            )).values('from_unit__unit_name').annotate(ltr_count=Count('from_unit')).order_by('-ltr_count')[:30]
         last_day_ltr_gp_by_sta = Letter.objects.filter(created_at__gte=date.today()-timedelta(days=1
-            )).values('from_unit__sta_name__sta_name').annotate(ltr_count=Count('from_unit'))
+            )).values('from_unit__sta_name__sta_name').annotate(ltr_count=Count('from_unit')).order_by('-ltr_count')
         last_wk_ltr_gp_by_unit = Letter.objects.filter(created_at__gte=date.today()-timedelta(days=7
-            )).values('from_unit__unit_name').annotate(ltr_count=Count('from_unit'))
+            )).values('from_unit__unit_name').annotate(ltr_count=Count('from_unit')).order_by('-ltr_count')[:30]
         last_wk_ltr_gp_by_sta = Letter.objects.filter(created_at__gte=date.today()-timedelta(days=7
-            )).values('from_unit__sta_name__sta_name').annotate(ltr_count=Count('from_unit'))
+            )).values('from_unit__sta_name__sta_name').annotate(ltr_count=Count('from_unit')).order_by('-ltr_count')
         context = {
             'todays_ltr_count': todays_ltr_count,
             'last_day_ltr_count': last_day_ltr_count,
