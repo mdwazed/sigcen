@@ -1,0 +1,68 @@
+{% extends 'transit_slip/layout.html' %}
+{% block content %}
+<div class="container">
+    <div>
+        <ul class="misc-admin-nav">
+            <li>
+                <a href="{% url 'misc_admin_info_general' %}">General</a>
+            </li>
+            <li>
+                <a href="{% url 'misc_admin_info_ts' %}">Transit Slip</a>
+            </li>
+            <li>
+                <a href="{% url 'misc_admin_info_dak_by_date' %}">DAK by Date</a>
+            </li>
+        </ul>
+    </div>
+    <div class="card card-header">
+        <h4>Transit Slip</h4>
+    </div>
+    <div class="card card-body">
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">TS ID</th>
+                    <th scope="col">From</th>
+                    <th scope="col">Despatched</th>
+                    <th scope="col">DST</th>
+                    <th scope="col">Received</th>
+                    <th scope="col">Through Sigcen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ts in ts_display_list %}
+                    <tr>
+                        <th scope="row">{{ ts.id }}</th>
+                        <td>{{ ts.prepared_by.profile.unit.sta_name }}</td>
+                        <td>{{ ts.despatched_on | date:"d/m/Y" }}</td>
+                        <td>{{ ts.dst }}</td>
+                        <td>{{ ts.received_on | date:"d/m/Y"}}</td>
+                        <td>
+                            {% if ts.through_sigcen %}
+                                <table>
+                                    <tbody>
+                                        {% for sigcen in ts.through_sigcen %}
+                                        <tr class="table-info">
+                                            <td>
+                                                {{ sigcen.sigcen }}
+                                            </td>
+                                            <td>
+                                                RCV:{{ sigcen.received_at }}
+                                            </td>
+                                            <td>
+                                                DSP:{{ sigcen.despatched_at }}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

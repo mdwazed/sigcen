@@ -7,7 +7,7 @@ from . import views
 urlpatterns = [
     path('not_auth_view/', views.not_auth_view, name= 'not_auth_view'),
     path('', views.Home.as_view(), name= 'home'),
-    path('misc_admin_info/', views.MiscAdminInfo.as_view(), name= 'misc_admin_info'),
+    
     # user
     path('user_list/', views.UserListView.as_view(), name= 'user_list'),
     path('create_user/', views.UserCreateView.as_view(), name= 'create_user'),
@@ -71,4 +71,8 @@ urlpatterns = [
     path('update_unit/<int:pk>', views.UnitUpdateView.as_view(), name= 'update_unit'),
     path('delete_unit/<int:pk>', views.UnitDeleteView.as_view(), name= 'delete_unit'),
     path('letter_delete_admin', views.letter_delete_admin_view, name= 'letter_delete_admin'),
+    #statics and analysis
+    path('misc_admin_info_general/', views.MiscAdminInfo.as_view(), name= 'misc_admin_info_general'),
+    path('misc_admin_info_ts/', views.MiscAdminInfoTs.as_view(), name= 'misc_admin_info_ts'),
+    path('misc_admin_info_dak_by_date/', views.MiscAdminInfoDakByDate.as_view(), name= 'misc_admin_info_dak_by_date'),
 ]

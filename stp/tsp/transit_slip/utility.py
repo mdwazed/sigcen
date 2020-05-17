@@ -137,3 +137,17 @@ def get_qr_code(str):
     img_str = base64.b64encode(buffered.getvalue())
     img_str = img_str.decode('utf-8')
     return img_str
+
+class TsDisplay:
+    """ create a ts object to display statistics """
+    def __init__(self, id, date, dst, prepared_by, despatched_on, received_on, through_sigcen=None):
+        self.id = id
+        self.date = date
+        self.dst = dst
+        self.through_sigcen = through_sigcen
+        self.prepared_by = prepared_by
+        self.despatched_on = despatched_on
+        self.received_on = received_on
+
+    def __str__(self):
+        return (f'{self.id}--{self.date}--{self.dst}')

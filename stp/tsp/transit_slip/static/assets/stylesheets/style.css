@@ -249,6 +249,21 @@
 .ts-list-header {
     display: flex;
     color:  #006e00;
-    
+}
+
+.misc-admin-nav {
+    display: flex;
+    list-style-type: none;
+}
+
+.misc-admin-nav a{
+    color: black;
+}
+
+.misc-admin-nav li {
+    margin-right: 30px;
+}
+.dak-generation-info {
+    line-height: 1;
 }
 

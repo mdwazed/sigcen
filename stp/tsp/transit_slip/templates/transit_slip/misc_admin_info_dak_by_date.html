@@ -1,0 +1,25 @@
+{% extends 'transit_slip/layout.html' %}
+{% block content %}
+<div class="container">
+    <div>
+        <ul class="misc-admin-nav">
+            <li>
+                <a href="{% url 'misc_admin_info_general' %}">General</a>
+            </li>
+            <li>
+                <a href="{% url 'misc_admin_info_ts' %}">Transit Slip</a>
+            </li>
+            <li>
+                <a href="{% url 'misc_admin_info_dak_by_date' %}">DAK by Date</a>
+            </li>
+        </ul>
+    </div>
+    <div class="card card-header">
+        <h4>DAK BY DATE (Graph display for analysis)</h4>
+    </div>
+    <div class="card card-body">
+        
+    </div>
+</div>
+
+{% endblock %}

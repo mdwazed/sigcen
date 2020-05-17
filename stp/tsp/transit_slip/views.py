@@ -935,6 +935,7 @@ def transit_slip_ltrs(request):
     create the actual transit slip fetching letters from the CreateTransitSlipView
     and createTransitSlipManualView
     """
+    candidate_ltr_count = 0
     if request.method == 'POST':
         try:
             dst = Sta.objects.get(sta_name=request.POST.get('dst-sta'))
@@ -958,6 +959,14 @@ def transit_slip_ltrs(request):
             if not ltr.transit_slip:
                 ltr.transit_slip = transit_slip
                 ltr.save()
+                candidate_ltr_count +=1
+        if not candidate_ltr_count:
+            transit_slip.delete()
+            logger.info(f'Zero length Transit slip create prevented')
+            err_msg = 'No suitable candidate ltr for transit slip.'
+            return render(request, 'transit_slip/generic_error.html', {'err_msg':err_msg})
+
+
     return redirect('transit_slip_detail', transit_slip.pk)
 
 class CurrentTransitSlipView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -1657,7 +1666,7 @@ class DakRtuView(LoginRequiredMixin, UserPassesTestMixin, View):
         return render(request, self.template, context)
 
 class MiscAdminInfo(LoginRequiredMixin, UserPassesTestMixin, View):
-    """ Display misc info for site admin"""
+    """ Display generated DAK statistics info for site admin"""
     template = "transit_slip/misc_admin_info.html"
     def test_func(self):
         user = self.request.user
@@ -1667,7 +1676,6 @@ class MiscAdminInfo(LoginRequiredMixin, UserPassesTestMixin, View):
             return False
 
     def get(self, request):
-        print(date.today())
         todays_ltr_count = Letter.objects.filter(created_at__gte=date.today()).count()
         last_day_ltr_count = Letter.objects.filter(created_at__gte=date.today()-timedelta(days=1)).count()
         last_wk_ltr_count = Letter.objects.filter(created_at__gte=date.today()-timedelta(days=7)).count()
@@ -1687,5 +1695,41 @@ class MiscAdminInfo(LoginRequiredMixin, UserPassesTestMixin, View):
             'last_day_ltr_gp_by_sta': last_day_ltr_gp_by_sta,
             'last_wk_ltr_gp_by_unit': last_wk_ltr_gp_by_unit,
             'last_wk_ltr_gp_by_sta': last_wk_ltr_gp_by_sta,
+        }
+        return render(request, self.template, context)
+
+class MiscAdminInfoTs(MiscAdminInfo):
+    """ displays few latest transit slip with current status  """
+    template = "transit_slip/misc_admin_info_ts.html"
+    def get(self, request):
+        ts_list = TransitSlip.objects.filter(date__gte=date.today()-timedelta(days=30)
+        ).order_by('-id')[:50]
+        ts_display_list = []
+        for ts in ts_list:
+            if ts.through_sigcens:
+                through_sigcen = json.loads(ts.through_sigcens)
+            else:
+                through_sigcen = None
+            ts_display = utility.TsDisplay(ts.id, ts.date, ts.dst, ts.prepared_by,
+                ts.despatched_on, ts.received_on, through_sigcen)
+            ts_display_list.append(ts_display)
+        # print(ts_display_list[3].through_sigcen[0].get('sigcen'))
+        # print(type(ts_display_list[3].date))
+        context = {
+            'ts_display_list': ts_display_list,
+        }
+
+        return render(request, self.template, context)
+
+class MiscAdminInfoDakByDate(MiscAdminInfo):
+    """ displays dak statistics by date of a selected sta """
+    template = "transit_slip/misc_admin_info_dak_by_date.html"
+
+
+    def get(self, request):
+        
+
+        context = {
+
         }
         return render(request, self.template, context)
