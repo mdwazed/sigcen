@@ -2,6 +2,7 @@ $(document).ready(function () {
     // Data table and select2
     $('#data_table_id').DataTable({
         "pageLength": 50,
+        "order": [[0, "desc"]]
     });
 
     $('.basic-multiple').select2();
