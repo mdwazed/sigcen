@@ -1705,7 +1705,7 @@ class MiscAdminInfoTs(MiscAdminInfo):
     template = "transit_slip/misc_admin_info_ts.html"
     def get(self, request):
         ts_list = TransitSlip.objects.filter(date__gte=date.today()-timedelta(days=10)
-        ).order_by('-id')[:500]
+        ).order_by('-id')[:200]
         ts_display_list = []
         for ts in ts_list:
             if ts.through_sigcens:

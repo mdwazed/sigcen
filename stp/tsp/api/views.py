@@ -31,12 +31,13 @@ def transit_slip_detail(request, pk, format=None):
     if not local_sta:
         logger.warning(f'api call without local_sta arguments by user: {request.user}. ts_id: {pk}')
     try: 
-        ts = TransitSlip.objects.get(pk=pk)
+        ts = TransitSlip.objects.get(pk=pk, despatched_on__isnull=False)
     except ObjectDoesNotExist:
-        err_txt = f'object not found with given ts id in api call by user: {request.user}. ts_id: {pk}'
+        err_txt = f'Transit slip not found with given ts id in api call by user:\
+             {request.user}. ts_id: {pk}. Was it despatched?'
         logger.warning(err_txt)
         return Response(err_txt, status=status.HTTP_404_NOT_FOUND)
-    print(f'ts-dst: {ts.dst}')
+    # print(f'ts-dst: {ts.dst}')
     if local_sta != ts.dst.sta_name:
         err_txt = f'local id and ts dst mismatch in api call by user: {request.user}. ts_id: {pk}'
         logger.warning(err_txt)
@@ -50,9 +51,9 @@ def transit_slip_detail(request, pk, format=None):
         print('ajax post receive')
         ts_id = request.POST.get('ts_id')
         try:
-            ts = TransitSlip.objects.get(pk=ts_id)
+            ts = TransitSlip.objects.get(pk=ts_id, despatched_on__isnull=False)
         except ObjectDoesNotExist:
-            err_txt = f'object not found with given ts id while saving receive info \
+            err_txt = f'Transit slip not found with given ts id while saving receive info \
                             in api call by user: {request.user}. ts_id: {pk}'
             logger.warning(err_txt)
             return Response(err_txt, status=status.HTTP_404_NOT_FOUND)
