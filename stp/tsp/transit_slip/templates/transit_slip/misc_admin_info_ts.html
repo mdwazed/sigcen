@@ -33,7 +33,9 @@
             <tbody>
                 {% for ts in ts_display_list %}
                     <tr>
-                        <th scope="row">{{ ts.id }}</th>
+                        <th scope="row">
+                            <a href="{% url  'transit_slip_detail' ts.id %}">{{ ts.id }}</a>
+                        </th>
                         <td>{{ ts.date | date:"d/m/Y" }}</td>
                         <td>{{ ts.prepared_by.profile.unit.sta_name }}</td>
                         <td>{{ ts.despatched_on | date:"d/m/Y" }}</td>

@@ -1052,8 +1052,10 @@ class ThroughPkgView(LoginRequiredMixin, UserPassesTestMixin, View):
         ts_no = request.POST['ts_no']
         try:
             ts = TransitSlip.objects.get(pk=ts_no, despatched_on__isnull=False)
-        except ObjectDoesNotExist as e:
-            return HttpResponse(e, status=404)
+        except ObjectDoesNotExist:
+            return HttpResponse("Not Found. Did other side despatched the Transit slip?",
+                status=404)
+        # not source or dst sta of the transit slip
         if ((ts.dst != request.user.profile.unit.sta_name) and
             (ts.prepared_by.profile.unit.sta_name != request.user.profile.unit.sta_name)):
             # through sigcen entry in transit_slip
@@ -1703,7 +1705,7 @@ class MiscAdminInfoTs(MiscAdminInfo):
     template = "transit_slip/misc_admin_info_ts.html"
     def get(self, request):
         ts_list = TransitSlip.objects.filter(date__gte=date.today()-timedelta(days=30)
-        ).order_by('-id')[:50]
+        ).order_by('-id')[:100]
         ts_display_list = []
         for ts in ts_list:
             if ts.through_sigcens:
