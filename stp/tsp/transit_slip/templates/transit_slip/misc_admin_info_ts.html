@@ -22,6 +22,7 @@
             <thead>
                 <tr>
                     <th scope="col">TS ID</th>
+                    <th scope="col">Date</th>
                     <th scope="col">From</th>
                     <th scope="col">Despatched</th>
                     <th scope="col">DST</th>
@@ -33,6 +34,7 @@
                 {% for ts in ts_display_list %}
                     <tr>
                         <th scope="row">{{ ts.id }}</th>
+                        <td>{{ ts.date | date:"d/m/Y" }}</td>
                         <td>{{ ts.prepared_by.profile.unit.sta_name }}</td>
                         <td>{{ ts.despatched_on | date:"d/m/Y" }}</td>
                         <td>{{ ts.dst }}</td>

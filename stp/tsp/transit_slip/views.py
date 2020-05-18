@@ -1051,7 +1051,7 @@ class ThroughPkgView(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request):
         ts_no = request.POST['ts_no']
         try:
-            ts = TransitSlip.objects.get(pk=ts_no)
+            ts = TransitSlip.objects.get(pk=ts_no, despatched_on__isnull=False)
         except ObjectDoesNotExist as e:
             return HttpResponse(e, status=404)
         if ((ts.dst != request.user.profile.unit.sta_name) and
