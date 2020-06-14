@@ -22,7 +22,7 @@
     font-size: .75rem;
     text-align: left;
     bottom: 0;
-    color: #E1DBB1;
+    color: black;
 }
 
 .do-printer {
@@ -79,6 +79,18 @@
     color: darkgray;
     font-weight: normal;
 }
+.label-address div {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
+
+.label-address div div:last-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
 
 
 @page {
@@ -105,8 +117,11 @@
     .label-address {
         margin-top: 1cm;
     }
-    .label-address {
+    .label-address div {
+        border: 1px solid red;
+        display: flex;
     }
+   
     .ts-print {
         font-size: 12pt;
     }

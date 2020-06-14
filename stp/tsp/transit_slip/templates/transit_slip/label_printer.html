@@ -11,17 +11,23 @@
     <div class="label-printer">
         <div class="label-address">
             <div>
-                <p>{{ letter.get_classification_display }}</p>
-                <p>{{ letter.ltr_no }}</p>
-                {% if letter.addr_line_1 %}
-                <p>{{ letter.addr_line_1 }}</p>
-                {% endif %}
-                {% if letter.addr_line_2 %}
-                <p>{{ letter.addr_line_2 }}</p>
-                {% endif %}
-                <p>{{ letter.to_unit }}</p>
-                <p>{{ letter.to_unit.sta_name }}</p>
-                <p>{{ letter.get_classification_display }}</p>
+                <div>
+                    <p>{{ letter.get_classification_display }}</p>
+                </div>
+                <div>
+                    <p><span>Ltr No:&nbsp;</span>{{ letter.ltr_no }}</p>
+                    {% if letter.addr_line_1 %}
+                    <p>{{ letter.addr_line_1 }}</p>
+                    {% endif %}
+                    {% if letter.addr_line_2 %}
+                    <p>{{ letter.addr_line_2 }}</p>
+                    {% endif %}
+                    <p>{{ letter.to_unit }}</p>
+                    <p>{{ letter.to_unit.sta_name }}</p>
+                </div>
+                <div>
+                    <p>{{ letter.get_classification_display }}</p>
+                </div>
             </div>
             
         </div>

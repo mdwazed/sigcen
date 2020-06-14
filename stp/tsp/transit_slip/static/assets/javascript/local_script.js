@@ -4,6 +4,10 @@ $(document).ready(function () {
         "pageLength": 50,
         "order": [[0, "desc"]]
     });
+    $('#data-table-display-ltr').DataTable({
+        "pageLength": 50,
+        "order": [[2, "desc"]],
+    });
 
     $('.basic-multiple').select2();
 });

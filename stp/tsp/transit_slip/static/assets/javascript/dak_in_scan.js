@@ -1,5 +1,6 @@
 // fetch letter to receive in sigcen by ajax call while scaning the QR code
 $(document).ready(function () {
+    let received_code = []
     $('#scan-input').on('change', function () {
         var code = $('#scan-input').val()
         var str = code.split("-")
@@ -10,35 +11,39 @@ $(document).ready(function () {
         var date_str = year+'-'+mon+'-'+day
         var u_string = str[1]
         // console.log(date_str)
+        // check for possible duplicate scan
+        if (received_code.includes(code)){
+            alert('Duplicate DAK. Can not receive.')
+        }else {
+            url = 'fetch_letter_json';
+            // console.log('invoking ajax call');
+            var data_dict = { 'date': date_str, 'u_string': u_string, 'csrfmiddlewaretoken': csrf_token };
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: data_dict,
+                dataType: 'json',
+                success: function (response) {
+                    
+                    var ltr = response[0]
+                    date = new Date(ltr.fields.date)
+                    var row = "<tr><td>" + ltr.fields.from_unit + "</td><td>" + ltr.fields.to_unit +
+                        "</td><td>" + ltr.fields.ltr_no + "</td><td>" +
+                        date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear() +
+                        "</td><td>" +
+                        ltr.fields.u_string +
+                        "</td><td><input type='checkbox' name='received_ltr' value='" + ltr.pk + "' checked></td>" +
+                        "<td><input type='checkbox' name='spl_pkg' value='" + ltr.pk + "' ></td></tr>"
 
-        url = 'fetch_letter_json';
-        // console.log('invoking ajax call');
-        var data_dict = { 'date': date_str, 'u_string': u_string, 'csrfmiddlewaretoken': csrf_token };
-        $.ajax({
-            type: 'POST',
-            url: url,
-            data: data_dict,
-            dataType : 'json',
-            success: function (response) {
-                console.log(response)
-                var ltr = response[0]
-                date = new Date(ltr.fields.date)
-                var row = "<tr><td>" + ltr.fields.from_unit + "</td><td>" + ltr.fields.to_unit +
-                    "</td><td>" + ltr.fields.ltr_no + "</td><td>" + 
-                    date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear() + 
-                    "</td><td>" +
-                    ltr.fields.u_string +
-                    "</td><td><input type='checkbox' name='received_ltr' value='" + ltr.pk + "' checked></td>" +
-                    "<td><input type='checkbox' name='spl_pkg' value='" + ltr.pk + "' ></td></tr>"
-
-                $('tbody').prepend(row)
-            },
-            error: function(jqXHR){
-                alert('Can not receive this DAk.' + jqXHR.responseText) 
-            }
-        });
+                    $('tbody').prepend(row);
+                    received_code.push(code);
+                    $('#received-count').text(received_code.length)
+                },
+                error: function (jqXHR) {
+                    alert('Can not receive this DAk.' + jqXHR.responseText)
+                }
+            });
+        };
         $(this).val('')
-
     });
-    
 });

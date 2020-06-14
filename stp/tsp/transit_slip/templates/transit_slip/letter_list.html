@@ -38,7 +38,7 @@
     
     <div>
         <h5>Recent Letters of {{ request.user.profile.unit.unit_name }} </h5>
-        <table id="data_table_id" class="display">
+        <table id="data-table-display-ltr" class="display">
             <thead>
                 <tr>
                     <th>From</th>
@@ -55,7 +55,10 @@
                     <tr>
                         <td>{{ letter.from_unit }}</td>
                         <td>{{ letter.to_unit }}</td>                        
-                        <td>{{ letter.date }}</td>
+                        <td>
+                            <span style="display: none;">{{ letter.date | date:"Ymd" }}</span>
+                            {{ letter.date | date:"d/m/Y"}}
+                        </td>
                         <td>{{ letter.u_string }}</td>
                         <td>{{ letter.ltr_no }}</td>
                         <td>{{ letter.get_current_status }}</td>
