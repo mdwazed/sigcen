@@ -7,6 +7,8 @@ services:
       - ./tsp:/project
     ports:
       - 8081:8000
+    depends_on: 
+      - db
 
   nginx:
     container_name: docker-nginx
@@ -21,5 +23,17 @@ services:
       - django
 
 
-
+  db:
+    container_name: docker-db
+    image: mysql:5.7
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 7620
+      MYSQL_DATABASE: stp
+    ports:
+      - 3302:3306
+volumes:
+  mysql_data:
   
