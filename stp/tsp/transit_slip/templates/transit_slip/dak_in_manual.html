@@ -7,18 +7,21 @@
 <div class="container">
 <h5>Dak In - Manual</h5>
     <div class="card">
-        <div class="card-body">
+        <div class="card-body flex-div">
             <form action="" method=POST>
                 {% csrf_token %}
                 {{form}}
                 <input type="submit" value="Search">
             </form>
+            <h4>
+                <span class="badge badge-primary" id="received-count" style="margin-left: 10px;">0 </span>
+            </h4>
         </div>
     </div>
     <div>
         <form action="dak_receive" method="POST">
             {% csrf_token %}
-        <table class="table table-hover">
+        <table class="table table-hover" id="ltr-display-tbl">
             <thead>
                 <tr>
                     <th scope="col">From</th>
@@ -39,7 +42,7 @@
                         <td>{{ letter.date }}</td>
                         <td>{{ letter.u_string }}</td>
                         <td>
-                            <input type="checkbox" name="received_ltr" value={{ letter.pk }}>
+                            <input type="checkbox" class="chkbox-rcv" name="received_ltr" value={{ letter.pk }}>
                         </td>
                         <td>
                             <input type="checkbox" name="spl_pkg" value={{ letter.pk }}>
@@ -67,4 +70,5 @@
             });
         });
     </script>
+    <script src="{% static 'assets/javascript/dak_in_manual.js' %}"></script>
 {% endblock %}

@@ -2,31 +2,42 @@
 {% load static %}
 {% block content %}
 <div class="container">
-    <div class="card">
-        <div class="card-body">
-            <form action="" method=POST>
-                {% csrf_token %}
-                <div class="input-group inline-header-form">
-                    
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="">Search DAK for:</span>
-                        </div>
-                        <select name="sta" id="id-sta">
-                            <option value="">-----</option>
-                            {% for sta in stas %}
-                            <option value="{{sta.id}}">{{sta.sta_name}}</option>
-                            {% endfor %}
-                        </select>
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="">PKG Size:</span>
-                        </div>
-                        <input type="text" class="form-control" name="pkg-size" value="75">
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-primary" type="submit" name="submit">Search</button>
-                        </div>
-                    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <div>
+                        <form action="" method=POST>
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="">Search DAK for:</span>
+                                </div>
+                                <select name="sta" id="id-sta">
+                                    <option value="">-----</option>
+                                    {% for sta in stas %}
+                                    <option value="{{sta.id}}">{{sta.sta_name}}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="">PKG Size:</span>
+                                </div>
+                                <input type="text" class="form-control" name="pkg-size" value="75">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-primary" type="submit" name="submit">Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </form>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card-body">
+                <h4>
+                    <span class="badge badge-primary" id="received-count" style="margin-left: 10px;">0 </span>
+                </h4>
+            </div>
         </div>
     </div>
     <div>
@@ -36,7 +47,7 @@
             <input type="hidden" name="dst-sta" value="{{ sta_name }}">
             <div class="ltr-list">
                 <div style="margin-top: 20px;">
-                    <h4>Showing DAK for {{ sta_name }}. Total count {{ ltrs | length }}</h4>
+                    <h4>Showing DAK for {{ sta_name }}.</h4>
                 </div>
                 <div>
                     <table id="transit-slip-table" class="table">
@@ -60,25 +71,19 @@
                                 <td>{{ ltr.u_string }}</td>
                                 <td><a class="ltr-remove-link" href="#">Remove</a></td>
                                 <input type="hidden" name="ltr-ids" value="{{ ltr.id }}">
-        
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-        
                 <div>
                     <input type="submit" name="submit_ltrs" class="btn btn-primary" value="Create transit slip">
                 </div>
-        
             </div>
         </form>
-        
         {% endif %}
     </div>
-    
 </div>
-
 {% endblock %}
 
 {% block script %}
