@@ -1,25 +1,34 @@
 {% extends 'transit_slip/layout.html' %}
+{% load static %}
+
 {% block content %}
 <div class="container">
     <div>
-        <ul class="misc-admin-nav">
-            <li>
-                <a href="{% url 'misc_admin_info_general' %}">General</a>
-            </li>
-            <li>
-                <a href="{% url 'misc_admin_info_ts' %}">Transit Slip</a>
-            </li>
-            <li>
-                <a href="{% url 'misc_admin_info_dak_by_date' %}">DAK by Date</a>
-            </li>
-        </ul>
+        {% include 'transit_slip/super_admin_nav.html' %}
+    </div>
+    <div>
+        <!-- {{ltrs}} -->
+        <!-- {% for ltr in ltrs %}
+            {{ ltr}}
+        {% endfor %} -->
     </div>
     <div class="card card-header">
         <h4>DAK BY DATE (Graph display for analysis)</h4>
     </div>
-    <div class="card card-body">
+    <div class="container">
+        <div class="weekly_graph">
+            <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+        </div>
         
     </div>
 </div>
 
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        var csrf_token = '{{ csrf_token }}'
+    </script>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="{% static 'assets/javascript/weekly_graph.js' %}"></script>
 {% endblock %}

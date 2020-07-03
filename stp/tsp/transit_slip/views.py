@@ -9,12 +9,14 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.views import View
 from django.conf import settings
 from django.core import serializers
+from django.core.serializers.json import DjangoJSONEncoder
 from django.urls import reverse_lazy 
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import F, Q, Count
-
+from django.db.models.functions import Extract, ExtractMonth, ExtractYear, ExtractWeek
+from django.db  import connection
 from transit_slip.models import (User, Letter, Unit, Sta, TransitSlip, LetterReceipt,
                                     OutGoingLetter, DeliveryReceipt)
 from transit_slip.forms import forms
@@ -1729,9 +1731,33 @@ class MiscAdminInfoDakByDate(MiscAdminInfo):
 
 
     def get(self, request):
-        
-
+        # get monthly dak
+        cur_year = str(datetime.today().isocalendar()[0])
+        # cur_week = str(datetime.today().isocalendar()[1])
+        ltrs = Letter.objects.filter(created_at__year=cur_year).annotate(create_wk=Extract('date', 'week'))
+        ltrs = ltrs.values('from_unit__sta_name__sta_name', 'create_wk').annotate(Count('from_unit'))
+        # ltrs_count[0].create_wk
+        # ltrs_count = Letter.objects.values('from_unit__sta_name__sta_name', 'date').\
+            # annotate(ltr_count=Count('from_unit'))
+        # print(f'total count: {ltrs_count}')
+        # print(connection.queries)
+        ltrs = json.dumps(list(ltrs), cls=DjangoJSONEncoder)
+        print(ltrs[0])
+        # ltrs_count = Letter.objects.filter(created_at__year=ExtractYear(datetime.now()))
         context = {
-
+            # 'ltrs': ltrs,
+            'cur_year': cur_year,
         }
         return render(request, self.template, context)
+
+def get_wk_graph_data(request):
+    """ return weekly aggregated dak in JSON """
+    if request.method == "GET":
+        cur_year = str(datetime.today().isocalendar()[0])
+        ltrs = Letter.objects.filter(created_at__year=cur_year).\
+            annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'week'))
+        ltrs = ltrs.values('sta', 'create_wk').annotate(count=Count('from_unit'))
+        # ltrs = json.dumps(list(ltrs), cls=DjangoJSONEncoder)
+        ltrs = list(ltrs)
+        return JsonResponse(ltrs, safe=False)
+

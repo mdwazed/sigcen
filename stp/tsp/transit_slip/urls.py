@@ -75,4 +75,5 @@ urlpatterns = [
     path('misc_admin_info_general/', views.MiscAdminInfo.as_view(), name= 'misc_admin_info_general'),
     path('misc_admin_info_ts/', views.MiscAdminInfoTs.as_view(), name= 'misc_admin_info_ts'),
     path('misc_admin_info_dak_by_date/', views.MiscAdminInfoDakByDate.as_view(), name= 'misc_admin_info_dak_by_date'),
+    path('get_wk_graph_data/', views.get_wk_graph_data, name= 'get_wk_graph_data'),
 ]
