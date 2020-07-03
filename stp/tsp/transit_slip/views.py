@@ -1756,7 +1756,7 @@ def get_wk_graph_data(request):
         cur_year = str(datetime.today().isocalendar()[0])
         ltrs = Letter.objects.filter(created_at__year=cur_year).\
             annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'week'))
-        ltrs = ltrs.values('sta', 'create_wk').annotate(count=Count('from_unit'))
+        ltrs = ltrs.values('sta', 'create_wk').annotate(count=Count('from_unit')).order_by('create_wk')
         # ltrs = json.dumps(list(ltrs), cls=DjangoJSONEncoder)
         ltrs = list(ltrs)
         return JsonResponse(ltrs, safe=False)
