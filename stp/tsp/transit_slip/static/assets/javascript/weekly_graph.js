@@ -4,7 +4,7 @@
 window.onload = function () {
     let raw_data = [];
     $.get("/get_wk_graph_data/", { 'csrfmiddlewaretoken': csrf_token }, function (data) {
-        // console.log(data);
+        console.log(data);
         data.forEach(function (el) {
             let sta = el.sta;
             raw_data.push([sta, el.create_wk, el.count ])

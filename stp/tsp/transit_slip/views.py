@@ -1762,7 +1762,7 @@ def get_wk_graph_data(request):
         # ltrs = Letter.objects.filter(created_at__year=cur_year).\
             # annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'week'))
         ltrs = Letter.objects.filter(Q(created_at__year=cur_year) & Q(created_at__lte=cap_date)).\
-            annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=ExtractWeek('date'))
+            annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'WEEK'))
         ltrs = ltrs.values('sta', 'create_wk').annotate(count=Count('from_unit')).order_by('create_wk')
         print(ltrs)
         ltrs = list(ltrs)
