@@ -1754,10 +1754,17 @@ def get_wk_graph_data(request):
     """ return weekly aggregated dak in JSON """
     if request.method == "GET":
         cur_year = str(datetime.today().isocalendar()[0])
-        ltrs = Letter.objects.filter(created_at__year=cur_year).\
-            annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'week'))
+        print(cur_year)
+        cur_week = str(datetime.today().isocalendar()[1])
+        print(cur_week)
+        cap_date = datetime.now()
+        print(cap_date)
+        # ltrs = Letter.objects.filter(created_at__year=cur_year).\
+            # annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'week'))
+        ltrs = Letter.objects.filter(Q(created_at__year=cur_year) & Q(created_at__lte=cap_date)).\
+            annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=ExtractWeek('date'))
         ltrs = ltrs.values('sta', 'create_wk').annotate(count=Count('from_unit')).order_by('create_wk')
-        # ltrs = json.dumps(list(ltrs), cls=DjangoJSONEncoder)
+        print(ltrs)
         ltrs = list(ltrs)
         return JsonResponse(ltrs, safe=False)
 
