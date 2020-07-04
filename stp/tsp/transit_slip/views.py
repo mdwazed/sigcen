@@ -1733,19 +1733,22 @@ class MiscAdminInfoDakByDate(MiscAdminInfo):
     def get(self, request):
         # get monthly dak
         cur_year = str(datetime.today().isocalendar()[0])
+        cap_date = datetime.now()
         # cur_week = str(datetime.today().isocalendar()[1])
-        ltrs = Letter.objects.filter(created_at__year=cur_year).annotate(create_wk=Extract('date', 'week'))
-        ltrs = ltrs.values('from_unit__sta_name__sta_name', 'create_wk').annotate(Count('from_unit'))
+        # ltrs = Letter.objects.filter(created_at__year=cur_year).annotate(create_wk=Extract('date', 'week'))
+        # ltrs = ltrs.values('from_unit__sta_name__sta_name', 'create_wk').annotate(Count('from_unit'))
         # ltrs_count[0].create_wk
         # ltrs_count = Letter.objects.values('from_unit__sta_name__sta_name', 'date').\
             # annotate(ltr_count=Count('from_unit'))
         # print(f'total count: {ltrs_count}')
         # print(connection.queries)
-        ltrs = json.dumps(list(ltrs), cls=DjangoJSONEncoder)
-        print(ltrs[0])
-        # ltrs_count = Letter.objects.filter(created_at__year=ExtractYear(datetime.now()))
+        # ltrs = json.dumps(list(ltrs), cls=DjangoJSONEncoder)
+        # print(ltrs[0])
+        ltrs = Letter.objects.filter(Q(created_at__year=cur_year) & Q(created_at__lte=cap_date)).\
+            annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'WEEK'))
+        ltrs = ltrs.filter(create_wk__gte=30)
         context = {
-            # 'ltrs': ltrs,
+            'ltrs': ltrs,
             'cur_year': cur_year,
         }
         return render(request, self.template, context)
