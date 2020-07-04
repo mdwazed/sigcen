@@ -33,8 +33,12 @@ def local_units(request):
     returns the local units list. useful for select options.
     includes child units as well.
     """
-    sta = request.user.profile.unit.sta_name
-    units = Unit.objects.filter(sta_name=sta).order_by('unit_name')
+    if request.user.is_staff:
+        sta = request.user.profile.unit.sta_name
+        units = Unit.objects.all().order_by('unit_name')
+    else:
+        sta = request.user.profile.unit.sta_name
+        units = Unit.objects.filter(sta_name=sta).order_by('unit_name')
     return units
 
 def render_generic_err(request, err_msg):

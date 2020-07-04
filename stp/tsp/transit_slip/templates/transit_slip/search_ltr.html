@@ -20,7 +20,7 @@
                     <input type="submit" name="submit" value="Search">
                 </form>
                 <p>
-                    Max return DAK for this search is 500. If the desired DAK is not found try narrow down
+                    Max return DAK for this search is 300. If the desired DAK is not found try narrow down
                     search result by selecting unit and date both.
                 </p>
             </div>
@@ -73,7 +73,7 @@
         jQuery(function ($) {
             $(".datepicker").datepicker({
                 dateFormat: "dd-mm-yy",
-                maxDate: "0d",
+                // maxDate: "0d",
                 // minDate: "-25d",
             });
         });

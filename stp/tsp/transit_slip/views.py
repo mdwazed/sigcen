@@ -1757,7 +1757,7 @@ def get_wk_graph_data(request):
         print(cur_year)
         cur_week = str(datetime.today().isocalendar()[1])
         print(cur_week)
-        cap_date = datetime.now()
+        cap_date = datetime(2020, 5, 1)
         print(cap_date)
         # ltrs = Letter.objects.filter(created_at__year=cur_year).\
             # annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'week'))
