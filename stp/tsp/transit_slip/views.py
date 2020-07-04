@@ -1744,7 +1744,7 @@ class MiscAdminInfoDakByDate(MiscAdminInfo):
         # print(connection.queries)
         # ltrs = json.dumps(list(ltrs), cls=DjangoJSONEncoder)
         # print(ltrs[0])
-        ltrs = Letter.objects.filter(Q(created_at__year=cur_year) & Q(created_at__lte=cap_date)).\
+        ltrs = Letter.objects.filter(created_at__year=cur_year, created_at__lte=cap_date).\
             annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'WEEK'))
         ltrs = ltrs.filter(create_wk__gte=30)
         context = {
