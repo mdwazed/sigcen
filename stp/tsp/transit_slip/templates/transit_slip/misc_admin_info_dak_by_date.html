@@ -7,7 +7,7 @@
         {% include 'transit_slip/super_admin_nav.html' %}
     </div>
     <div>
-        <!-- {{ltrs}} -->
+        {{cur_year}}
         {% for ltr in ltrs %}
             <p>{{ ltr.create_wk}}--{{ltr.date }}</p>
         {% endfor %}
