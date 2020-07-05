@@ -1744,9 +1744,9 @@ class MiscAdminInfoDakByDate(MiscAdminInfo):
         # print(connection.queries)
         # ltrs = json.dumps(list(ltrs), cls=DjangoJSONEncoder)
         # print(ltrs[0])
-        ltrs = Letter.objects.filter(created_at__year=2020, created_at__lte=cap_date).\
+        ltrs = Letter.objects.filter(created_at__year=cur_year, created_at__lte=cap_date).\
             annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'WEEK'))
-        ltrs = ltrs.filter(create_wk__gte=30)
+        ltrs = ltrs.filter(create_wk__gte=20)
         context = {
             'ltrs': ltrs,
             'cur_year': cur_year,
@@ -1767,7 +1767,7 @@ def get_wk_graph_data(request):
         ltrs = Letter.objects.filter(Q(created_at__year=cur_year) & Q(created_at__lte=cap_date)).\
             annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'WEEK'))
         ltrs = ltrs.values('sta', 'create_wk').annotate(count=Count('from_unit')).order_by('create_wk')
-        print(ltrs)
         ltrs = list(ltrs)
+        print(ltrs[-10:])
         return JsonResponse(ltrs, safe=False)
 
