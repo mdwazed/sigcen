@@ -1728,28 +1728,8 @@ class MiscAdminInfoTs(MiscAdminInfo):
 class MiscAdminInfoDakByDate(MiscAdminInfo):
     """ displays dak statistics by date of a selected sta """
     template = "transit_slip/misc_admin_info_dak_by_date.html"
-
-
     def get(self, request):
-        # get monthly dak
-        cur_year = str(datetime.today().isocalendar()[0])
-        cap_date = datetime.now()
-        # cur_week = str(datetime.today().isocalendar()[1])
-        # ltrs = Letter.objects.filter(created_at__year=cur_year).annotate(create_wk=Extract('date', 'week'))
-        # ltrs = ltrs.values('from_unit__sta_name__sta_name', 'create_wk').annotate(Count('from_unit'))
-        # ltrs_count[0].create_wk
-        # ltrs_count = Letter.objects.values('from_unit__sta_name__sta_name', 'date').\
-            # annotate(ltr_count=Count('from_unit'))
-        # print(f'total count: {ltrs_count}')
-        # print(connection.queries)
-        # ltrs = json.dumps(list(ltrs), cls=DjangoJSONEncoder)
-        # print(ltrs[0])
-        ltrs = Letter.objects.filter(created_at__year=cur_year, created_at__lte=cap_date).\
-            annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'WEEK'))
-        ltrs = ltrs.filter(create_wk__gte=24)
         context = {
-            'ltrs': ltrs,
-            'cur_year': cur_year,
         }
         return render(request, self.template, context)
 
@@ -1757,18 +1737,12 @@ def get_wk_graph_data(request):
     """ return weekly aggregated dak in JSON """
     if request.method == "GET":
         cur_year = str(datetime.today().isocalendar()[0])
-        print(cur_year)
-        cur_week = str(datetime.today().isocalendar()[1]-1)
-        print(cur_week)
+        last_week = str(datetime.today().isocalendar()[1]-1)
         cap_date = datetime.now()
-        print(cap_date)
-        # ltrs = Letter.objects.filter(created_at__year=cur_year).\
-            # annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'week'))
-        ltrs = Letter.objects.filter(Q(created_at__year=cur_year) & Q(created_at__lte=cap_date)).\
+        ltrs = Letter.objects.filter(created_at__year=cur_year).\
             annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'WEEK'))
         ltrs = ltrs.values('sta', 'create_wk').annotate(count=Count('from_unit')).order_by('create_wk')
-        ltrs = ltrs.filter(create_wk__lte=cur_week)
+        ltrs = ltrs.filter(create_wk__lte=last_week)
         ltrs = list(ltrs)
-        print(ltrs[-10:])
         return JsonResponse(ltrs, safe=False)
 
