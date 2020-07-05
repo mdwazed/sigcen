@@ -1746,7 +1746,7 @@ class MiscAdminInfoDakByDate(MiscAdminInfo):
         # print(ltrs[0])
         ltrs = Letter.objects.filter(created_at__year=cur_year, created_at__lte=cap_date).\
             annotate(sta=F('from_unit__sta_name__sta_name'), create_wk=Extract('date', 'WEEK'))
-        ltrs = ltrs.filter(create_wk__gte=20)
+        ltrs = ltrs.filter(create_wk__gte=24)
         context = {
             'ltrs': ltrs,
             'cur_year': cur_year,
@@ -1758,7 +1758,7 @@ def get_wk_graph_data(request):
     if request.method == "GET":
         cur_year = str(datetime.today().isocalendar()[0])
         print(cur_year)
-        cur_week = str(datetime.today().isocalendar()[1])
+        cur_week = str(datetime.today().isocalendar()[1]-1)
         print(cur_week)
         cap_date = datetime.now()
         print(cap_date)
